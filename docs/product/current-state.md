@@ -33,3 +33,7 @@ El flujo de escaneo ya diferencia mejor entre:
 - error real de conexion con backend
 
 Ademas, la URL de la API puede configurarse desde la propia app para uso desde otros dispositivos.
+
+## Estado de instalacion
+
+El frontend queda listo para instalarse como app web progresiva.

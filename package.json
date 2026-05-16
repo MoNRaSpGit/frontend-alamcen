@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:gh": "tsc -b && vite build --base=/frontend-alamcen/",
-    "deploy": "npm run build:gh && npx gh-pages -d dist",
+    "deploy": "npm run build:gh && npx gh-pages -d dist --dotfiles",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },

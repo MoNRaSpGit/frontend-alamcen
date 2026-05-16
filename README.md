@@ -29,6 +29,15 @@ Casos practicos:
 - si la abres desde GitHub Pages, necesitas un backend publicado por `https`
 - si el backend esta en otra URL, puedes pegarla y probar la conexion dentro de la app
 
+## PWA
+
+`frontend-alamcen` ahora queda preparado como `PWA`:
+
+- manifest web
+- service worker con actualizacion automatica
+- instalable en celular, tablet o desktop
+- iconos construidos a partir de `almacen.png`
+
 ## Documentacion
 
 - arquitectura general del SaaS: `backend/docs`
