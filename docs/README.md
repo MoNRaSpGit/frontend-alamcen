@@ -1,16 +1,44 @@
-# Frontend Alamcen
+# Frontend Alamcen Docs
 
-Cascaron inicial del producto `alamcen`.
+Fecha de actualizacion: 2026-05-16
 
 ## Objetivo
 
-- arrancar rapido con un frontend separado;
-- tener una demo usable para discovery;
-- no acoplarse todavia a backend real.
+Esta carpeta documenta el producto `alamcen` del lado frontend.
 
-## Estructura
+Su funcion es dejar claro:
 
-- `src/app`: entrada de la app
-- `src/features/alamcen`: modulo principal
-- `src/shared`: shell, config y utilidades
-- `src/styles`: estilos globales
+- en que estado esta hoy el modulo
+- que base tecnica y visual ya existe
+- para que sirve este frontend en su etapa actual
+
+## Alcance
+
+`frontend-alamcen/docs` documenta:
+
+- estado real del frontend
+- contexto inicial del producto
+- decisiones finas del modulo mientras arranca
+
+No documenta:
+
+- arquitectura global del SaaS
+- metodo global de trabajo
+- reglas compartidas de backend, auth, tenant o billing
+
+Eso vive en `backend/docs`.
+
+## Orden recomendado de lectura
+
+1. [Estado actual del frontend](./product/current-state.md)
+2. [Contexto inicial del producto](./product/product-context.md)
+
+## Estructura de esta carpeta
+
+### `product/`
+
+Define el estado y contexto actual del modulo.
+
+## Regla importante de este corte
+
+`alamcen` sigue como base temprana de frontend, sin contrato backend cerrado todavia.
