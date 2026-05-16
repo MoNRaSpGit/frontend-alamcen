@@ -6,6 +6,8 @@ import "./styles/global.css";
 
 registerAppServiceWorker();
 
+window.__alamcenBooted = true;
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />

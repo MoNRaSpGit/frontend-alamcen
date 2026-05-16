@@ -15,9 +15,141 @@
     <link rel="apple-touch-icon" href="%BASE_URL%pwa-192x192.png" />
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
     <title>Alamcen Demo</title>
+    <style>
+      #boot-fallback {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: #ffffff;
+        font-family: "Segoe UI", "Aptos", sans-serif;
+      }
+
+      #boot-fallback.visible {
+        display: flex;
+      }
+
+      .boot-fallback-card {
+        width: min(420px, 100%);
+        border: 1px solid #e4e4e4;
+        border-radius: 24px;
+        background: #ffffff;
+        box-shadow: 0 24px 60px rgba(15, 15, 15, 0.14);
+        padding: 22px;
+      }
+
+      .boot-fallback-card h1 {
+        margin: 0 0 10px;
+        font-size: 1.2rem;
+        color: #161616;
+      }
+
+      .boot-fallback-card p {
+        margin: 0 0 10px;
+        color: #596454;
+        line-height: 1.5;
+      }
+
+      .boot-fallback-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .boot-fallback-button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 16px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .boot-fallback-button.primary {
+        background: #151515;
+        color: #ffffff;
+      }
+
+      .boot-fallback-button.secondary {
+        background: #eef3e7;
+        color: #33402d;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div id="boot-fallback" aria-live="polite">
+      <div class="boot-fallback-card">
+        <h1>No pudimos abrir la app</h1>
+        <p>
+          Parece que esta instalacion quedo con una version vieja o un cache roto. Puedes reintentar o restablecer la
+          app.
+        </p>
+        <p>Si estas en tablet, esta opcion suele resolver la pantalla en blanco.</p>
+        <div class="boot-fallback-actions">
+          <button id="boot-retry" class="boot-fallback-button primary" type="button">Reintentar</button>
+          <button id="boot-reset" class="boot-fallback-button secondary" type="button">Restablecer app</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      window.__alamcenBooted = false;
+      window.setTimeout(function () {
+        if (window.__alamcenBooted) {
+          return;
+        }
+
+        var fallback = document.getElementById("boot-fallback");
+        if (fallback) {
+          fallback.classList.add("visible");
+        }
+      }, 5000);
+
+      document.getElementById("boot-retry")?.addEventListener("click", function () {
+        window.location.reload();
+      });
+
+      document.getElementById("boot-reset")?.addEventListener("click", function () {
+        Promise.resolve()
+          .then(function () {
+            if ("serviceWorker" in navigator) {
+              return navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                return Promise.all(
+                  registrations.map(function (registration) {
+                    return registration.unregister();
+                  })
+                );
+              });
+            }
+
+            return Promise.resolve();
+          })
+          .then(function () {
+            if ("caches" in window) {
+              return caches.keys().then(function (keys) {
+                return Promise.all(
+                  keys.map(function (key) {
+                    return caches.delete(key);
+                  })
+                );
+              });
+            }
+
+            return Promise.resolve();
+          })
+          .finally(function () {
+            try {
+              window.localStorage.removeItem("alamcen.api.baseUrl");
+            } catch (error) {}
+
+            window.location.replace(window.location.pathname + "?resetApp=" + Date.now());
+          });
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
   </html>
