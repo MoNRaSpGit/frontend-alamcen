@@ -26,6 +26,49 @@ button {
   cursor: pointer;
 }
 
+.app-update-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 1000;
+  width: min(560px, calc(100vw - 24px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid #d9ded4;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 40px rgba(15, 15, 15, 0.16);
+  transform: translateX(-50%);
+}
+
+.app-update-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.app-update-copy strong {
+  color: #161616;
+  font-size: 0.98rem;
+}
+
+.app-update-copy span {
+  color: #5a6750;
+  font-size: 0.9rem;
+}
+
+.app-update-button {
+  border: 0;
+  border-radius: 999px;
+  background: #151515;
+  color: #ffffff;
+  padding: 11px 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .barcode-screen {
   min-height: 100vh;
   display: block;
@@ -76,6 +119,13 @@ button {
   color: #a33d2d;
   font-size: 0.95rem;
   font-weight: 700;
+}
+
+.barcode-helper-text {
+  margin: 10px 0 0;
+  text-align: center;
+  color: #66725f;
+  font-size: 0.9rem;
 }
 
 .barcode-manual-action {
@@ -332,6 +382,16 @@ button {
 }
 
 @media (max-width: 640px) {
+  .app-update-notice {
+    bottom: 14px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-update-button {
+    width: 100%;
+  }
+
   .sale-line {
     grid-template-columns: 1fr;
     align-items: stretch;

@@ -1,4 +1,4 @@
-const CACHE_NAME = "alamcen-pwa-v1";
+const CACHE_NAME = "alamcen-pwa-v2";
 const ASSETS_TO_CACHE = [
   "/frontend-alamcen/",
   "/frontend-alamcen/index.html",
@@ -8,9 +8,15 @@ const ASSETS_TO_CACHE = [
   "/frontend-alamcen/almacen.png"
 ];
 
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    void self.skipWaiting();
+  }
+});
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
 });
 
@@ -35,6 +41,32 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
+  const isNavigationRequest =
+    event.request.mode === "navigate" ||
+    (event.request.headers.get("accept") || "").includes("text/html");
+
+  if (isNavigationRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          void caches.open(CACHE_NAME).then((cache) => cache.put("/frontend-alamcen/index.html", responseClone));
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cachedPage = await caches.match("/frontend-alamcen/index.html");
+          return cachedPage || Response.error();
+        })
+    );
+    return;
+  }
+
+  if (!isSameOrigin) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -51,7 +83,7 @@ self.addEventListener("fetch", (event) => {
           void caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
           return networkResponse;
         })
-        .catch(() => caches.match("/frontend-alamcen/index.html"));
+        .catch(() => Response.error());
     })
   );
 });

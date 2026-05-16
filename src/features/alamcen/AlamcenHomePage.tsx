@@ -346,6 +346,7 @@ export function AlamcenHomePage() {
             onChange={(event) => setBarcodeInput(event.target.value)}
           />
           {lookupError ? <p className="barcode-error">{lookupError}</p> : null}
+          <p className="barcode-helper-text">Escanea o carga un producto manual para seguir.</p>
           <div className="barcode-manual-action">
             <button
               type="button"
