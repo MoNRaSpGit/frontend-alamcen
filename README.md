@@ -19,6 +19,16 @@ La prioridad hoy es:
 - validar direccion funcional minima
 - no acoplarse todavia a backend real
 
+## Conexion desde otros dispositivos
+
+La app ahora permite configurar la URL base de la API desde la propia interfaz.
+
+Casos practicos:
+
+- si la abres por LAN en `http://<ip-local>:5173`, intenta usar `http://<ip-local>:3000/api/v1`
+- si la abres desde GitHub Pages, necesitas un backend publicado por `https`
+- si el backend esta en otra URL, puedes pegarla y probar la conexion dentro de la app
+
 ## Documentacion
 
 - arquitectura general del SaaS: `backend/docs`

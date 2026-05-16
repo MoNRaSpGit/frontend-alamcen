@@ -24,3 +24,12 @@ La estructura actual ya separa:
 ## Regla tecnica del corte
 
 El frontend sirve como base inicial para ordenar la experiencia del producto antes de cerrar integracion formal.
+
+## Nota operativa reciente
+
+El flujo de escaneo ya diferencia mejor entre:
+
+- producto no encontrado
+- error real de conexion con backend
+
+Ademas, la URL de la API puede configurarse desde la propia app para uso desde otros dispositivos.

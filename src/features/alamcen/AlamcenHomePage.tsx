@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { createManualProduct, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
+import { getApiBaseUrl, getDefaultApiBaseUrl, resetApiBaseUrl, setApiBaseUrl } from "../../shared/config/api";
+import { createManualProduct, fetchAlamcenStatus, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
 
 type SaleLine = {
   productId: number;
@@ -20,6 +21,11 @@ function formatCurrency(value: number) {
 
 export function AlamcenHomePage() {
   const [barcodeInput, setBarcodeInput] = useState("");
+  const [lookupError, setLookupError] = useState("");
+  const [apiBaseUrlInput, setApiBaseUrlInput] = useState(() => getApiBaseUrl());
+  const [apiStatusMessage, setApiStatusMessage] = useState("");
+  const [apiStatusTone, setApiStatusTone] = useState<"idle" | "success" | "error">("idle");
+  const [apiStatusLoading, setApiStatusLoading] = useState(false);
   const [saleLines, setSaleLines] = useState<SaleLine[]>([]);
   const [manualBarcode, setManualBarcode] = useState("");
   const [manualPriceInput, setManualPriceInput] = useState("");
@@ -44,6 +50,11 @@ export function AlamcenHomePage() {
       barcodeInputRef.current?.select();
     });
   }
+
+  const isMixedContentRisk =
+    typeof window !== "undefined" &&
+    window.location.protocol === "https:" &&
+    apiBaseUrlInput.trim().toLowerCase().startsWith("http://");
 
   useEffect(() => {
     focusBarcodeInput();
@@ -167,6 +178,8 @@ export function AlamcenHomePage() {
       return;
     }
 
+    setLookupError("");
+
     try {
       const product = await findProductByBarcode(normalizedBarcode);
       if (!product) {
@@ -179,14 +192,54 @@ export function AlamcenHomePage() {
       focusBarcodeInput();
     } catch (error) {
       console.error(error);
-      openManualProductModal(normalizedBarcode);
+      setLookupError(
+        "No pudimos consultar productos ahora. Revisa la conexion al backend o la configuracion de la API."
+      );
+      focusBarcodeInput();
     }
   }
 
   function handleCheckout() {
     setSaleLines([]);
     setBarcodeInput("");
+    setLookupError("");
     focusBarcodeInput();
+  }
+
+  async function handleApiConnectionTest() {
+    const normalizedApiBaseUrl = apiBaseUrlInput.trim();
+    if (!normalizedApiBaseUrl) {
+      setApiStatusTone("error");
+      setApiStatusMessage("La URL de la API es obligatoria.");
+      return;
+    }
+
+    setApiStatusLoading(true);
+    setApiStatusTone("idle");
+    setApiStatusMessage("");
+    setApiBaseUrl(normalizedApiBaseUrl);
+
+    try {
+      const status = await fetchAlamcenStatus();
+      setApiStatusTone("success");
+      setApiStatusMessage(`Conexion OK con ${status.module}. Tabla fuente: ${status.sourceTable}.`);
+    } catch (error) {
+      console.error(error);
+      setApiStatusTone("error");
+      setApiStatusMessage(
+        "No pudimos conectar con la API. Verifica URL, backend levantado y CORS del entorno."
+      );
+    } finally {
+      setApiStatusLoading(false);
+    }
+  }
+
+  function handleResetApiBaseUrl() {
+    resetApiBaseUrl();
+    const nextValue = getDefaultApiBaseUrl();
+    setApiBaseUrlInput(nextValue);
+    setApiStatusTone("idle");
+    setApiStatusMessage(`Se restauro la API por defecto: ${nextValue}`);
   }
 
   function handleRemoveLine(productId: number) {
@@ -316,7 +369,60 @@ export function AlamcenHomePage() {
             }}
             onChange={(event) => setBarcodeInput(event.target.value)}
           />
+          {lookupError ? <p className="barcode-error">{lookupError}</p> : null}
         </form>
+
+        <section className="api-config-card">
+          <div className="api-config-header">
+            <strong>Conexion API</strong>
+            <span>Usa una URL accesible desde este dispositivo</span>
+          </div>
+
+          <label className="api-config-label" htmlFor="api-base-url-input">
+            URL base
+          </label>
+          <input
+            id="api-base-url-input"
+            className="api-config-input"
+            type="text"
+            inputMode="url"
+            value={apiBaseUrlInput}
+            placeholder="http://192.168.1.20:3000/api/v1"
+            onChange={(event) => setApiBaseUrlInput(event.target.value)}
+          />
+
+          <div className="api-config-actions">
+            <button
+              type="button"
+              className="api-config-button primary"
+              onClick={() => void handleApiConnectionTest()}
+              disabled={apiStatusLoading}
+            >
+              {apiStatusLoading ? "Probando..." : "Guardar y probar"}
+            </button>
+            <button type="button" className="api-config-button" onClick={handleResetApiBaseUrl}>
+              Restaurar
+            </button>
+          </div>
+
+          <div className="api-config-help">
+            <span>Default detectado: {getDefaultApiBaseUrl()}</span>
+            <span>Actual guardado: {getApiBaseUrl()}</span>
+          </div>
+
+          {isMixedContentRisk ? (
+            <p className="api-status-message error">
+              Si la app esta en `https`, una API `http` va a ser bloqueada por el navegador. Para GitHub Pages necesitas
+              backend con `https`.
+            </p>
+          ) : null}
+
+          {apiStatusMessage ? (
+            <p className={apiStatusTone === "error" ? "api-status-message error" : "api-status-message success"}>
+              {apiStatusMessage}
+            </p>
+          ) : null}
+        </section>
 
         <section className="sale-panel">
           <div className="sale-panel-header">

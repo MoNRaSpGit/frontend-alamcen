@@ -70,6 +70,111 @@ button {
   border-color: #7d7d7d;
 }
 
+.barcode-error {
+  margin: 12px 0 0;
+  text-align: center;
+  color: #a33d2d;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.api-config-card {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  border: 1px solid #e4e4e4;
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(15, 15, 15, 0.05);
+  display: grid;
+  gap: 12px;
+}
+
+.api-config-header {
+  display: grid;
+  gap: 4px;
+}
+
+.api-config-header strong {
+  color: #1f1f1f;
+  font-size: 1rem;
+}
+
+.api-config-header span,
+.api-config-help span {
+  color: #666666;
+  font-size: 0.92rem;
+}
+
+.api-config-label {
+  color: #333333;
+  font-weight: 700;
+}
+
+.api-config-input {
+  width: 100%;
+  border: 1px solid #d7d7d7;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 14px 16px;
+  font-size: 1rem;
+  color: #111111;
+  outline: none;
+}
+
+.api-config-input:focus {
+  border-color: #7d7d7d;
+}
+
+.api-config-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.api-config-button {
+  border: 1px solid #d7ddd1;
+  border-radius: 999px;
+  background: #f6f8f2;
+  color: #33402d;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.api-config-button.primary {
+  border-color: #151515;
+  background: #151515;
+  color: #ffffff;
+}
+
+.api-config-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.api-config-help {
+  display: grid;
+  gap: 4px;
+}
+
+.api-status-message {
+  margin: 0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.api-status-message.success {
+  background: #edf6ea;
+  color: #275d2d;
+}
+
+.api-status-message.error {
+  background: #fff0ed;
+  color: #a33d2d;
+}
+
 .sale-panel {
   width: min(760px, 100%);
   margin: 0 auto;
