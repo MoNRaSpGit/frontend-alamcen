@@ -11,6 +11,8 @@ type SaleLine = {
   image: string | null;
 };
 
+type ManualModalMode = "barcode-miss" | "manual-button";
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-UY", {
     style: "currency",
@@ -29,6 +31,7 @@ export function AlamcenHomePage() {
   const [saleLines, setSaleLines] = useState<SaleLine[]>([]);
   const [manualBarcode, setManualBarcode] = useState("");
   const [manualPriceInput, setManualPriceInput] = useState("");
+  const [manualModalMode, setManualModalMode] = useState<ManualModalMode>("barcode-miss");
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [editingLineId, setEditingLineId] = useState<number | null>(null);
   const [editNameInput, setEditNameInput] = useState("");
@@ -141,7 +144,19 @@ export function AlamcenHomePage() {
     );
   }
 
-  function openManualProductModal(barcode: string) {
+  function appendLocalManualProduct(price: number) {
+    const manualProductId = Date.now() * -1;
+    appendProductToSale({
+      id: manualProductId,
+      nombre: "Producto Manual",
+      precioVenta: price,
+      imagen: null,
+      tieneImagen: false
+    });
+  }
+
+  function openManualProductModal(barcode: string, mode: ManualModalMode = "barcode-miss") {
+    setManualModalMode(mode);
     setManualBarcode(barcode);
     setManualPriceInput("");
     setManualModalOpen(true);
@@ -149,6 +164,7 @@ export function AlamcenHomePage() {
 
   function closeManualProductModal() {
     setManualModalOpen(false);
+    setManualModalMode("barcode-miss");
     setShouldRestoreBarcodeFocus(true);
     setManualBarcode("");
     setManualPriceInput("");
@@ -291,9 +307,15 @@ export function AlamcenHomePage() {
     }
 
     try {
-      const product = await createManualProduct(manualBarcode, parsedPrice);
-      appendProductToSale(product);
+      if (manualModalMode === "manual-button") {
+        appendLocalManualProduct(parsedPrice);
+      } else {
+        const product = await createManualProduct(manualBarcode, parsedPrice);
+        appendProductToSale(product);
+      }
+
       setManualModalOpen(false);
+      setManualModalMode("barcode-miss");
       setShouldRestoreBarcodeFocus(true);
       setManualBarcode("");
       setManualPriceInput("");
@@ -370,6 +392,15 @@ export function AlamcenHomePage() {
             onChange={(event) => setBarcodeInput(event.target.value)}
           />
           {lookupError ? <p className="barcode-error">{lookupError}</p> : null}
+          <div className="barcode-manual-action">
+            <button
+              type="button"
+              className="barcode-manual-button"
+              onClick={() => openManualProductModal("", "manual-button")}
+            >
+              Producto Manual
+            </button>
+          </div>
         </form>
 
         <section className="api-config-card">
@@ -507,7 +538,7 @@ export function AlamcenHomePage() {
             </div>
 
             <div className="manual-modal-copy">
-              <span>Codigo leido: {manualBarcode}</span>
+              {manualModalMode === "barcode-miss" ? <span>Codigo leido: {manualBarcode}</span> : <span>Ingrese precio</span>}
               <strong>Producto Manual</strong>
             </div>
 

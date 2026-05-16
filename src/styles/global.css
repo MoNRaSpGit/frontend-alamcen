@@ -78,6 +78,31 @@ button {
   font-weight: 700;
 }
 
+.barcode-manual-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.barcode-manual-button {
+  min-width: 220px;
+  border: 1px solid #d7ddd1;
+  border-radius: 999px;
+  background: #f6f8f2;
+  color: #33402d;
+  padding: 12px 18px;
+  font-weight: 700;
+}
+
+.barcode-manual-button:hover {
+  background: #eef3e7;
+}
+
+.barcode-manual-button:focus-visible {
+  outline: 2px solid #6b8260;
+  outline-offset: 2px;
+}
+
 .api-config-card {
   width: min(760px, 100%);
   margin: 0 auto;
