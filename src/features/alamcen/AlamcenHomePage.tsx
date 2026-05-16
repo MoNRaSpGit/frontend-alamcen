@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { getApiBaseUrl, getDefaultApiBaseUrl, resetApiBaseUrl, setApiBaseUrl } from "../../shared/config/api";
+import {
+  getApiBaseUrl,
+  getDefaultApiBaseUrl,
+  isLocalHttpApiUrl,
+  resetApiBaseUrl,
+  setApiBaseUrl
+} from "../../shared/config/api";
 import { createManualProduct, fetchAlamcenStatus, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
 
 type SaleLine = {
@@ -57,7 +63,7 @@ export function AlamcenHomePage() {
   const isMixedContentRisk =
     typeof window !== "undefined" &&
     window.location.protocol === "https:" &&
-    apiBaseUrlInput.trim().toLowerCase().startsWith("http://");
+    isLocalHttpApiUrl(apiBaseUrlInput);
 
   useEffect(() => {
     focusBarcodeInput();
@@ -443,8 +449,8 @@ export function AlamcenHomePage() {
 
           {isMixedContentRisk ? (
             <p className="api-status-message error">
-              Si la app esta en `https`, una API `http` va a ser bloqueada por el navegador. Para GitHub Pages necesitas
-              backend con `https`.
+              Esta app esta abierta por `https`, pero la API cargada es local por `http`. El navegador la va a bloquear.
+              Usa el backend SaaS oficial o una API publicada por `https`.
             </p>
           ) : null}
 

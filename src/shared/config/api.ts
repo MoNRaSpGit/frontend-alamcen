@@ -1,6 +1,7 @@
 import { readJsonStorage, writeJsonStorage } from "../lib/persistence";
 
 const API_URL_STORAGE_KEY = "alamcen.api.baseUrl";
+const OFFICIAL_API_BASE_URL = "https://saasproback.onrender.com/api/v1";
 
 function normalizeApiBaseUrl(value: string) {
   return value.trim().replace(/\/+$/, "");
@@ -41,14 +42,35 @@ function buildLanApiFallback() {
   return `http://${hostname}:3000/api/v1`;
 }
 
+function getLegacyLocalDefaults() {
+  const defaults = ["http://localhost:3000/api/v1", "http://127.0.0.1:3000/api/v1"];
+  const lanFallback = buildLanApiFallback();
+
+  return Array.from(new Set(lanFallback ? [...defaults, lanFallback] : defaults));
+}
+
 export function getDefaultApiBaseUrl() {
-  return normalizeApiBaseUrl(
-    import.meta.env.VITE_API_URL ?? buildLanApiFallback() ?? "http://localhost:3000/api/v1"
-  );
+  return normalizeApiBaseUrl(import.meta.env.VITE_API_URL ?? buildLanApiFallback() ?? OFFICIAL_API_BASE_URL);
+}
+
+function resolveStoredApiBaseUrl() {
+  const storedValue = normalizeApiBaseUrl(readJsonStorage(API_URL_STORAGE_KEY, ""));
+  if (!storedValue) {
+    return getDefaultApiBaseUrl();
+  }
+
+  const isHttpsPage = typeof window !== "undefined" && window.location.protocol === "https:";
+  if (isHttpsPage && getLegacyLocalDefaults().includes(storedValue)) {
+    const nextValue = getDefaultApiBaseUrl();
+    writeJsonStorage(API_URL_STORAGE_KEY, nextValue);
+    return nextValue;
+  }
+
+  return storedValue;
 }
 
 export function getApiBaseUrl() {
-  return normalizeApiBaseUrl(readJsonStorage(API_URL_STORAGE_KEY, getDefaultApiBaseUrl()));
+  return resolveStoredApiBaseUrl();
 }
 
 export function setApiBaseUrl(value: string) {
@@ -57,4 +79,15 @@ export function setApiBaseUrl(value: string) {
 
 export function resetApiBaseUrl() {
   writeJsonStorage(API_URL_STORAGE_KEY, getDefaultApiBaseUrl());
+}
+
+export function isLocalHttpApiUrl(value: string) {
+  const normalizedValue = normalizeApiBaseUrl(value);
+
+  try {
+    const parsed = new URL(normalizedValue);
+    return parsed.protocol === "http:" && isPrivateNetworkHostname(parsed.hostname);
+  } catch {
+    return false;
+  }
 }
