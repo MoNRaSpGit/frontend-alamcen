@@ -1,10 +1,10 @@
-# Frontend Alamcen Docs
+# Frontend Almacen Docs
 
 Fecha de actualizacion: 2026-05-16
 
 ## Objetivo
 
-Esta carpeta documenta el producto `alamcen` del lado frontend.
+Esta carpeta documenta el producto `almacen` del lado frontend.
 
 Su funcion es dejar claro:
 

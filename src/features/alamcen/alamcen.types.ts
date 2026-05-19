@@ -65,4 +65,81 @@ export interface BarcodeProductLookup {
   tieneImagen: boolean;
   estado: "activo" | "inactivo" | "sin_stock" | "archivado";
   imagen: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AlamcenModuleStatus {
+  module: "alamcen";
+  tenant: {
+    id: number;
+    name: string;
+    slug: string;
+  };
+  user: {
+    id: number;
+    email: string;
+    membershipRole: string;
+  };
+  backend: {
+    database: "connected";
+    currentTimestamp: string;
+  };
+  phase: "sprint-1";
+  capabilities: string[];
+}
+
+export interface AlamcenSalePayload {
+  externalId?: string;
+  notes?: string;
+  items: Array<{
+    productId?: number | null;
+    isManual?: boolean;
+    nombre: string;
+    precioVenta: number;
+    quantity: number;
+    thumbnailUrl?: string | null;
+  }>;
+}
+
+export interface AlamcenDashboardPayload {
+  ok: true;
+  dashboard: {
+    date: string;
+    metrics: {
+      initialCash: number;
+      salesToday: number;
+      currentAmount: number;
+      paymentsTotal: number;
+    };
+    comparison: {
+      today: number;
+      yesterday: number;
+      record: number;
+    };
+    movements: Array<{
+      id: string;
+      type: "Venta" | "Pago";
+      amount: number;
+      createdAt: string;
+      detail: {
+        kind: "sale" | "payment";
+        description?: string | null;
+        operator?: string;
+        createdAt?: string;
+        items?: Array<{
+          id: number;
+          name: string;
+          quantity: number;
+          lineTotal: number;
+        }>;
+      };
+    }>;
+    ranking: Array<{
+      key: string;
+      name: string;
+      qty: number;
+      thumbnailUrl: string | null;
+    }>;
+  };
 }

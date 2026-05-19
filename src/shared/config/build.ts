@@ -1,4 +1,4 @@
 export const buildConfig = {
-  productName: "Alamcen Demo",
+  productName: "Almacen Demo",
   stageLabel: "Demo"
 };

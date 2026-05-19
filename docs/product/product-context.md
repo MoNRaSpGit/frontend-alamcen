@@ -1,23 +1,26 @@
-# Alamcen - Contexto inicial del producto
+# Almacen - Contexto inicial del producto
 
 Fecha de actualizacion: 2026-05-16
 
 ## Contexto
 
-`frontend-alamcen` nace como cascaron inicial del producto `alamcen`.
+`frontend-alamcen` nació como cascarón inicial del producto `alamcen`, pero este corte ya arranca la transición hacia módulo operativo real.
 
 ## Estado de definicion actual
 
-Hoy el modulo todavia no tiene:
+Hoy el módulo todavía no tiene completo:
 
-- contrato formal de backend
-- persistencia real
-- alcance funcional completamente cerrado
+- clon completo de `LaClaudia`
+- tiempo real
+- stock
+- meses
+- impresión
+- diagnóstico remoto
 
 ## Meta de esta etapa
 
 La documentacion en esta fase busca:
 
 - dejar una base limpia
-- registrar lo poco que ya esta definido
-- evitar sobreinventar arquitectura de producto demasiado temprano
+- registrar el paso de demo a slice real
+- sostener la clonación funcional de `LaClaudia` sin tocar su repo ni migrar datos

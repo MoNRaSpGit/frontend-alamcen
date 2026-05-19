@@ -1,5 +1,6 @@
+import { fetchWithAuth, logoutSession } from "../auth/auth.client";
 import { getApiBaseUrl } from "../../shared/config/api";
-import { BarcodeProductLookup } from "./alamcen.types";
+import { AlamcenDashboardPayload, AlamcenModuleStatus, AlamcenSalePayload, BarcodeProductLookup } from "./alamcen.types";
 
 async function buildApiError(response: Response) {
   let message = `Error ${response.status}`;
@@ -12,34 +13,53 @@ async function buildApiError(response: Response) {
       message = payload.message;
     }
   } catch {
-    // Keep the generic status message if the response body is not JSON.
+    // Keep generic message when response body is not JSON.
+  }
+
+  if (response.status === 401) {
+    await logoutSession().catch(() => {});
   }
 
   return new Error(message);
 }
 
 function buildUrl(path: string) {
-  const baseUrl = getApiBaseUrl();
-  return `${baseUrl}${path}`;
+  return `${getApiBaseUrl()}${path}`;
 }
 
 export async function fetchAlamcenStatus() {
-  const response = await fetch(buildUrl("/alamcen/status"));
+  const response = await fetchWithAuth(buildUrl("/alamcen/status"));
 
   if (!response.ok) {
     throw await buildApiError(response);
   }
 
+  return (await response.json()) as AlamcenModuleStatus;
+}
+
+export async function listProducts(options: { search?: string; limit?: number } = {}) {
+  const searchParams = new URLSearchParams();
+  if (options.search?.trim()) {
+    searchParams.set("search", options.search.trim());
+  }
+  if (options.limit) {
+    searchParams.set("limit", String(options.limit));
+  }
+
+  const query = searchParams.toString();
+  const response = await fetchWithAuth(buildUrl(`/alamcen/products${query ? `?${query}` : ""}`));
+  if (!response.ok) {
+    throw await buildApiError(response);
+  }
+
   return (await response.json()) as {
-    module: string;
-    status: string;
-    capabilities: string[];
-    sourceTable: string;
+    count: number;
+    items: BarcodeProductLookup[];
   };
 }
 
 export async function findProductByBarcode(barcode: string) {
-  const response = await fetch(buildUrl(`/alamcen/productos/barcode/${encodeURIComponent(barcode)}`));
+  const response = await fetchWithAuth(buildUrl(`/alamcen/productos/barcode/${encodeURIComponent(barcode)}`));
 
   if (!response.ok) {
     throw await buildApiError(response);
@@ -49,7 +69,7 @@ export async function findProductByBarcode(barcode: string) {
 }
 
 export async function createManualProduct(barcode: string, price: number) {
-  const response = await fetch(buildUrl("/alamcen/productos/manual"), {
+  const response = await fetchWithAuth(buildUrl("/alamcen/productos/manual"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -68,7 +88,7 @@ export async function createManualProduct(barcode: string, price: number) {
 }
 
 export async function updateProduct(productId: number, payload: { nombre: string; precioVenta: number }) {
-  const response = await fetch(buildUrl(`/alamcen/productos/${productId}`), {
+  const response = await fetchWithAuth(buildUrl(`/alamcen/productos/${productId}`), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json"
@@ -81,4 +101,64 @@ export async function updateProduct(productId: number, payload: { nombre: string
   }
 
   return (await response.json()) as BarcodeProductLookup;
+}
+
+export async function createSale(payload: AlamcenSalePayload) {
+  const response = await fetchWithAuth(buildUrl("/alamcen/sales"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response);
+  }
+
+  return (await response.json()) as {
+    ok: true;
+    sale: {
+      id: number;
+      externalId: string | null;
+      totalAmount: number;
+      itemsCount: number;
+      createdAt: string;
+    };
+  };
+}
+
+export async function createPayment(payload: { externalId?: string; amount: number; description: string }) {
+  const response = await fetchWithAuth(buildUrl("/alamcen/payments"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response);
+  }
+
+  return (await response.json()) as {
+    ok: true;
+    payment: {
+      id: number;
+      externalId: string | null;
+      amount: number;
+      description: string | null;
+      createdAt: string;
+    };
+  };
+}
+
+export async function fetchDashboard() {
+  const response = await fetchWithAuth(buildUrl("/alamcen/dashboard"));
+
+  if (!response.ok) {
+    throw await buildApiError(response);
+  }
+
+  return (await response.json()) as AlamcenDashboardPayload;
 }

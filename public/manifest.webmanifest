@@ -1,8 +1,8 @@
 {
   "id": "/frontend-alamcen/",
-  "name": "Alamcen",
-  "short_name": "Alamcen",
-  "description": "Escaneo, consulta y edicion de productos para el modulo alamcen.",
+  "name": "Almacen",
+  "short_name": "Almacen",
+  "description": "Escaneo, consulta y edicion de productos para el modulo almacen.",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "display": "standalone",

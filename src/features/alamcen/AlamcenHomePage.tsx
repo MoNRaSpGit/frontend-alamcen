@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { createManualProduct, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
+import { createManualProduct, createSale, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
 
 type SaleLine = {
   productId: number;
@@ -12,6 +12,10 @@ type SaleLine = {
 
 type ManualModalMode = "barcode-miss" | "manual-button";
 
+type AlamcenHomePageProps = {
+  onSaleRecorded: () => void;
+};
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-UY", {
     style: "currency",
@@ -20,7 +24,7 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export function AlamcenHomePage() {
+export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
   const [barcodeInput, setBarcodeInput] = useState("");
   const [lookupError, setLookupError] = useState("");
   const [saleLines, setSaleLines] = useState<SaleLine[]>([]);
@@ -33,6 +37,8 @@ export function AlamcenHomePage() {
   const [editPriceInput, setEditPriceInput] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [shouldRestoreBarcodeFocus, setShouldRestoreBarcodeFocus] = useState(false);
+  const [saleMessage, setSaleMessage] = useState("");
+  const [isSubmittingSale, setIsSubmittingSale] = useState(false);
   const barcodeInputRef = useRef<HTMLInputElement | null>(null);
   const manualPriceInputRef = useRef<HTMLInputElement | null>(null);
   const editNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -206,10 +212,40 @@ export function AlamcenHomePage() {
   }
 
   function handleCheckout() {
-    setSaleLines([]);
-    setBarcodeInput("");
-    setLookupError("");
-    focusBarcodeInput();
+    if (!saleLines.length || isSubmittingSale) {
+      return;
+    }
+
+    setIsSubmittingSale(true);
+    setSaleMessage("");
+
+    createSale({
+      externalId: `alamcen-sale-${Date.now()}`,
+      items: saleLines.map((line) => ({
+        productId: line.productId > 0 ? line.productId : null,
+        isManual: line.productId <= 0,
+        nombre: line.name,
+        precioVenta: line.price,
+        quantity: line.quantity,
+        thumbnailUrl: line.image
+      }))
+    })
+      .then(() => {
+        setSaleLines([]);
+        setBarcodeInput("");
+        setLookupError("");
+        setSaleMessage("Venta registrada correctamente.");
+        onSaleRecorded();
+        focusBarcodeInput();
+      })
+      .catch((error) => {
+        console.error(error);
+        setSaleMessage(error instanceof Error ? error.message : "No pudimos registrar la venta.");
+        focusBarcodeInput();
+      })
+      .finally(() => {
+        setIsSubmittingSale(false);
+      });
   }
 
   function handleRemoveLine(productId: number) {
@@ -300,15 +336,22 @@ export function AlamcenHomePage() {
     }
 
     try {
-      const product = await updateProduct(editingLineId, {
-        nombre: normalizedName,
-        precioVenta: parsedPrice
-      });
+      if (editingLineId > 0) {
+        const product = await updateProduct(editingLineId, {
+          nombre: normalizedName,
+          precioVenta: parsedPrice
+        });
 
-      applyEditedProduct(editingLineId, {
-        nombre: product.nombre,
-        precioVenta: product.precioVenta
-      });
+        applyEditedProduct(editingLineId, {
+          nombre: product.nombre,
+          precioVenta: product.precioVenta
+        });
+      } else {
+        applyEditedProduct(editingLineId, {
+          nombre: normalizedName,
+          precioVenta: parsedPrice
+        });
+      }
 
       setEditModalOpen(false);
       setEditingLineId(null);
@@ -327,9 +370,6 @@ export function AlamcenHomePage() {
     >
       <section className="barcode-layout">
         <form className="barcode-form" onSubmit={handleBarcodeSubmit}>
-          <label className="barcode-label" htmlFor="barcode-input">
-            Buscar codigo de barras
-          </label>
           <input
             id="barcode-input"
             ref={barcodeInputRef}
@@ -346,7 +386,7 @@ export function AlamcenHomePage() {
             onChange={(event) => setBarcodeInput(event.target.value)}
           />
           {lookupError ? <p className="barcode-error">{lookupError}</p> : null}
-          <p className="barcode-helper-text">Escanea o carga un producto manual para seguir.</p>
+          {saleMessage ? <p className="barcode-helper-text">{saleMessage}</p> : null}
           <div className="barcode-manual-action">
             <button
               type="button"
@@ -358,16 +398,14 @@ export function AlamcenHomePage() {
           </div>
         </form>
 
+        {saleLines.length > 0 ? (
         <section className="sale-panel">
           <div className="sale-panel-header">
             <strong>Productos</strong>
           </div>
 
           <div className="sale-list">
-            {saleLines.length === 0 ? (
-              <div className="sale-empty">Todavia no hay productos.</div>
-            ) : (
-              saleLines.map((line) => (
+            {saleLines.map((line) => (
                 <article key={line.productId} className="sale-line">
                   <button
                     type="button"
@@ -409,8 +447,7 @@ export function AlamcenHomePage() {
                     </button>
                   </div>
                 </article>
-              ))
-            )}
+              ))}
           </div>
 
           <div className="sale-total-card">
@@ -418,10 +455,11 @@ export function AlamcenHomePage() {
             <strong className="sale-total-value">{formatCurrency(total)}</strong>
           </div>
 
-          <button type="button" className="checkout-button" onClick={handleCheckout}>
-            Cobrar
+          <button type="button" className="checkout-button" onClick={handleCheckout} disabled={isSubmittingSale}>
+            {isSubmittingSale ? "Cobrando..." : "Cobrar"}
           </button>
         </section>
+        ) : null}
       </section>
 
       {manualModalOpen ? (

@@ -1,23 +1,25 @@
 # frontend-alamcen
 
-Frontend del producto `alamcen` dentro de `SaasPro`.
+Frontend del producto `almacen` dentro de `SaasPro`.
 
 ## Estado actual
 
-- demo base del modulo
-- persistencia local
-- sin integracion formal con backend todavia
-- estructura inicial lista para discovery
+- auth SaaS real
+- sesión persistida con refresh token
+- integración formal con backend `alamcen`
+- scanner operativo con registro real de ventas
+- panel básico con pagos, movimientos y ranking
+- consulta básica de productos por nombre
 
 ## Regla importante de este corte
 
-`alamcen` sigue como cascaron inicial de producto.
+`alamcen` ya no es solo un cascarón visual.
 
-La prioridad hoy es:
+La prioridad de este corte es:
 
-- ordenar el frontend base
-- validar direccion funcional minima
-- no acoplarse todavia a backend real
+- sostener un slice vertical mínimo real
+- validar el flujo `login -> caja -> venta -> pago -> dashboard`
+- seguir clonando comportamiento de `LaClaudia` sobre el core SaaS
 
 ## Conexion desde otros dispositivos
 
