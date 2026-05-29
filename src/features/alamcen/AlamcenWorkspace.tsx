@@ -21,7 +21,7 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
+export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("scanner");
   const [statusError, setStatusError] = useState("");
   const [panelRefreshKey, setPanelRefreshKey] = useState(0);
@@ -69,6 +69,9 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
     <main className="workspace-shell">
       <header className="workspace-topbar">
         <div className="workspace-topbar-actions">
+          <span className="workspace-tenant-badge">
+            {currentUser.tenantContext?.tenant.name || "Sin tenant"}
+          </span>
           <button
             type="button"
             className={activeTab === "scanner" ? "workspace-tab active" : "workspace-tab"}

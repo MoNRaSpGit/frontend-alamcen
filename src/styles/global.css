@@ -711,6 +711,20 @@ button:disabled {
   flex-wrap: wrap;
 }
 
+.workspace-tenant-badge {
+  max-width: min(260px, 100%);
+  border: 1px solid #dde3d6;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #31402a;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .workspace-tab.active {
   background: #151515;
   color: #ffffff;
@@ -891,6 +905,11 @@ button:disabled {
   .workspace-topbar-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .workspace-tenant-badge {
+    max-width: 100%;
+    order: -1;
   }
 
   .products-item-card {

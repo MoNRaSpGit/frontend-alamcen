@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
-import { getApiBaseUrl, resetApiBaseUrl, setApiBaseUrl } from "../../shared/config/api";
+import { getApiBaseUrl, getDefaultApiBaseUrl, resetApiBaseUrl, setApiBaseUrl } from "../../shared/config/api";
 import { AuthSession } from "./auth.types";
 import { saveSession } from "./auth.client";
 
@@ -23,14 +23,14 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
   const [apiBaseUrl, setApiBaseUrlDraft] = useState(() => getApiBaseUrl());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const helperUrl = useMemo(() => getApiBaseUrl(), []);
+  const helperUrl = useMemo(() => apiBaseUrl, [apiBaseUrl]);
 
-  async function submitLogin(nextEmail: string, nextPassword: string) {
+  async function submitLogin(nextEmail: string, nextPassword: string, nextApiBaseUrl = apiBaseUrl) {
     setError("");
     setSubmitting(true);
 
     try {
-      setApiBaseUrl(apiBaseUrl);
+      setApiBaseUrl(nextApiBaseUrl);
       const response = await fetch(`${getApiBaseUrl()}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,9 +112,11 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
               className="auth-secondary-button"
               disabled={submitting}
               onClick={() => {
+                const officialApiBaseUrl = getDefaultApiBaseUrl();
                 setEmail(RAMON_CREDENTIALS.email);
                 setPassword(RAMON_CREDENTIALS.password);
-                void submitLogin(RAMON_CREDENTIALS.email, RAMON_CREDENTIALS.password);
+                setApiBaseUrlDraft(officialApiBaseUrl);
+                void submitLogin(RAMON_CREDENTIALS.email, RAMON_CREDENTIALS.password, officialApiBaseUrl);
               }}
             >
               Ramon
