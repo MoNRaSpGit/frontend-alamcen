@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createManualProduct, createSale, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
+import { getApiBaseUrl } from "../../shared/config/api";
 
 type SaleLine = {
   productId: number;
@@ -43,6 +44,20 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
   const manualPriceInputRef = useRef<HTMLInputElement | null>(null);
   const editNameInputRef = useRef<HTMLInputElement | null>(null);
   const total = saleLines.reduce((sum, line) => sum + line.subtotal, 0);
+
+  function buildLookupErrorMessage(error: unknown) {
+    if (error instanceof Error) {
+      const normalizedMessage = error.message.trim();
+
+      if (!normalizedMessage || normalizedMessage === "Failed to fetch") {
+        return `No pudimos consultar productos. Revisa la API activa (${getApiBaseUrl()}) y la conexion al backend.`;
+      }
+
+      return `No pudimos consultar productos. ${normalizedMessage}`;
+    }
+
+    return `No pudimos consultar productos. Revisa la API activa (${getApiBaseUrl()}) y la conexion al backend.`;
+  }
 
   function focusBarcodeInput() {
     if (manualModalOpen || editModalOpen) {
@@ -204,9 +219,7 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       focusBarcodeInput();
     } catch (error) {
       console.error(error);
-      setLookupError(
-        "No pudimos consultar productos ahora. Revisa la conexion al backend o la configuracion de la API."
-      );
+      setLookupError(buildLookupErrorMessage(error));
       focusBarcodeInput();
     }
   }

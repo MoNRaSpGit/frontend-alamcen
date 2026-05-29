@@ -43,6 +43,8 @@ El frontend ya quedó acoplado al backend real del módulo, pero todavía está 
 - el panel ya consume datos reales del dashboard del módulo
 - el tab `Productos` permite una consulta básica para edición rápida
 
+- el scanner ya muestra el error real del backend o la API activa cuando falla el lookup por barcode
+
 ## Estado de instalacion
 
 El frontend queda listo para instalarse como app web progresiva.

@@ -1,10 +1,10 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserRound } from "lucide-react";
 import { logoutSession } from "../auth/auth.client";
-import { StoredAuthUser } from "../auth/auth.types";
 import { AlamcenHomePage } from "./AlamcenHomePage";
 import { createPayment, fetchAlamcenStatus, fetchDashboard, listProducts, updateProduct } from "./alamcen.catalog.client";
-import { AlamcenModuleStatus, BarcodeProductLookup } from "./alamcen.types";
+import { StoredAuthUser } from "../auth/auth.types";
+import { BarcodeProductLookup } from "./alamcen.types";
 
 type AlamcenWorkspaceProps = {
   currentUser: StoredAuthUser;
@@ -21,7 +21,7 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceProps) {
+export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("scanner");
   const [statusError, setStatusError] = useState("");
   const [panelRefreshKey, setPanelRefreshKey] = useState(0);
@@ -30,7 +30,7 @@ export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceP
 
   useEffect(() => {
     fetchAlamcenStatus()
-      .then((payload) => {
+      .then(() => {
         setStatusError("");
       })
       .catch((error) => {
