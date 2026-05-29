@@ -565,6 +565,7 @@ button:disabled {
 
 .auth-card {
   width: min(100%, 460px);
+  max-width: calc(100vw - 32px);
   border: 1px solid #d9ded4;
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.94);
@@ -608,6 +609,7 @@ button:disabled {
 .auth-field {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .auth-field span {
@@ -618,6 +620,7 @@ button:disabled {
 
 .auth-field input {
   width: 100%;
+  min-width: 0;
   border: 1px solid #d6dbd1;
   border-radius: 16px;
   padding: 14px 16px;
@@ -627,6 +630,7 @@ button:disabled {
 
 .auth-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -657,11 +661,12 @@ button:disabled {
 }
 
 .auth-primary-button {
-  flex: 1;
+  flex: 1 1 110px;
 }
 
 .auth-secondary-button {
-  white-space: nowrap;
+  flex: 1 1 130px;
+  min-width: 0;
 }
 
 .auth-error,
@@ -676,6 +681,7 @@ button:disabled {
   margin: 0;
   color: #66725f;
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .workspace-shell {
