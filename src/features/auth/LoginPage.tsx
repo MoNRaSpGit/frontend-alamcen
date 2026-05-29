@@ -8,6 +8,11 @@ const DEMO_CREDENTIALS = {
   password: "almacen123"
 } as const;
 
+const RAMON_CREDENTIALS = {
+  email: "almacen@saaspro.local",
+  password: "almacen123"
+} as const;
+
 type LoginPageProps = {
   onLoggedIn: () => void;
 };
@@ -101,6 +106,18 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
               }}
             >
               Entrar como invitado
+            </button>
+            <button
+              type="button"
+              className="auth-secondary-button"
+              disabled={submitting}
+              onClick={() => {
+                setEmail(RAMON_CREDENTIALS.email);
+                setPassword(RAMON_CREDENTIALS.password);
+                void submitLogin(RAMON_CREDENTIALS.email, RAMON_CREDENTIALS.password);
+              }}
+            >
+              Ramon
             </button>
             <button type="submit" className="auth-primary-button" disabled={submitting}>
               {submitting ? "Entrando..." : "Entrar"}

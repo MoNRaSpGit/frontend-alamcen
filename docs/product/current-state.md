@@ -24,6 +24,7 @@ La estructura actual ya separa:
 ## Capacidades reales del corte actual
 
 - login con usuario del SaaS
+- acceso rapido `Ramon` para entrar al tenant operativo de almacen
 - validación de acceso al módulo `alamcen`
 - scanner con lookup por barcode
 - alta manual por barcode no encontrado

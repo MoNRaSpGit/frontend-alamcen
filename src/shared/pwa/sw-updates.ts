@@ -5,6 +5,19 @@ type UpdateHandler = () => void;
 let waitingWorker: ServiceWorker | null = null;
 let alreadyReloading = false;
 
+function isLocalHostname(hostname: string) {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".local");
+}
+
+async function unregisterLocalServiceWorkers() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(registrations.map((registration) => registration.unregister()));
+}
+
 function notifyUpdateReady(worker: ServiceWorker | null) {
   waitingWorker = worker;
   window.dispatchEvent(new CustomEvent(UPDATE_EVENT_NAME));
@@ -12,6 +25,15 @@ function notifyUpdateReady(worker: ServiceWorker | null) {
 
 export function registerAppServiceWorker() {
   if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  const isLocalEnvironment =
+    import.meta.env.DEV ||
+    (typeof window !== "undefined" && isLocalHostname(window.location.hostname));
+
+  if (isLocalEnvironment) {
+    void unregisterLocalServiceWorkers();
     return;
   }
 

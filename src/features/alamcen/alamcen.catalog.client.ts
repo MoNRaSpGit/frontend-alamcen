@@ -27,6 +27,15 @@ function buildUrl(path: string) {
   return `${getApiBaseUrl()}${path}`;
 }
 
+async function parseOptionalJson<T>(response: Response) {
+  const rawBody = await response.text();
+  if (!rawBody.trim()) {
+    return null;
+  }
+
+  return JSON.parse(rawBody) as T;
+}
+
 export async function fetchAlamcenStatus() {
   const response = await fetchWithAuth(buildUrl("/alamcen/status"));
 
@@ -65,7 +74,7 @@ export async function findProductByBarcode(barcode: string) {
     throw await buildApiError(response);
   }
 
-  return (await response.json()) as BarcodeProductLookup | null;
+  return await parseOptionalJson<BarcodeProductLookup>(response);
 }
 
 export async function createManualProduct(barcode: string, price: number) {
