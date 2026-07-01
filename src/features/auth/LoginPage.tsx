@@ -4,11 +4,13 @@ import { AuthSession } from "./auth.types";
 import { saveSession } from "./auth.client";
 
 const DEMO_CREDENTIALS = {
-  email: "almacen.demo@saaspro.com"
+  email: "almacen.demo@saaspro.com",
+  password: "almacen123"
 } as const;
 
 const RAMON_CREDENTIALS = {
-  email: "almacen@saaspro.local"
+  email: "almacen@saaspro.local",
+  password: "almacen123"
 } as const;
 
 type LoginPageProps = {
@@ -99,10 +101,11 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
               disabled={submitting}
               onClick={() => {
                 setEmail(DEMO_CREDENTIALS.email);
-                setPassword("");
+                setPassword(DEMO_CREDENTIALS.password);
+                void submitLogin(DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password);
               }}
             >
-              Usar invitado
+              Entrar como invitado
             </button>
             <button
               type="button"
@@ -111,8 +114,9 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
               onClick={() => {
                 const officialApiBaseUrl = getDefaultApiBaseUrl();
                 setEmail(RAMON_CREDENTIALS.email);
-                setPassword("");
+                setPassword(RAMON_CREDENTIALS.password);
                 setApiBaseUrlDraft(officialApiBaseUrl);
+                void submitLogin(RAMON_CREDENTIALS.email, RAMON_CREDENTIALS.password, officialApiBaseUrl);
               }}
             >
               Ramon
