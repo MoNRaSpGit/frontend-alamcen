@@ -23,6 +23,7 @@ import { ScannerInputPanel } from "./components/ScannerInputPanel";
 import { ScannerProductsPanel } from "./components/ScannerProductsPanel";
 import { ScannerCheckoutConfirmModal } from "./components/ScannerCheckoutConfirmModal";
 import { ScannerProductModal } from "./components/ScannerProductModal";
+import { logScannerWarmup, logScanResult, logScanUi, warnWarmupFailure } from "./alamcen.diagnostics";
 
 type AlamcenHomePageProps = {
   onSaleRecorded: () => void;
@@ -74,20 +75,10 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
           return;
         }
 
-        console.log(
-          JSON.stringify({
-            context: "alamcen-scanner-warmup",
-            statusMs: metrics.statusMs,
-            scannerRouteMs: metrics.scannerRouteMs,
-            totalMs: metrics.totalMs,
-            statusAuth: metrics.statusAuth,
-            scannerRouteAuth: metrics.scannerRouteAuth,
-            measuredAt: new Date().toISOString()
-          })
-        );
+        logScannerWarmup(metrics);
       } catch (error) {
         if (!cancelled) {
-          console.warn("[alamcen-warmup] No pudimos precalentar la caja.", error);
+          warnWarmupFailure(error);
         }
       }
     })();
@@ -203,36 +194,7 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       const durationMs = Math.round(performance.now() - startedAt);
       const uiStartedAt = performance.now();
 
-      console.log(
-        JSON.stringify({
-          context: "alamcen-scan-result",
-          barcode: normalizedBarcode,
-          found: Boolean(product),
-          productName: product?.nombre || null,
-          durationMs,
-          breakdown: {
-            cacheHit: metrics.cacheHit,
-            sharedInflight: metrics.sharedInflight,
-            cacheReadMs: metrics.cacheReadMs,
-            networkMs: metrics.networkMs,
-            parseMs: metrics.parseMs,
-            cacheWriteMs: metrics.cacheWriteMs,
-            auth: metrics.auth
-              ? {
-                  hadAccessToken: metrics.auth.hadAccessToken,
-                  authPath: metrics.auth.authPath,
-                  firstRequestMs: metrics.auth.firstRequestMs,
-                  refreshMs: metrics.auth.refreshMs,
-                  retryAfterRefreshMs: metrics.auth.retryAfterRefreshMs,
-                  autoLoginMs: metrics.auth.autoLoginMs,
-                  retryAfterAutoLoginMs: metrics.auth.retryAfterAutoLoginMs,
-                  finalStatus: metrics.auth.finalStatus
-                }
-              : null
-          },
-          measuredAt: new Date().toISOString()
-        })
-      );
+      logScanResult(normalizedBarcode, product?.nombre || null, Boolean(product), durationMs, metrics);
 
       if (!product) {
         openManualProductModal(normalizedBarcode);
@@ -244,16 +206,7 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       setBarcodeInput("");
       focusBarcodeInput();
 
-      console.log(
-        JSON.stringify({
-          context: "alamcen-scan-ui",
-          barcode: normalizedBarcode,
-          productName: product.nombre,
-          uiMs,
-          totalMeasuredMs: durationMs + uiMs,
-          measuredAt: new Date().toISOString()
-        })
-      );
+      logScanUi(normalizedBarcode, product.nombre, uiMs, durationMs + uiMs);
     } catch (error) {
       console.error(error);
       setLookupError(buildLookupErrorMessage(error, getApiBaseUrl()));

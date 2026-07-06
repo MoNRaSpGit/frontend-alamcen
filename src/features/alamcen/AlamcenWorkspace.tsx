@@ -38,7 +38,7 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
         setStatusError("");
       })
       .catch((error) => {
-        setStatusError(error instanceof Error ? error.message : "No pudimos validar el módulo.");
+        setStatusError(error instanceof Error ? error.message : "No pudimos validar el modulo.");
       });
   }, []);
 
@@ -92,7 +92,7 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
             <button
               type="button"
               className={isUserMenuOpen ? "workspace-user-button open" : "workspace-user-button"}
-              aria-label="Abrir menú de usuario"
+              aria-label="Abrir menu de usuario"
               aria-expanded={isUserMenuOpen}
               onClick={() => setIsUserMenuOpen((current) => !current)}
             >
@@ -163,7 +163,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
     event.preventDefault();
     const parsedAmount = Number(amount.replace(",", "."));
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0 || !description.trim()) {
-      setError("Ingresa monto válido y descripción.");
+      setError("Ingresa monto valido y descripcion.");
       return;
     }
 
@@ -192,7 +192,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
   return (
     <section className="panel-grid">
       <article className="panel-card panel-metrics-card">
-        <h2>Resumen del día</h2>
+        <h2>Resumen del dia</h2>
         {dashboard ? (
           <div className="panel-metrics">
             <div><span>Caja inicial</span><strong>{formatCurrency(dashboard.metrics.initialCash)}</strong></div>
@@ -207,7 +207,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
         <h2>Registrar pago</h2>
         <form className="panel-payment-form" onSubmit={handleSubmit}>
           <input type="text" inputMode="decimal" placeholder="Monto" value={amount} onChange={(event) => setAmount(event.target.value)} />
-          <input type="text" placeholder="Descripción" value={description} onChange={(event) => setDescription(event.target.value)} />
+          <input type="text" placeholder="Descripcion" value={description} onChange={(event) => setDescription(event.target.value)} />
           <button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar pago"}</button>
         </form>
         {error ? <p className="workspace-error">{error}</p> : null}
@@ -362,3 +362,4 @@ function ProductsTab() {
     </section>
   );
 }
+

@@ -2,6 +2,7 @@ import { AuthFetchMetrics, fetchWithAuth, fetchWithAuthDetailed, logoutSession }
 import { getApiBaseUrl } from "../../shared/config/api";
 import { readJsonStorage, writeJsonStorage } from "../../shared/lib/persistence";
 import { AlamcenDashboardPayload, AlamcenModuleStatus, AlamcenSalePayload, BarcodeProductLookup } from "./alamcen.types";
+import { warnPrimeCacheFailure } from "./alamcen.diagnostics";
 
 const PRODUCT_LOOKUP_CACHE_KEY = "alamcen.product-lookup-cache.v1";
 const PRODUCT_LOOKUP_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
@@ -307,7 +308,7 @@ export async function primeProductLookupCache() {
     });
     window.localStorage.setItem(PRODUCT_LOOKUP_PRIME_DAY_KEY, currentDayKey);
   } catch (error) {
-    console.warn("[alamcen-cache] No pudimos precargar productos para acelerar la primera lectura.", error);
+    warnPrimeCacheFailure(error);
   }
 }
 
