@@ -217,15 +217,55 @@ button:disabled {
   color: #666666;
 }
 
-.sale-line {
-  border: 1px solid #ededed;
-  border-radius: 16px;
+.sale-table-wrap {
+  margin-top: 4px;
+  border: 1px solid #e6eaee;
+  border-radius: 18px;
   background: #ffffff;
-  padding: 14px 16px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 104px minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(33, 37, 41, 0.08);
+}
+
+.sale-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.sale-table thead th {
+  padding: 12px 14px;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6c757d;
+  background: #ffffff;
+  border-bottom: 1px solid #e6eaee;
+}
+
+.sale-table thead th:first-child {
+  text-align: left;
+}
+
+.sale-table-edit-head,
+.sale-table-qty-head {
+  text-align: center;
+}
+
+.sale-table-total-head,
+.sale-table-remove-head {
+  text-align: right;
+}
+
+.sale-row td {
+  padding: 0.95rem 0.9rem;
+  vertical-align: middle;
+  font-size: 1rem;
+  background: #ffffff;
+  border-bottom: 1px solid #edf0f2;
+}
+
+.sale-row:last-child td {
+  border-bottom: 0;
 }
 
 .sale-line-main {
@@ -237,9 +277,9 @@ button:disabled {
   align-items: center;
   gap: 12px;
   min-width: 0;
-  flex: 1;
   text-align: left;
   width: 100%;
+  cursor: pointer;
 }
 
 .sale-line-main:hover {
@@ -307,40 +347,49 @@ button:disabled {
   color: #55604f;
   font-size: 0.92rem;
   font-weight: 700;
+  display: inline-block;
+  margin-top: 0.15rem;
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  color: #0f5132;
+  background-color: rgba(25, 135, 84, 0.18);
 }
 
-.sale-line-side {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  width: 100%;
-  justify-content: flex-end;
-  justify-self: end;
+.sale-table-edit-cell {
+  text-align: center;
 }
 
-.sale-line-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  justify-self: center;
+.sale-table-qty-cell {
+  text-align: center;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sale-table-total-cell {
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sale-table-remove-cell {
+  text-align: right;
 }
 
 .sale-line-edit {
-  border: 1px solid #d7ddd1;
+  border: 1px solid #ced4da;
   border-radius: 999px;
-  background: #f6f8f2;
+  background: #ffffff;
   color: #33402d;
-  padding: 8px 14px;
-  min-width: 92px;
+  padding: 8px 16px;
+  min-width: 96px;
   font-size: 0.88rem;
   font-weight: 700;
   line-height: 1;
 }
 
 .sale-line-edit:hover {
-  background: #eef3e7;
+  background: #f8f9fa;
 }
 
 .sale-line-edit:focus-visible {
@@ -348,35 +397,17 @@ button:disabled {
   outline-offset: 2px;
 }
 
-.sale-line-meta {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  text-align: right;
-  white-space: nowrap;
-  justify-content: flex-end;
-}
-
-.sale-line-meta span {
-  color: #666666;
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
-.sale-line-meta strong {
-  font-size: 1.3rem;
-  color: #111111;
-  line-height: 1;
-}
-
 .sale-line-remove {
-  width: 34px;
-  height: 34px;
-  border: 1px solid #e4d8d5;
+  min-width: 30px;
+  min-height: 30px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ced4da;
   border-radius: 999px;
-  background: #fff7f5;
-  color: #8a3d31;
-  font-size: 1.3rem;
+  background: #ffffff;
+  color: #111111;
+  font-size: 1rem;
+  font-weight: 700;
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -385,11 +416,12 @@ button:disabled {
 }
 
 .sale-line-remove:hover {
-  background: #fbe8e2;
+  background: #f8f9fa;
+  border-color: #adb5bd;
 }
 
 .sale-line-remove:focus-visible {
-  outline: 2px solid #c56756;
+  outline: 2px solid #6b8260;
   outline-offset: 2px;
 }
 
@@ -404,24 +436,45 @@ button:disabled {
     width: 100%;
   }
 
-  .sale-line {
-    grid-template-columns: 1fr;
-    align-items: stretch;
+  .sale-table,
+  .sale-table thead,
+  .sale-table tbody,
+  .sale-table tr,
+  .sale-table th,
+  .sale-table td {
+    display: block;
   }
 
-  .sale-line-center {
+  .sale-table thead {
+    display: none;
+  }
+
+  .sale-table-wrap {
+    border-radius: 16px;
+  }
+
+  .sale-row {
+    display: grid;
+    gap: 8px;
+    padding: 14px;
+    border-bottom: 1px solid #edf0f2;
+  }
+
+  .sale-row td {
+    padding: 0;
+    border: 0;
+  }
+
+  .sale-table-edit-cell,
+  .sale-table-qty-cell,
+  .sale-table-total-cell,
+  .sale-table-remove-cell {
+    text-align: left;
+  }
+
+  .sale-table-remove-cell {
+    display: flex;
     justify-content: flex-start;
-  }
-
-  .sale-line-side {
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  .sale-line-meta {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
   }
 }
 

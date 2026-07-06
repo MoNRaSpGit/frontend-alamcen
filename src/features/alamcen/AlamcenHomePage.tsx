@@ -417,52 +417,62 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
             <strong>Productos</strong>
           </div>
 
-          <div className="sale-list">
-            {saleLines.map((line) => (
-                <article key={line.productId} className="sale-line">
-                  <button
-                    type="button"
-                    className="sale-line-main"
-                    onClick={() => handleIncreaseLine(line.productId)}
-                    aria-label={`Sumar una unidad de ${line.name}`}
-                  >
-                    <div className="product-thumb">
-                      {line.image ? (
-                        <img src={line.image} alt={line.name} />
-                      ) : (
-                        <div className="product-placeholder">{line.name.slice(0, 2).toUpperCase()}</div>
-                      )}
-                    </div>
-                    <div className="sale-line-copy">
-                      <strong>{line.name}</strong>
-                      <span>{formatCurrency(line.price)} c/u</span>
-                    </div>
-                  </button>
-
-                  <div className="sale-line-center">
-                    <button type="button" className="sale-line-edit" onClick={() => openEditModal(line)}>
-                      Editar
-                    </button>
-                  </div>
-
-                  <div className="sale-line-side">
-                    <div className="sale-line-meta">
-                      <span>Cant {line.quantity}</span>
-                      <strong>{formatCurrency(line.subtotal)}</strong>
-                    </div>
-                    <button
-                      type="button"
-                      className="sale-line-remove"
-                      aria-label={`Quitar ${line.name}`}
-                      onClick={() => handleRemoveLine(line.productId)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                </article>
-              ))}
+          <div className="sale-table-wrap">
+            <table className="sale-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th className="sale-table-edit-head">Editar</th>
+                  <th className="sale-table-qty-head">Cant.</th>
+                  <th className="sale-table-total-head">Total</th>
+                  <th className="sale-table-remove-head" />
+                </tr>
+              </thead>
+              <tbody>
+                {saleLines.map((line) => (
+                  <tr key={line.productId} className="sale-row">
+                    <td>
+                      <button
+                        type="button"
+                        className="sale-line-main"
+                        onClick={() => handleIncreaseLine(line.productId)}
+                        aria-label={`Sumar una unidad de ${line.name}`}
+                      >
+                        <div className="product-thumb">
+                          {line.image ? (
+                            <img src={line.image} alt={line.name} />
+                          ) : (
+                            <div className="product-placeholder">{line.name.slice(0, 2).toUpperCase()}</div>
+                          )}
+                        </div>
+                        <div className="sale-line-copy">
+                          <strong>{line.name}</strong>
+                          <span>{formatCurrency(line.price)} c/u</span>
+                        </div>
+                      </button>
+                    </td>
+                    <td className="sale-table-edit-cell">
+                      <button type="button" className="sale-line-edit" onClick={() => openEditModal(line)}>
+                        Editar
+                      </button>
+                    </td>
+                    <td className="sale-table-qty-cell">{line.quantity}</td>
+                    <td className="sale-table-total-cell">{formatCurrency(line.subtotal)}</td>
+                    <td className="sale-table-remove-cell">
+                      <button
+                        type="button"
+                        className="sale-line-remove"
+                        aria-label={`Quitar ${line.name}`}
+                        onClick={() => handleRemoveLine(line.productId)}
+                      >
+                        x
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-
           <div className="sale-total-card">
             <span className="sale-total-label">Total</span>
             <strong className="sale-total-value">{formatCurrency(total)}</strong>
