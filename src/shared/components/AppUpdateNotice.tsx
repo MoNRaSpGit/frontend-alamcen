@@ -65,7 +65,7 @@ export function AppUpdateNotice() {
     <div className="app-update-notice" role="status" aria-live="polite">
       <div className="app-update-copy">
         <strong>{isUpdating ? "Actualizando..." : "Hay una nueva version disponible"}</strong>
-        <span>{isUpdating ? "Aplicando la ultima version..." : "Actualiza la app para cargar los ultimos cambios."}</span>
+        <span>{isUpdating ? "Aplicando la ultima version..." : "Actualiza la app para ver los ultimos cambios."}</span>
       </div>
       {!isUpdating ? (
         <button type="button" className="app-update-button" onClick={handleUpdate}>
