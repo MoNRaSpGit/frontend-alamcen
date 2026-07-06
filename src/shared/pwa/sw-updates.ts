@@ -7,6 +7,7 @@ let waitingWorker: ServiceWorker | null = null;
 let alreadyReloading = false;
 let hasPendingUpdate = false;
 
+// Keep the update flow resilient even when an older PWA install has stale state.
 function isLocalHostname(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".local");
 }
