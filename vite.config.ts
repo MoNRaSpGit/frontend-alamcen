@@ -9,6 +9,10 @@ export default defineConfig(() => {
     plugins: [react()],
     define: {
       __APP_BUILD_ID__: JSON.stringify(appBuildId)
+    },
+    test: {
+      environment: "node",
+      include: ["src/**/*.test.ts"]
     }
   };
 });
