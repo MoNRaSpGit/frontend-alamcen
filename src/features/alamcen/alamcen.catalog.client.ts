@@ -14,6 +14,11 @@ type CachedLookupEntry = {
   product: BarcodeProductLookup;
 };
 
+type StoredLookupCache = {
+  dayKey: string;
+  entries: CachedLookupEntry[];
+};
+
 const inMemoryLookupCache = new Map<string, CachedLookupEntry>();
 const inflightLookupRequests = new Map<string, Promise<BarcodeProductLookup | null>>();
 
@@ -46,8 +51,37 @@ function normalizeBarcode(barcode: string) {
   return String(barcode || "").trim().replace(/\s+/g, "");
 }
 
+function getCacheDayKey() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function readStoredLookupEntries() {
+  const storedValue = readJsonStorage<StoredLookupCache | CachedLookupEntry[] | null>(PRODUCT_LOOKUP_CACHE_KEY, null);
+  if (!storedValue) {
+    return [];
+  }
+
+  if (Array.isArray(storedValue)) {
+    return storedValue;
+  }
+
+  if (storedValue.dayKey !== getCacheDayKey()) {
+    writeJsonStorage(PRODUCT_LOOKUP_CACHE_KEY, {
+      dayKey: getCacheDayKey(),
+      entries: []
+    } satisfies StoredLookupCache);
+    return [];
+  }
+
+  return Array.isArray(storedValue.entries) ? storedValue.entries : [];
+}
+
 function buildLookupCacheMap() {
-  const storedEntries = readJsonStorage<CachedLookupEntry[]>(PRODUCT_LOOKUP_CACHE_KEY, []);
+  const storedEntries = readStoredLookupEntries();
   const now = Date.now();
 
   return storedEntries.reduce((cache, entry) => {
@@ -69,7 +103,10 @@ function persistLookupCache() {
     .sort((left, right) => Number(right.cachedAt || 0) - Number(left.cachedAt || 0))
     .slice(0, PRODUCT_LOOKUP_CACHE_MAX_ENTRIES);
 
-  writeJsonStorage(PRODUCT_LOOKUP_CACHE_KEY, entries);
+  writeJsonStorage(PRODUCT_LOOKUP_CACHE_KEY, {
+    dayKey: getCacheDayKey(),
+    entries
+  } satisfies StoredLookupCache);
 }
 
 function getCachedLookup(barcode: string) {
