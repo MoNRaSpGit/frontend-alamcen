@@ -5,9 +5,13 @@ import { registerAppServiceWorker } from "./shared/pwa/sw-updates";
 import "react-toastify/dist/ReactToastify.css";
 import "./styles/global.css";
 
-registerAppServiceWorker();
-
 window.__alamcenBooted = true;
+
+try {
+  registerAppServiceWorker();
+} catch (error) {
+  console.warn("[alamcen-pwa] Error durante el bootstrap del service worker.", error);
+}
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

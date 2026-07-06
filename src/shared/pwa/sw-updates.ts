@@ -31,14 +31,18 @@ function syncSeenBuildVersion() {
     return;
   }
 
-  const currentBuildId = __APP_BUILD_ID__;
-  const previousBuildId = window.localStorage.getItem(LAST_SEEN_BUILD_KEY);
+  try {
+    const currentBuildId = __APP_BUILD_ID__;
+    const previousBuildId = window.localStorage.getItem(LAST_SEEN_BUILD_KEY);
 
-  if (previousBuildId && previousBuildId !== currentBuildId) {
-    notifyUpdateReady(null);
+    if (previousBuildId && previousBuildId !== currentBuildId) {
+      notifyUpdateReady(null);
+    }
+
+    window.localStorage.setItem(LAST_SEEN_BUILD_KEY, currentBuildId);
+  } catch (error) {
+    console.warn("[alamcen-pwa] No pudimos acceder al storage para revisar actualizaciones.", error);
   }
-
-  window.localStorage.setItem(LAST_SEEN_BUILD_KEY, currentBuildId);
 }
 
 export function registerAppServiceWorker() {
@@ -57,37 +61,43 @@ export function registerAppServiceWorker() {
 
   syncSeenBuildVersion();
 
-  window.addEventListener("load", async () => {
-    const swUrl = `${import.meta.env.BASE_URL}sw.js?build=${encodeURIComponent(__APP_BUILD_ID__)}`;
-    const registration = await navigator.serviceWorker.register(swUrl);
+  window.addEventListener("load", () => {
+    void (async () => {
+      try {
+        const swUrl = `${import.meta.env.BASE_URL}sw.js?build=${encodeURIComponent(__APP_BUILD_ID__)}`;
+        const registration = await navigator.serviceWorker.register(swUrl);
 
-    void registration.update().catch(() => {});
+        void registration.update().catch(() => {});
 
-    if (registration.waiting) {
-      notifyUpdateReady(registration.waiting);
-    }
-
-    registration.addEventListener("updatefound", () => {
-      const installingWorker = registration.installing;
-      if (!installingWorker) {
-        return;
-      }
-
-      installingWorker.addEventListener("statechange", () => {
-        if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
-          notifyUpdateReady(installingWorker);
+        if (registration.waiting) {
+          notifyUpdateReady(registration.waiting);
         }
-      });
-    });
 
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (alreadyReloading) {
-        return;
+        registration.addEventListener("updatefound", () => {
+          const installingWorker = registration.installing;
+          if (!installingWorker) {
+            return;
+          }
+
+          installingWorker.addEventListener("statechange", () => {
+            if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
+              notifyUpdateReady(installingWorker);
+            }
+          });
+        });
+
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (alreadyReloading) {
+            return;
+          }
+
+          alreadyReloading = true;
+          window.location.reload();
+        });
+      } catch (error) {
+        console.warn("[alamcen-pwa] No pudimos registrar el service worker.", error);
       }
-
-      alreadyReloading = true;
-      window.location.reload();
-    });
+    })();
   });
 }
 
