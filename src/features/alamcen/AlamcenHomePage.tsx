@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { createManualProduct, createSale, findProductByBarcode, primeProductLookupCache, updateProduct } from "./alamcen.catalog.client";
+import { createManualProduct, createSale, findProductByBarcodeDetailed, primeProductLookupCache, updateProduct } from "./alamcen.catalog.client";
 import { ManualModalMode, SaleLine } from "./alamcen.scanner.types";
 import {
   appendLocalManualProduct,
@@ -159,8 +159,9 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
 
     try {
       const startedAt = performance.now();
-      const product = await findProductByBarcode(normalizedBarcode);
+      const { product, metrics } = await findProductByBarcodeDetailed(normalizedBarcode);
       const durationMs = Math.round(performance.now() - startedAt);
+      const uiStartedAt = performance.now();
 
       console.log(
         JSON.stringify({
@@ -169,6 +170,26 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
           found: Boolean(product),
           productName: product?.nombre || null,
           durationMs,
+          breakdown: {
+            cacheHit: metrics.cacheHit,
+            sharedInflight: metrics.sharedInflight,
+            cacheReadMs: metrics.cacheReadMs,
+            networkMs: metrics.networkMs,
+            parseMs: metrics.parseMs,
+            cacheWriteMs: metrics.cacheWriteMs,
+            auth: metrics.auth
+              ? {
+                  hadAccessToken: metrics.auth.hadAccessToken,
+                  authPath: metrics.auth.authPath,
+                  firstRequestMs: metrics.auth.firstRequestMs,
+                  refreshMs: metrics.auth.refreshMs,
+                  retryAfterRefreshMs: metrics.auth.retryAfterRefreshMs,
+                  autoLoginMs: metrics.auth.autoLoginMs,
+                  retryAfterAutoLoginMs: metrics.auth.retryAfterAutoLoginMs,
+                  finalStatus: metrics.auth.finalStatus
+                }
+              : null
+          },
           measuredAt: new Date().toISOString()
         })
       );
@@ -179,8 +200,20 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       }
 
       setSaleLines((current) => appendProductToSale(current, product));
+      const uiMs = Math.round(performance.now() - uiStartedAt);
       setBarcodeInput("");
       focusBarcodeInput();
+
+      console.log(
+        JSON.stringify({
+          context: "alamcen-scan-ui",
+          barcode: normalizedBarcode,
+          productName: product.nombre,
+          uiMs,
+          totalMeasuredMs: durationMs + uiMs,
+          measuredAt: new Date().toISOString()
+        })
+      );
     } catch (error) {
       console.error(error);
       setLookupError(buildLookupErrorMessage(error, getApiBaseUrl()));

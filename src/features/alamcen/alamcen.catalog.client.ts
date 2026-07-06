@@ -1,4 +1,4 @@
-import { fetchWithAuth, logoutSession } from "../auth/auth.client";
+import { AuthFetchMetrics, fetchWithAuth, fetchWithAuthDetailed, logoutSession } from "../auth/auth.client";
 import { getApiBaseUrl } from "../../shared/config/api";
 import { readJsonStorage, writeJsonStorage } from "../../shared/lib/persistence";
 import { AlamcenDashboardPayload, AlamcenModuleStatus, AlamcenSalePayload, BarcodeProductLookup } from "./alamcen.types";
@@ -23,6 +23,18 @@ type StoredLookupCache = {
 
 const inMemoryLookupCache = new Map<string, CachedLookupEntry>();
 const inflightLookupRequests = new Map<string, Promise<BarcodeProductLookup | null>>();
+
+export type BarcodeLookupMetrics = {
+  cacheHit: boolean;
+  sharedInflight: boolean;
+  responseStatus: number | null;
+  auth: AuthFetchMetrics | null;
+  cacheReadMs: number;
+  networkMs: number;
+  parseMs: number;
+  cacheWriteMs: number;
+  totalMs: number;
+};
 
 async function buildApiError(response: Response) {
   let message = `Error ${response.status}`;
@@ -260,38 +272,111 @@ export async function primeProductLookupCache() {
 }
 
 export async function findProductByBarcode(barcode: string) {
+  const { product } = await findProductByBarcodeDetailed(barcode);
+  return product;
+}
+
+export async function findProductByBarcodeDetailed(barcode: string) {
+  const lookupStartedAt = performance.now();
   const normalizedBarcode = normalizeBarcode(barcode);
   if (!normalizedBarcode) {
-    return null;
+    return {
+      product: null,
+      metrics: {
+        cacheHit: false,
+        sharedInflight: false,
+        responseStatus: null,
+        auth: null,
+        cacheReadMs: 0,
+        networkMs: 0,
+        parseMs: 0,
+        cacheWriteMs: 0,
+        totalMs: 0
+      } satisfies BarcodeLookupMetrics
+    };
   }
 
+  const cacheReadStartedAt = performance.now();
   const cachedProduct = getCachedLookup(normalizedBarcode);
+  const cacheReadMs = Math.round(performance.now() - cacheReadStartedAt);
   if (cachedProduct) {
-    return cachedProduct;
+    return {
+      product: cachedProduct,
+      metrics: {
+        cacheHit: true,
+        sharedInflight: false,
+        responseStatus: 200,
+        auth: null,
+        cacheReadMs,
+        networkMs: 0,
+        parseMs: 0,
+        cacheWriteMs: 0,
+        totalMs: Math.round(performance.now() - lookupStartedAt)
+      } satisfies BarcodeLookupMetrics
+    };
   }
 
   const inflightKey = `${getApiBaseUrl()}::${normalizedBarcode}`;
   const inflightRequest = inflightLookupRequests.get(inflightKey);
   if (inflightRequest) {
-    return inflightRequest;
+    const product = await inflightRequest;
+    return {
+      product,
+      metrics: {
+        cacheHit: false,
+        sharedInflight: true,
+        responseStatus: 200,
+        auth: null,
+        cacheReadMs,
+        networkMs: Math.round(performance.now() - lookupStartedAt),
+        parseMs: 0,
+        cacheWriteMs: 0,
+        totalMs: Math.round(performance.now() - lookupStartedAt)
+      } satisfies BarcodeLookupMetrics
+    };
   }
 
   const requestPromise = (async () => {
-    const response = await fetchWithAuth(buildUrl(`/alamcen/productos/barcode/${encodeURIComponent(normalizedBarcode)}`));
+    const networkStartedAt = performance.now();
+    const { response, metrics: authMetrics } = await fetchWithAuthDetailed(
+      buildUrl(`/alamcen/productos/barcode/${encodeURIComponent(normalizedBarcode)}`)
+    );
+    const networkMs = Math.round(performance.now() - networkStartedAt);
 
     if (!response.ok) {
       throw await buildApiError(response);
     }
 
+    const parseStartedAt = performance.now();
     const product = await parseOptionalJson<BarcodeProductLookup>(response);
+    const parseMs = Math.round(performance.now() - parseStartedAt);
+    let cacheWriteMs = 0;
     if (product) {
+      const cacheWriteStartedAt = performance.now();
       setCachedLookup(normalizedBarcode, product);
+      cacheWriteMs = Math.round(performance.now() - cacheWriteStartedAt);
     }
 
-    return product;
+    return {
+      product,
+      metrics: {
+        cacheHit: false,
+        sharedInflight: false,
+        responseStatus: response.status,
+        auth: authMetrics,
+        cacheReadMs,
+        networkMs,
+        parseMs,
+        cacheWriteMs,
+        totalMs: Math.round(performance.now() - lookupStartedAt)
+      } satisfies BarcodeLookupMetrics
+    };
   })();
 
-  inflightLookupRequests.set(inflightKey, requestPromise);
+  inflightLookupRequests.set(
+    inflightKey,
+    requestPromise.then((result) => result.product)
+  );
 
   try {
     return await requestPromise;

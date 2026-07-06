@@ -10,6 +10,17 @@ export const RAMON_CREDENTIALS = {
   password: "almacen123"
 } as const;
 
+export type AuthFetchMetrics = {
+  hadAccessToken: boolean;
+  firstRequestMs: number;
+  refreshMs: number;
+  retryAfterRefreshMs: number;
+  autoLoginMs: number;
+  retryAfterAutoLoginMs: number;
+  finalStatus: number;
+  authPath: "direct" | "refresh" | "auto-login" | "failed";
+};
+
 function buildApiUrl(path: string) {
   return `${getApiBaseUrl()}${path}`;
 }
@@ -128,8 +139,23 @@ export async function logoutSession() {
 }
 
 export async function fetchWithAuth(input: string, init?: RequestInit) {
+  const { response } = await fetchWithAuthDetailed(input, init);
+  return response;
+}
+
+export async function fetchWithAuthDetailed(input: string, init?: RequestInit) {
   const token = getAccessToken();
   const headers = new Headers(init?.headers || {});
+  const metrics: AuthFetchMetrics = {
+    hadAccessToken: Boolean(token),
+    firstRequestMs: 0,
+    refreshMs: 0,
+    retryAfterRefreshMs: 0,
+    autoLoginMs: 0,
+    retryAfterAutoLoginMs: 0,
+    finalStatus: 0,
+    authPath: "direct"
+  };
 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
@@ -141,26 +167,45 @@ export async function fetchWithAuth(input: string, init?: RequestInit) {
       headers
     });
 
+  let startedAt = performance.now();
   let response = await doRequest();
+  metrics.firstRequestMs = Math.round(performance.now() - startedAt);
   if (response.status !== 401) {
-    return response;
+    metrics.finalStatus = response.status;
+    return { response, metrics };
   }
 
+  metrics.authPath = "failed";
+
+  startedAt = performance.now();
   const refreshed = await refreshSession();
+  metrics.refreshMs = Math.round(performance.now() - startedAt);
   if (refreshed) {
+    metrics.authPath = "refresh";
     headers.set("Authorization", `Bearer ${refreshed.accessToken}`);
+    startedAt = performance.now();
     response = await doRequest();
+    metrics.retryAfterRefreshMs = Math.round(performance.now() - startedAt);
     if (response.status !== 401) {
-      return response;
+      metrics.finalStatus = response.status;
+      return { response, metrics };
     }
   }
 
   try {
+    startedAt = performance.now();
     const session = await autoLoginRamon();
+    metrics.autoLoginMs = Math.round(performance.now() - startedAt);
+    metrics.authPath = "auto-login";
     headers.set("Authorization", `Bearer ${session.tokens.accessToken}`);
-    return await doRequest();
+    startedAt = performance.now();
+    response = await doRequest();
+    metrics.retryAfterAutoLoginMs = Math.round(performance.now() - startedAt);
+    metrics.finalStatus = response.status;
+    return { response, metrics };
   } catch {
     clearSession();
-    return response;
+    metrics.finalStatus = response.status;
+    return { response, metrics };
   }
 }
