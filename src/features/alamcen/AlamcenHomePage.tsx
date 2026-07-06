@@ -22,7 +22,7 @@ function formatCurrency(value: number) {
     maximumFractionDigits: 0
   }).format(value);
 
-  return `pesos ${formattedValue}`;
+  return `$ ${formattedValue}`;
 }
 
 export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {

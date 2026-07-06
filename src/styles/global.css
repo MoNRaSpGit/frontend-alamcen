@@ -223,7 +223,7 @@ button:disabled {
   background: #ffffff;
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 112px auto;
+  grid-template-columns: minmax(0, 1fr) 104px minmax(0, 1fr);
   gap: 16px;
   align-items: center;
 }
@@ -313,7 +313,10 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  justify-content: flex-end;
+  justify-self: end;
 }
 
 .sale-line-center {
@@ -321,6 +324,7 @@ button:disabled {
   justify-content: center;
   align-items: center;
   width: 100%;
+  justify-self: center;
 }
 
 .sale-line-edit {
@@ -350,6 +354,7 @@ button:disabled {
   gap: 10px;
   text-align: right;
   white-space: nowrap;
+  justify-content: flex-end;
 }
 
 .sale-line-meta span {
