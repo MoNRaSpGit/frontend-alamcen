@@ -130,7 +130,21 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
     setLookupError("");
 
     try {
+      const startedAt = performance.now();
       const product = await findProductByBarcode(normalizedBarcode);
+      const durationMs = Math.round(performance.now() - startedAt);
+
+      console.log(
+        JSON.stringify({
+          context: "alamcen-scan-result",
+          barcode: normalizedBarcode,
+          found: Boolean(product),
+          productName: product?.nombre || null,
+          durationMs,
+          measuredAt: new Date().toISOString()
+        })
+      );
+
       if (!product) {
         openManualProductModal(normalizedBarcode);
         return;
