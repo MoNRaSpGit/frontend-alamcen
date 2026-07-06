@@ -5,9 +5,18 @@ import { autoLoginRamon, getAccessToken, getStoredUser } from "../features/auth/
 import { AppUpdateNotice } from "../shared/components/AppUpdateNotice";
 import { AlamcenWorkspace } from "../features/alamcen/AlamcenWorkspace";
 
+const ALAMCEN_EXIT_FLAG = "saaspro_alamcen_exit_requested";
+
 export function App() {
   const [sessionVersion, setSessionVersion] = useState(0);
   const [isBootstrappingSession, setIsBootstrappingSession] = useState(true);
+  const [isExitRequested, setIsExitRequested] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.sessionStorage.getItem(ALAMCEN_EXIT_FLAG) === "1";
+  });
   const token = getAccessToken();
   const currentUser = useMemo(() => getStoredUser(), [sessionVersion]);
 
@@ -18,6 +27,10 @@ export function App() {
 
     async function bootstrapSession() {
       try {
+        if (isExitRequested) {
+          return;
+        }
+
         if (!token || !currentUser) {
           await autoLoginRamon();
           if (!cancelled) {
@@ -38,13 +51,33 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [currentUser, token]);
+  }, [currentUser, isExitRequested, token]);
+
+  useEffect(() => {
+    if (!isExitRequested || typeof window === "undefined") {
+      return;
+    }
+
+    window.setTimeout(() => {
+      window.close();
+      window.location.replace("about:blank");
+    }, 20);
+  }, [isExitRequested]);
+
+  function handleLoggedOut() {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(ALAMCEN_EXIT_FLAG, "1");
+    }
+
+    setIsExitRequested(true);
+    setSessionVersion((current) => current + 1);
+  }
 
   return (
     <>
       <AppUpdateNotice />
       <ToastContainer position="top-right" autoClose={2400} newestOnTop closeOnClick pauseOnFocusLoss={false} />
-      {isBootstrappingSession ? (
+      {isExitRequested ? null : isBootstrappingSession ? (
         <main className="auth-screen">
           <section className="auth-card">
             <div className="auth-copy">
@@ -57,7 +90,7 @@ export function App() {
       ) : !token || !currentUser ? (
         <LoginPage onLoggedIn={() => setSessionVersion((current) => current + 1)} />
       ) : canAccessModule ? (
-        <AlamcenWorkspace currentUser={currentUser} onLoggedOut={() => setSessionVersion((current) => current + 1)} />
+        <AlamcenWorkspace currentUser={currentUser} onLoggedOut={handleLoggedOut} />
       ) : (
         <main className="auth-screen">
           <section className="auth-card">
