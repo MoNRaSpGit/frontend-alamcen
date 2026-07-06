@@ -1,15 +1,25 @@
 export type FrontendBuildMeta = {
-  scriptSrc: string;
+  bundleId: string;
 };
+
+function extractBundleId(rawValue: string) {
+  const normalizedValue = String(rawValue || "").trim();
+  if (!normalizedValue) {
+    return "";
+  }
+
+  const match = normalizedValue.match(/index-([A-Za-z0-9_-]+)\.js/i);
+  return match ? match[1] : "";
+}
 
 export function getCurrentFrontendBuildMeta(): FrontendBuildMeta {
   if (typeof document === "undefined") {
-    return { scriptSrc: "" };
+    return { bundleId: "" };
   }
 
   const script = document.querySelector<HTMLScriptElement>('script[type="module"][src*="/assets/index-"]');
   return {
-    scriptSrc: script?.src || ""
+    bundleId: extractBundleId(script?.src || "")
   };
 }
 
@@ -29,6 +39,6 @@ export async function fetchPublishedFrontendBuildMeta() {
   const scriptSrc = html.match(/<script[^>]+src="([^"]*\/assets\/index-[^"]+\.js)"/i)?.[1] || "";
 
   return {
-    scriptSrc
+    bundleId: extractBundleId(scriptSrc)
   };
 }

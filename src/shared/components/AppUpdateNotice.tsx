@@ -19,7 +19,7 @@ export function AppUpdateNotice() {
           return;
         }
 
-        setIsVisible(Boolean(published.scriptSrc && current.scriptSrc && published.scriptSrc !== current.scriptSrc));
+        setIsVisible(Boolean(published.bundleId && current.bundleId && published.bundleId !== current.bundleId));
       } catch {
         if (mounted) {
           setIsVisible(false);
