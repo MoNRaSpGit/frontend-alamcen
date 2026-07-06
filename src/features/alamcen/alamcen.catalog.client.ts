@@ -6,6 +6,8 @@ import { AlamcenDashboardPayload, AlamcenModuleStatus, AlamcenSalePayload, Barco
 const PRODUCT_LOOKUP_CACHE_KEY = "alamcen.product-lookup-cache.v1";
 const PRODUCT_LOOKUP_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
 const PRODUCT_LOOKUP_CACHE_MAX_ENTRIES = 250;
+const PRODUCT_LOOKUP_PRIME_DAY_KEY = "alamcen.product-lookup-cache.prime-day.v1";
+const PRODUCT_LOOKUP_PRIME_LIMIT = 250;
 
 type CachedLookupEntry = {
   barcode: string;
@@ -218,6 +220,30 @@ export async function listProducts(options: { search?: string; limit?: number } 
   };
 }
 
+export async function primeProductLookupCache() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const currentDayKey = getCacheDayKey();
+  if (window.localStorage.getItem(PRODUCT_LOOKUP_PRIME_DAY_KEY) === currentDayKey) {
+    return;
+  }
+
+  try {
+    const payload = await listProducts({ limit: PRODUCT_LOOKUP_PRIME_LIMIT });
+    payload.items.forEach((product) => {
+      const cacheBarcode = product.barcodeNormalized || product.barcode;
+      if (cacheBarcode) {
+        setCachedLookup(cacheBarcode, product);
+      }
+    });
+    window.localStorage.setItem(PRODUCT_LOOKUP_PRIME_DAY_KEY, currentDayKey);
+  } catch (error) {
+    console.warn("[alamcen-cache] No pudimos precargar productos para acelerar la primera lectura.", error);
+  }
+}
+
 export async function findProductByBarcode(barcode: string) {
   const normalizedBarcode = normalizeBarcode(barcode);
   if (!normalizedBarcode) {
@@ -264,6 +290,7 @@ export function clearProductLookupCache() {
   if (typeof window !== "undefined") {
     // Manual reset helps re-measure first-scan latency from a clean local cache state.
     window.localStorage.removeItem(PRODUCT_LOOKUP_CACHE_KEY);
+    window.localStorage.removeItem(PRODUCT_LOOKUP_PRIME_DAY_KEY);
   }
 }
 

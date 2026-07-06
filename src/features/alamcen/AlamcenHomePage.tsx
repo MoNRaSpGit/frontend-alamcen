@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { createManualProduct, createSale, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
+import { createManualProduct, createSale, findProductByBarcode, primeProductLookupCache, updateProduct } from "./alamcen.catalog.client";
 import { ManualModalMode, SaleLine } from "./alamcen.scanner.types";
 import {
   appendLocalManualProduct,
@@ -55,6 +55,10 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
 
   useEffect(() => {
     focusBarcodeInput();
+  }, []);
+
+  useEffect(() => {
+    void primeProductLookupCache();
   }, []);
 
   useEffect(() => {
