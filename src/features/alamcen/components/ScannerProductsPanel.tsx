@@ -40,7 +40,7 @@ export function ScannerProductsPanel({
           <tbody>
             {saleLines.map((line) => (
               <tr key={line.productId} className="scanner-row-default">
-                <td>
+                <td className="scanner-product-cell">
                   <button
                     type="button"
                     className="scanner-line-main"
@@ -68,14 +68,18 @@ export function ScannerProductsPanel({
                     </div>
                   </button>
                 </td>
-                <td className="scanner-col-center">
+                <td className="scanner-col-center scanner-mobile-stat" data-label="Editar">
                   <button type="button" className="scanner-edit-btn" onClick={() => onOpenEdit(line)}>
                     Editar
                   </button>
                 </td>
-                <td className="scanner-col-end scanner-line-qty">{line.quantity}</td>
-                <td className="scanner-col-end scanner-line-total">{formatCurrency(line.subtotal)}</td>
-                <td className="scanner-col-end">
+                <td className="scanner-col-end scanner-line-qty scanner-mobile-stat" data-label="Cant.">
+                  {line.quantity}
+                </td>
+                <td className="scanner-col-end scanner-line-total scanner-mobile-stat" data-label="Total">
+                  {formatCurrency(line.subtotal)}
+                </td>
+                <td className="scanner-col-end scanner-mobile-actions" data-label="Quitar">
                   <button
                     type="button"
                     className="scanner-remove-btn"

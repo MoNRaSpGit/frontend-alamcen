@@ -892,13 +892,22 @@ button:disabled {
 
   .scanner-products-panel {
     border-radius: 16px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
   }
 
   .scanner-row-default {
     display: grid;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px 14px;
     padding: 14px;
-    border-bottom: 1px solid #edf0f2;
+    border: 1px solid #e6eaee;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(33, 37, 41, 0.08);
+    margin-bottom: 12px;
   }
 
   .scanner-products-table tbody td {
@@ -906,9 +915,81 @@ button:disabled {
     border: 0;
   }
 
+  .scanner-product-cell {
+    grid-column: 1 / -1;
+  }
+
+  .scanner-line-main {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .scanner-line-copy {
+    flex: 1 1 auto;
+  }
+
+  .scanner-product-name {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
+    line-height: 1.25;
+  }
+
   .scanner-col-center,
   .scanner-col-end {
     text-align: left;
+  }
+
+  .scanner-mobile-stat,
+  .scanner-mobile-actions {
+    display: grid !important;
+    gap: 6px;
+    align-content: start;
+  }
+
+  .scanner-mobile-stat::before,
+  .scanner-mobile-actions::before {
+    content: attr(data-label);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6c757d;
+    letter-spacing: 0.03em;
+  }
+
+  .scanner-line-qty,
+  .scanner-line-total {
+    font-size: 1rem;
+  }
+
+  .scanner-edit-btn {
+    min-width: 88px;
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+
+  .scanner-mobile-actions {
+    justify-items: end;
+  }
+
+  .scanner-remove-btn {
+    min-width: 36px;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .scanner-checkout {
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+
+  .scanner-total {
+    font-size: 1.35rem;
+  }
+
+  .scanner-charge-btn {
+    min-height: 60px;
   }
 
   .scanner-modal-actions {
