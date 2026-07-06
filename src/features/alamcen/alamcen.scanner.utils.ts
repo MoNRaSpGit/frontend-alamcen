@@ -51,7 +51,7 @@ export function appendProductToSale(current: SaleLine[], product: LookupProduct)
       price: product.precioVenta,
       quantity: 1,
       subtotal: product.precioVenta,
-      image: product.tieneImagen ? product.imagen : null
+      image: null
     },
     ...current
   ];
