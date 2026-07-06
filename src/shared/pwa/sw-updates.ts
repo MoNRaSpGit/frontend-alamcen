@@ -1,9 +1,11 @@
 const UPDATE_EVENT_NAME = "alamcen-pwa-update-ready";
+const LAST_SEEN_BUILD_KEY = "alamcen-pwa-last-seen-build";
 
 type UpdateHandler = () => void;
 
 let waitingWorker: ServiceWorker | null = null;
 let alreadyReloading = false;
+let hasPendingUpdate = false;
 
 function isLocalHostname(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".local");
@@ -20,7 +22,23 @@ async function unregisterLocalServiceWorkers() {
 
 function notifyUpdateReady(worker: ServiceWorker | null) {
   waitingWorker = worker;
+  hasPendingUpdate = true;
   window.dispatchEvent(new CustomEvent(UPDATE_EVENT_NAME));
+}
+
+function syncSeenBuildVersion() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const currentBuildId = __APP_BUILD_ID__;
+  const previousBuildId = window.localStorage.getItem(LAST_SEEN_BUILD_KEY);
+
+  if (previousBuildId && previousBuildId !== currentBuildId) {
+    notifyUpdateReady(null);
+  }
+
+  window.localStorage.setItem(LAST_SEEN_BUILD_KEY, currentBuildId);
 }
 
 export function registerAppServiceWorker() {
@@ -36,6 +54,8 @@ export function registerAppServiceWorker() {
     void unregisterLocalServiceWorkers();
     return;
   }
+
+  syncSeenBuildVersion();
 
   window.addEventListener("load", async () => {
     const swUrl = `${import.meta.env.BASE_URL}sw.js?build=${encodeURIComponent(__APP_BUILD_ID__)}`;
@@ -74,6 +94,10 @@ export function registerAppServiceWorker() {
 export function onAppUpdateReady(handler: UpdateHandler) {
   const wrappedHandler = () => handler();
   window.addEventListener(UPDATE_EVENT_NAME, wrappedHandler);
+
+  if (hasPendingUpdate) {
+    handler();
+  }
 
   return () => {
     window.removeEventListener(UPDATE_EVENT_NAME, wrappedHandler);
