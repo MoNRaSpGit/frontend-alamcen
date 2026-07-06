@@ -485,17 +485,18 @@ button:disabled {
 
 .scanner-manual-trigger {
   min-width: 260px;
-  border: 1px solid #ced4da;
+  border: 1px solid #111;
   border-radius: 999px;
-  background: #ffffff;
-  color: #111827;
+  background: #111;
+  color: #ffffff;
   padding: 15px 24px;
   font-weight: 700;
 }
 
 .scanner-manual-trigger:hover,
 .scanner-manual-trigger:focus-visible {
-  background: #f8f9fa;
+  background: #000;
+  border-color: #000;
 }
 
 .scanner-panel-shell {
