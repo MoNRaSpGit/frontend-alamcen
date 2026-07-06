@@ -125,5 +125,6 @@ export function applyAppUpdate() {
 }
 
 export function previewAppUpdateNotice() {
+  // Handy local hook while validating the notice without waiting for a real SW update cycle.
   notifyUpdateReady(null);
 }
