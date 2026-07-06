@@ -379,7 +379,10 @@ export async function findProductByBarcodeDetailed(barcode: string) {
   const requestPromise = (async () => {
     const networkStartedAt = performance.now();
     const { response, metrics: authMetrics } = await fetchWithAuthDetailed(
-      buildUrl(`/alamcen/productos/barcode/${encodeURIComponent(normalizedBarcode)}`)
+      buildUrl(`/alamcen/productos/barcode/${encodeURIComponent(normalizedBarcode)}`),
+      {
+        cache: "no-store"
+      }
     );
     const networkMs = Math.round(performance.now() - networkStartedAt);
 
