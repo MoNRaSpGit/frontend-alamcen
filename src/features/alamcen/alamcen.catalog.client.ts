@@ -262,6 +262,7 @@ export async function findProductByBarcode(barcode: string) {
 export function clearProductLookupCache() {
   inMemoryLookupCache.clear();
   if (typeof window !== "undefined") {
+    // Manual reset helps re-measure first-scan latency from a clean local cache state.
     window.localStorage.removeItem(PRODUCT_LOOKUP_CACHE_KEY);
   }
 }
