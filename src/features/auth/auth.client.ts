@@ -147,12 +147,20 @@ export async function fetchWithAuth(input: string, init?: RequestInit) {
   }
 
   const refreshed = await refreshSession();
-  if (!refreshed) {
+  if (refreshed) {
+    headers.set("Authorization", `Bearer ${refreshed.accessToken}`);
+    response = await doRequest();
+    if (response.status !== 401) {
+      return response;
+    }
+  }
+
+  try {
+    const session = await autoLoginRamon();
+    headers.set("Authorization", `Bearer ${session.tokens.accessToken}`);
+    return await doRequest();
+  } catch {
     clearSession();
     return response;
   }
-
-  headers.set("Authorization", `Bearer ${refreshed.accessToken}`);
-  response = await doRequest();
-  return response;
 }
