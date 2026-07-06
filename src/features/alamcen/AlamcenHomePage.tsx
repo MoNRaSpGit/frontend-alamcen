@@ -1,30 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { createManualProduct, createSale, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
+import { ManualModalMode, SaleLine } from "./alamcen.scanner.types";
+import {
+  appendLocalManualProduct,
+  appendProductToSale,
+  applyEditedProduct,
+  buildLookupErrorMessage,
+  increaseSaleLine,
+  parsePriceInput,
+  removeSaleLine
+} from "./alamcen.scanner.utils";
 import { getApiBaseUrl } from "../../shared/config/api";
-
-type SaleLine = {
-  productId: number;
-  name: string;
-  price: number;
-  quantity: number;
-  subtotal: number;
-  image: string | null;
-};
-
-type ManualModalMode = "barcode-miss" | "manual-button";
+import { ScannerInputPanel } from "./components/ScannerInputPanel";
+import { ScannerProductsPanel } from "./components/ScannerProductsPanel";
+import { ScannerCheckoutConfirmModal } from "./components/ScannerCheckoutConfirmModal";
+import { ScannerProductModal } from "./components/ScannerProductModal";
 
 type AlamcenHomePageProps = {
   onSaleRecorded: () => void;
 };
-
-function formatCurrency(value: number) {
-  const formattedValue = new Intl.NumberFormat("es-UY", {
-    maximumFractionDigits: 0
-  }).format(value);
-
-  return `$ ${formattedValue}`;
-}
 
 export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
   const [barcodeInput, setBarcodeInput] = useState("");
@@ -46,20 +41,6 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
   const manualPriceInputRef = useRef<HTMLInputElement | null>(null);
   const editNameInputRef = useRef<HTMLInputElement | null>(null);
   const total = saleLines.reduce((sum, line) => sum + line.subtotal, 0);
-
-  function buildLookupErrorMessage(error: unknown) {
-    if (error instanceof Error) {
-      const normalizedMessage = error.message.trim();
-
-      if (!normalizedMessage || normalizedMessage === "Failed to fetch") {
-        return `No pudimos consultar productos. Revisa la API activa (${getApiBaseUrl()}) y la conexion al backend.`;
-      }
-
-      return `No pudimos consultar productos. ${normalizedMessage}`;
-    }
-
-    return `No pudimos consultar productos. Revisa la API activa (${getApiBaseUrl()}) y la conexion al backend.`;
-  }
 
   function focusBarcodeInput() {
     if (manualModalOpen || editModalOpen) {
@@ -106,67 +87,6 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
     focusBarcodeInput();
     setShouldRestoreBarcodeFocus(false);
   }, [editModalOpen, manualModalOpen, shouldRestoreBarcodeFocus]);
-
-  function appendProductToSale(product: {
-    id: number;
-    nombre: string;
-    precioVenta: number;
-    imagen: string | null;
-    tieneImagen: boolean;
-  }) {
-    setSaleLines((current) => {
-      const existingLine = current.find((line) => line.productId === product.id);
-      if (existingLine) {
-        return current.map((line) =>
-          line.productId === product.id
-            ? {
-                ...line,
-                quantity: line.quantity + 1,
-                subtotal: (line.quantity + 1) * line.price
-              }
-            : line
-        );
-      }
-
-      return [
-        {
-          productId: product.id,
-          name: product.nombre,
-          price: product.precioVenta,
-          quantity: 1,
-          subtotal: product.precioVenta,
-          image: product.tieneImagen ? product.imagen : null
-        },
-        ...current
-      ];
-    });
-  }
-
-  function applyEditedProduct(productId: number, payload: { nombre: string; precioVenta: number }) {
-    setSaleLines((current) =>
-      current.map((line) =>
-        line.productId === productId
-          ? {
-              ...line,
-              name: payload.nombre,
-              price: payload.precioVenta,
-              subtotal: line.quantity * payload.precioVenta
-            }
-          : line
-      )
-    );
-  }
-
-  function appendLocalManualProduct(price: number) {
-    const manualProductId = Date.now() * -1;
-    appendProductToSale({
-      id: manualProductId,
-      nombre: "Producto Manual",
-      precioVenta: price,
-      imagen: null,
-      tieneImagen: false
-    });
-  }
 
   function openManualProductModal(barcode: string, mode: ManualModalMode = "barcode-miss") {
     setManualModalMode(mode);
@@ -216,12 +136,12 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
         return;
       }
 
-      appendProductToSale(product);
+      setSaleLines((current) => appendProductToSale(current, product));
       setBarcodeInput("");
       focusBarcodeInput();
     } catch (error) {
       console.error(error);
-      setLookupError(buildLookupErrorMessage(error));
+      setLookupError(buildLookupErrorMessage(error, getApiBaseUrl()));
       focusBarcodeInput();
     }
   }
@@ -267,47 +187,19 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
   }
 
   function handleRemoveLine(productId: number) {
-    setSaleLines((current) =>
-      current.flatMap((line) => {
-        if (line.productId !== productId) {
-          return [line];
-        }
-
-        if (line.quantity <= 1) {
-          return [];
-        }
-
-        return [
-          {
-            ...line,
-            quantity: line.quantity - 1,
-            subtotal: (line.quantity - 1) * line.price
-          }
-        ];
-      })
-    );
+    setSaleLines((current) => removeSaleLine(current, productId));
     focusBarcodeInput();
   }
 
   function handleIncreaseLine(productId: number) {
-    setSaleLines((current) =>
-      current.map((line) =>
-        line.productId === productId
-          ? {
-              ...line,
-              quantity: line.quantity + 1,
-              subtotal: (line.quantity + 1) * line.price
-            }
-          : line
-      )
-    );
+    setSaleLines((current) => increaseSaleLine(current, productId));
     focusBarcodeInput();
   }
 
   async function handleManualProductSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsedPrice = Number(manualPriceInput.replace(",", "."));
+    const parsedPrice = parsePriceInput(manualPriceInput);
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
       manualPriceInputRef.current?.focus();
       manualPriceInputRef.current?.select();
@@ -316,18 +208,13 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
 
     try {
       if (manualModalMode === "manual-button") {
-        appendLocalManualProduct(parsedPrice);
+        setSaleLines((current) => appendLocalManualProduct(current, parsedPrice));
       } else {
         const product = await createManualProduct(manualBarcode, parsedPrice);
-        appendProductToSale(product);
+        setSaleLines((current) => appendProductToSale(current, product));
       }
 
-      setManualModalOpen(false);
-      setManualModalMode("barcode-miss");
-      setShouldRestoreBarcodeFocus(true);
-      setManualBarcode("");
-      setManualPriceInput("");
-      setBarcodeInput("");
+      closeManualProductModal();
     } catch (error) {
       console.error(error);
     }
@@ -341,7 +228,7 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
     }
 
     const normalizedName = editNameInput.trim();
-    const parsedPrice = Number(editPriceInput.replace(",", "."));
+    const parsedPrice = parsePriceInput(editPriceInput);
 
     if (!normalizedName) {
       editNameInputRef.current?.focus();
@@ -360,26 +247,27 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
           precioVenta: parsedPrice
         });
 
-        applyEditedProduct(editingLineId, {
-          nombre: product.nombre,
-          precioVenta: product.precioVenta
-        });
+        setSaleLines((current) =>
+          applyEditedProduct(current, editingLineId, {
+            nombre: product.nombre,
+            precioVenta: product.precioVenta
+          })
+        );
       } else {
-        applyEditedProduct(editingLineId, {
-          nombre: normalizedName,
-          precioVenta: parsedPrice
-        });
+        setSaleLines((current) =>
+          applyEditedProduct(current, editingLineId, {
+            nombre: normalizedName,
+            precioVenta: parsedPrice
+          })
+        );
       }
 
-      setEditModalOpen(false);
-      setEditingLineId(null);
-      setEditNameInput("");
-      setEditPriceInput("");
-      setShouldRestoreBarcodeFocus(true);
+      closeEditModal();
     } catch (error) {
       console.error(error);
     }
   }
+
   return (
     <main
       className="barcode-screen"
@@ -388,202 +276,52 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       }
     >
       <section className="barcode-layout">
-        <div className="scanner-input-dominant">
-          <form className="scanner-input-shell" onSubmit={handleBarcodeSubmit}>
-            <input
-              id="barcode-input"
-              ref={barcodeInputRef}
-              className="scanner-input-control"
-              type="text"
-              inputMode="numeric"
-              value={barcodeInput}
-              placeholder="Escanear aqui"
-              onBlur={() => {
-                if (!manualModalOpen && !editModalOpen && !isCheckoutConfirmOpen) {
-                  focusBarcodeInput();
-                }
-              }}
-              onChange={(event) => setBarcodeInput(event.target.value)}
-            />
-          </form>
-          {lookupError ? <p className="scanner-feedback scanner-feedback-error">{lookupError}</p> : null}
-          {saleMessage ? <p className="scanner-feedback scanner-feedback-ok">{saleMessage}</p> : null}
-          <div className="scanner-manual-actions">
-            <button
-              type="button"
-              className="scanner-manual-trigger"
-              onClick={() => openManualProductModal("", "manual-button")}
-            >
-              Producto Manual
-            </button>
-          </div>
-        </div>
+        <ScannerInputPanel
+          barcodeInput={barcodeInput}
+          lookupError={lookupError}
+          saleMessage={saleMessage}
+          isCheckoutConfirmOpen={isCheckoutConfirmOpen}
+          manualModalOpen={manualModalOpen}
+          editModalOpen={editModalOpen}
+          barcodeInputRef={barcodeInputRef}
+          onSubmit={handleBarcodeSubmit}
+          onChangeBarcode={setBarcodeInput}
+          onBlurBarcode={focusBarcodeInput}
+          onOpenManual={() => openManualProductModal("", "manual-button")}
+        />
 
-        {saleLines.length > 0 ? (
-          <section className="scanner-panel-shell">
-            <div className="scanner-products-panel">
-              <table className="scanner-products-table">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th className="scanner-col-center">Editar</th>
-                    <th className="scanner-col-end">Cant.</th>
-                    <th className="scanner-col-end">Total</th>
-                    <th className="scanner-col-end" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {saleLines.map((line) => (
-                    <tr key={line.productId} className="scanner-row-default">
-                      <td>
-                        <button
-                          type="button"
-                          className="scanner-line-main"
-                          onClick={() => handleIncreaseLine(line.productId)}
-                          aria-label={`Sumar una unidad de ${line.name}`}
-                        >
-                          {line.image ? (
-                            <div className="scanner-thumb-frame">
-                              <img src={line.image} alt={line.name} className="scanner-thumb" />
-                            </div>
-                          ) : (
-                            <div className="scanner-thumb-frame scanner-thumb-placeholder">
-                              <span className="scanner-thumb-placeholder-label">{line.name.slice(0, 2).toUpperCase()}</span>
-                            </div>
-                          )}
-                          <div className="scanner-line-copy">
-                            <div className="scanner-product-name">{line.name}</div>
-                            <div className="scanner-price-badge">{formatCurrency(line.price)} c/u</div>
-                          </div>
-                        </button>
-                      </td>
-                      <td className="scanner-col-center">
-                        <button type="button" className="scanner-edit-btn" onClick={() => openEditModal(line)}>
-                          Editar
-                        </button>
-                      </td>
-                      <td className="scanner-col-end scanner-line-qty">{line.quantity}</td>
-                      <td className="scanner-col-end scanner-line-total">{formatCurrency(line.subtotal)}</td>
-                      <td className="scanner-col-end">
-                        <button
-                          type="button"
-                          className="scanner-remove-btn"
-                          aria-label={`Quitar ${line.name}`}
-                          onClick={() => handleRemoveLine(line.productId)}
-                        >
-                          x
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="scanner-checkout">
-              <div className="scanner-total-row">
-                <span className="scanner-total-label">Total</span>
-                <span className="scanner-total">{formatCurrency(total)}</span>
-              </div>
-              <button
-                type="button"
-                className="scanner-charge-btn"
-                onClick={() => setIsCheckoutConfirmOpen(true)}
-                disabled={isSubmittingSale}
-              >
-                Cobrar
-              </button>
-            </div>
-          </section>
-        ) : null}
+        <ScannerProductsPanel
+          saleLines={saleLines}
+          total={total}
+          isSubmittingSale={isSubmittingSale}
+          onIncreaseLine={handleIncreaseLine}
+          onOpenEdit={openEditModal}
+          onRemoveLine={handleRemoveLine}
+          onOpenCheckout={() => setIsCheckoutConfirmOpen(true)}
+        />
       </section>
 
-      {isCheckoutConfirmOpen ? (
-        <div className="scanner-modal-overlay" onClick={() => setIsCheckoutConfirmOpen(false)}>
-          <section
-            className="scanner-modal-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="checkout-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="scanner-modal-header">
-              <h2 id="checkout-title" className="scanner-modal-title">Confirmar cobro</h2>
-              <button
-                type="button"
-                className="scanner-modal-close"
-                onClick={() => setIsCheckoutConfirmOpen(false)}
-                aria-label="Cerrar"
-                disabled={isSubmittingSale}
-              >
-                x
-              </button>
-            </div>
-            <p className="scanner-modal-kicker">Total a cobrar</p>
-            <p className="scanner-modal-total">{formatCurrency(total)}</p>
-            <div className="scanner-modal-actions">
-              <button
-                type="button"
-                className="scanner-secondary-btn"
-                onClick={() => setIsCheckoutConfirmOpen(false)}
-                disabled={isSubmittingSale}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="scanner-primary-btn"
-                onClick={() => {
-                  handleCheckout().catch(() => {});
-                }}
-                disabled={isSubmittingSale}
-              >
-                {isSubmittingSale ? "Confirmando..." : "Confirmar"}
-              </button>
-            </div>
-          </section>
-        </div>
-      ) : null}
+      <ScannerCheckoutConfirmModal
+        isOpen={isCheckoutConfirmOpen}
+        total={total}
+        isSubmittingSale={isSubmittingSale}
+        onClose={() => setIsCheckoutConfirmOpen(false)}
+        onConfirm={() => {
+          void handleCheckout();
+        }}
+      />
 
-      {manualModalOpen ? (
-        <div className="scanner-modal-overlay" onClick={closeManualProductModal}>
-          <section
-            className="scanner-modal-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="manual-product-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="scanner-modal-header">
-              <h2 id="manual-product-title" className="scanner-modal-title">Producto manual</h2>
-              <button type="button" className="scanner-modal-close" onClick={closeManualProductModal} aria-label="Cerrar">
-                x
-              </button>
-            </div>
-            <div className="scanner-modal-copy">
-              {manualModalMode === "barcode-miss" ? <span>Codigo leido: {manualBarcode}</span> : <span>Ingrese precio</span>}
-            </div>
-            <form className="scanner-modal-form" onSubmit={handleManualProductSubmit}>
-              <label className="scanner-modal-label" htmlFor="manual-price-input">
-                Precio
-              </label>
-              <input
-                id="manual-price-input"
-                ref={manualPriceInputRef}
-                className="scanner-modal-input"
-                type="text"
-                inputMode="decimal"
-                placeholder="0"
-                value={manualPriceInput}
-                onChange={(event) => setManualPriceInput(event.target.value)}
-              />
-              <button type="submit" className="scanner-primary-btn scanner-primary-btn-full">
-                Agregar
-              </button>
-            </form>
-          </section>
-        </div>
-      ) : null}
+      <ScannerProductModal
+        isOpen={manualModalOpen}
+        title="Producto manual"
+        helperText={manualModalMode === "barcode-miss" ? `Codigo leido: ${manualBarcode}` : "Ingrese precio"}
+        submitLabel="Agregar"
+        priceInput={manualPriceInput}
+        priceInputRef={manualPriceInputRef}
+        onClose={closeManualProductModal}
+        onChangePrice={setManualPriceInput}
+        onSubmit={handleManualProductSubmit}
+      />
 
       {editModalOpen ? (
         <div className="scanner-modal-overlay" onClick={closeEditModal}>
