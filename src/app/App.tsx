@@ -90,7 +90,7 @@ export function App() {
       ) : !token || !currentUser ? (
         <LoginPage onLoggedIn={() => setSessionVersion((current) => current + 1)} />
       ) : canAccessModule ? (
-        <AlamcenWorkspace currentUser={currentUser} onLoggedOut={handleLoggedOut} />
+        <AlamcenWorkspace onLoggedOut={handleLoggedOut} />
       ) : (
         <main className="auth-screen">
           <section className="auth-card">

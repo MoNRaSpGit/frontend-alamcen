@@ -1,22 +1,17 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Menu, UserRound } from "lucide-react";
-import { toast } from "react-toastify";
 import { logoutSession } from "../auth/auth.client";
 import { AlamcenHomePage } from "./AlamcenHomePage";
 import {
-  clearProductLookupCache,
   createPayment,
   fetchAlamcenStatus,
   fetchDashboard,
   listProducts,
-  resetBackendProductLookupCache,
   updateProduct
 } from "./alamcen.catalog.client";
-import { StoredAuthUser } from "../auth/auth.types";
 import { BarcodeProductLookup } from "./alamcen.types";
 
 type AlamcenWorkspaceProps = {
-  currentUser: StoredAuthUser;
   onLoggedOut: () => void;
 };
 
@@ -30,7 +25,7 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceProps) {
+export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("scanner");
   const [statusError, setStatusError] = useState("");
   const [panelRefreshKey, setPanelRefreshKey] = useState(0);
@@ -74,24 +69,10 @@ export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceP
     onLoggedOut();
   }
 
-  async function handleResetProductCache() {
-    clearProductLookupCache();
-    try {
-      const result = await resetBackendProductLookupCache();
-      toast.success(`Cache local y backend reiniciados (${result.clearedEntries}).`);
-    } catch (error) {
-      console.error(error);
-      toast.warn("Cache local reiniciado. No pudimos limpiar el backend.");
-    }
-  }
-
   return (
     <main className="workspace-shell">
       <header className="workspace-topbar">
         <div className="workspace-topbar-actions">
-          <span className="workspace-tenant-badge">
-            {currentUser.tenantContext?.tenant.name || "Sin tenant"}
-          </span>
           <button
             type="button"
             className={activeTab === "scanner" ? "workspace-tab active" : "workspace-tab"}
@@ -105,9 +86,6 @@ export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceP
             onClick={() => setActiveTab("panel")}
           >
             Panel de control
-          </button>
-          <button type="button" className="workspace-utility-button" onClick={handleResetProductCache}>
-            Reiniciar cache
           </button>
 
           <div className="workspace-user-menu" ref={userMenuRef}>
