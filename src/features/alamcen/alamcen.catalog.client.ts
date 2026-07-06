@@ -36,6 +36,15 @@ export type BarcodeLookupMetrics = {
   totalMs: number;
 };
 
+export type AlamcenWarmupMetrics = {
+  statusMs: number;
+  statusAuth: AuthFetchMetrics | null;
+  scannerRouteMs: number;
+  scannerRouteStatus: number | null;
+  scannerRouteAuth: AuthFetchMetrics | null;
+  totalMs: number;
+};
+
 async function buildApiError(response: Response) {
   let message = `Error ${response.status}`;
 
@@ -209,6 +218,37 @@ export async function fetchAlamcenStatus() {
   }
 
   return (await response.json()) as AlamcenModuleStatus;
+}
+
+export async function warmAlamcenScanner() {
+  const startedAt = performance.now();
+
+  const statusStartedAt = performance.now();
+  const { response: statusResponse, metrics: statusAuth } = await fetchWithAuthDetailed(buildUrl("/alamcen/status"));
+  const statusMs = Math.round(performance.now() - statusStartedAt);
+  if (!statusResponse.ok) {
+    throw await buildApiError(statusResponse);
+  }
+
+  const scannerStartedAt = performance.now();
+  const { response: scannerResponse, metrics: scannerAuth } = await fetchWithAuthDetailed(
+    buildUrl(`/alamcen/productos/barcode/${encodeURIComponent("__warmup__")}`)
+  );
+  const scannerRouteMs = Math.round(performance.now() - scannerStartedAt);
+  if (!scannerResponse.ok) {
+    throw await buildApiError(scannerResponse);
+  }
+
+  await parseOptionalJson<BarcodeProductLookup>(scannerResponse);
+
+  return {
+    statusMs,
+    statusAuth,
+    scannerRouteMs,
+    scannerRouteStatus: scannerResponse.status,
+    scannerRouteAuth: scannerAuth,
+    totalMs: Math.round(performance.now() - startedAt)
+  } satisfies AlamcenWarmupMetrics;
 }
 
 export async function resetBackendProductLookupCache() {

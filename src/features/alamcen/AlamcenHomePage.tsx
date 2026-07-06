@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { createManualProduct, createSale, findProductByBarcodeDetailed, primeProductLookupCache, updateProduct } from "./alamcen.catalog.client";
+import {
+  createManualProduct,
+  createSale,
+  findProductByBarcodeDetailed,
+  primeProductLookupCache,
+  updateProduct,
+  warmAlamcenScanner
+} from "./alamcen.catalog.client";
 import { ManualModalMode, SaleLine } from "./alamcen.scanner.types";
 import {
   appendLocalManualProduct,
@@ -55,6 +62,39 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
 
   useEffect(() => {
     focusBarcodeInput();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const metrics = await warmAlamcenScanner();
+        if (cancelled) {
+          return;
+        }
+
+        console.log(
+          JSON.stringify({
+            context: "alamcen-scanner-warmup",
+            statusMs: metrics.statusMs,
+            scannerRouteMs: metrics.scannerRouteMs,
+            totalMs: metrics.totalMs,
+            statusAuth: metrics.statusAuth,
+            scannerRouteAuth: metrics.scannerRouteAuth,
+            measuredAt: new Date().toISOString()
+          })
+        );
+      } catch (error) {
+        if (!cancelled) {
+          console.warn("[alamcen-warmup] No pudimos precalentar la caja.", error);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
