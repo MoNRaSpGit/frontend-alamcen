@@ -1,15 +1,10 @@
 import { FormEvent, useMemo, useState } from "react";
-import { getApiBaseUrl, getDefaultApiBaseUrl, resetApiBaseUrl, setApiBaseUrl } from "../../shared/config/api";
+import { getApiBaseUrl, getDefaultApiBaseUrl, resetApiBaseUrl } from "../../shared/config/api";
 import { AuthSession } from "./auth.types";
-import { saveSession } from "./auth.client";
+import { loginWithCredentials, RAMON_CREDENTIALS, saveSession } from "./auth.client";
 
 const DEMO_CREDENTIALS = {
   email: "almacen.demo@saaspro.com",
-  password: "almacen123"
-} as const;
-
-const RAMON_CREDENTIALS = {
-  email: "almacen@saaspro.local",
   password: "almacen123"
 } as const;
 
@@ -30,22 +25,8 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
     setSubmitting(true);
 
     try {
-      setApiBaseUrl(nextApiBaseUrl);
-      const response = await fetch(`${getApiBaseUrl()}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: nextEmail.trim(),
-          password: nextPassword
-        })
-      });
-
-      const payload = (await response.json().catch(() => ({}))) as Partial<AuthSession> & { message?: string };
-      if (!response.ok || !payload.user || !payload.tokens) {
-        throw new Error(payload.message || "No se pudo iniciar sesion.");
-      }
-
-      saveSession(payload as AuthSession);
+      const payload = (await loginWithCredentials(nextEmail, nextPassword, nextApiBaseUrl)) as AuthSession;
+      saveSession(payload);
       onLoggedIn();
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "No se pudo iniciar sesion.");
