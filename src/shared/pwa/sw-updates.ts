@@ -38,7 +38,10 @@ export function registerAppServiceWorker() {
   }
 
   window.addEventListener("load", async () => {
-    const registration = await navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+    const swUrl = `${import.meta.env.BASE_URL}sw.js?build=${encodeURIComponent(__APP_BUILD_ID__)}`;
+    const registration = await navigator.serviceWorker.register(swUrl);
+
+    void registration.update().catch(() => {});
 
     if (registration.waiting) {
       notifyUpdateReady(registration.waiting);
