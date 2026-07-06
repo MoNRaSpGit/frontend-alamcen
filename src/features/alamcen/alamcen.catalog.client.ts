@@ -7,7 +7,7 @@ const PRODUCT_LOOKUP_CACHE_KEY = "alamcen.product-lookup-cache.v1";
 const PRODUCT_LOOKUP_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
 const PRODUCT_LOOKUP_CACHE_MAX_ENTRIES = 250;
 const PRODUCT_LOOKUP_PRIME_DAY_KEY = "alamcen.product-lookup-cache.prime-day.v1";
-const PRODUCT_LOOKUP_PRIME_LIMIT = 250;
+const PRODUCT_LOOKUP_PRIME_LIMIT = 100;
 
 type CachedLookupEntry = {
   barcode: string;

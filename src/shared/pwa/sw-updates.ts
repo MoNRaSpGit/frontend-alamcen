@@ -1,11 +1,9 @@
 const UPDATE_EVENT_NAME = "alamcen-pwa-update-ready";
-const LAST_SEEN_BUILD_KEY = "alamcen-pwa-last-seen-build";
 
 type UpdateHandler = () => void;
 
 let waitingWorker: ServiceWorker | null = null;
 let alreadyReloading = false;
-let hasPendingUpdate = false;
 
 // Keep the update flow resilient even when an older PWA install has stale state.
 function isLocalHostname(hostname: string) {
@@ -23,27 +21,7 @@ async function unregisterLocalServiceWorkers() {
 
 function notifyUpdateReady(worker: ServiceWorker | null) {
   waitingWorker = worker;
-  hasPendingUpdate = true;
   window.dispatchEvent(new CustomEvent(UPDATE_EVENT_NAME));
-}
-
-function syncSeenBuildVersion() {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    const currentBuildId = __APP_BUILD_ID__;
-    const previousBuildId = window.localStorage.getItem(LAST_SEEN_BUILD_KEY);
-
-    if (previousBuildId && previousBuildId !== currentBuildId) {
-      notifyUpdateReady(null);
-    }
-
-    window.localStorage.setItem(LAST_SEEN_BUILD_KEY, currentBuildId);
-  } catch (error) {
-    console.warn("[alamcen-pwa] No pudimos acceder al storage para revisar actualizaciones.", error);
-  }
 }
 
 export function registerAppServiceWorker() {
@@ -60,12 +38,10 @@ export function registerAppServiceWorker() {
     return;
   }
 
-  syncSeenBuildVersion();
-
   window.addEventListener("load", () => {
     void (async () => {
       try {
-        const swUrl = `${import.meta.env.BASE_URL}sw.js?build=${encodeURIComponent(__APP_BUILD_ID__)}`;
+        const swUrl = `${import.meta.env.BASE_URL}sw.js`;
         const registration = await navigator.serviceWorker.register(swUrl);
 
         void registration.update().catch(() => {});
@@ -105,10 +81,6 @@ export function registerAppServiceWorker() {
 export function onAppUpdateReady(handler: UpdateHandler) {
   const wrappedHandler = () => handler();
   window.addEventListener(UPDATE_EVENT_NAME, wrappedHandler);
-
-  if (hasPendingUpdate) {
-    handler();
-  }
 
   return () => {
     window.removeEventListener(UPDATE_EVENT_NAME, wrappedHandler);
