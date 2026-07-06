@@ -49,7 +49,13 @@ export function ScannerProductsPanel({
                   >
                     {line.image ? (
                       <div className="scanner-thumb-frame">
-                        <img src={line.image} alt={line.name} className="scanner-thumb" />
+                        <img
+                          src={line.image}
+                          alt={line.name}
+                          className="scanner-thumb"
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                     ) : (
                       <div className="scanner-thumb-frame scanner-thumb-placeholder">

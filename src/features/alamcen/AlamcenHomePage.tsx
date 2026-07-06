@@ -58,7 +58,31 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
   }, []);
 
   useEffect(() => {
-    void primeProductLookupCache();
+    let timeoutId: number | null = null;
+    let idleCallbackId: number | null = null;
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    const runPrime = () => {
+      void primeProductLookupCache();
+    };
+
+    if (typeof idleWindow.requestIdleCallback === "function") {
+      idleCallbackId = idleWindow.requestIdleCallback(runPrime, { timeout: 2500 });
+    } else {
+      timeoutId = globalThis.setTimeout(runPrime, 1200);
+    }
+
+    return () => {
+      if (timeoutId != null) {
+        globalThis.clearTimeout(timeoutId);
+      }
+      if (idleCallbackId != null && typeof idleWindow.cancelIdleCallback === "function") {
+        idleWindow.cancelIdleCallback(idleCallbackId);
+      }
+    };
   }, []);
 
   useEffect(() => {
