@@ -6,7 +6,6 @@ import { AlamcenHomePage } from "./AlamcenHomePage";
 import { clearProductLookupCache, createPayment, fetchAlamcenStatus, fetchDashboard, listProducts, updateProduct } from "./alamcen.catalog.client";
 import { StoredAuthUser } from "../auth/auth.types";
 import { BarcodeProductLookup } from "./alamcen.types";
-import { previewAppUpdateNotice } from "../../shared/pwa/sw-updates";
 
 type AlamcenWorkspaceProps = {
   currentUser: StoredAuthUser;
@@ -72,11 +71,6 @@ export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceP
     toast.success("Cache de productos reiniciado.");
   }
 
-  function handlePreviewUpdateNotice() {
-    previewAppUpdateNotice();
-    toast.success("Aviso de actualizacion disparado.");
-  }
-
   return (
     <main className="workspace-shell">
       <header className="workspace-topbar">
@@ -100,9 +94,6 @@ export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceP
           </button>
           <button type="button" className="workspace-utility-button" onClick={handleResetProductCache}>
             Reiniciar cache
-          </button>
-          <button type="button" className="workspace-utility-button" onClick={handlePreviewUpdateNotice}>
-            Probar actualizacion
           </button>
 
           <div className="workspace-user-menu" ref={userMenuRef}>
