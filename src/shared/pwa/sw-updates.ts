@@ -112,3 +112,7 @@ export function applyAppUpdate() {
 
   window.location.reload();
 }
+
+export function previewAppUpdateNotice() {
+  notifyUpdateReady(null);
+}

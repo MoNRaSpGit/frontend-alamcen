@@ -1153,6 +1153,7 @@ button:disabled {
 
 .auth-secondary-button,
 .workspace-tab,
+.workspace-utility-button,
 .workspace-logout-button {
   background: #edf3e5;
   color: #31402a;
@@ -1226,6 +1227,16 @@ button:disabled {
 .workspace-tab.active {
   background: #151515;
   color: #ffffff;
+}
+
+.workspace-utility-button {
+  border: 1px solid #d8dfd0;
+  box-shadow: inset 0 0 0 1px rgba(91, 109, 83, 0.05);
+}
+
+.workspace-utility-button:hover,
+.workspace-utility-button:focus-visible {
+  background: #e6eedc;
 }
 
 .workspace-user-menu {

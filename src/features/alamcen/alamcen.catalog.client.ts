@@ -259,6 +259,13 @@ export async function findProductByBarcode(barcode: string) {
   }
 }
 
+export function clearProductLookupCache() {
+  inMemoryLookupCache.clear();
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(PRODUCT_LOOKUP_CACHE_KEY);
+  }
+}
+
 export async function createManualProduct(barcode: string, price: number) {
   const response = await fetchWithAuth(buildUrl("/alamcen/productos/manual"), {
     method: "POST",
