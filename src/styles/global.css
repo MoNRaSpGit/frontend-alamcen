@@ -223,7 +223,7 @@ button:disabled {
   background: #ffffff;
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) 112px auto;
   gap: 16px;
   align-items: center;
 }
@@ -320,6 +320,7 @@ button:disabled {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .sale-line-edit {
@@ -327,7 +328,8 @@ button:disabled {
   border-radius: 999px;
   background: #f6f8f2;
   color: #33402d;
-  padding: 8px 12px;
+  padding: 8px 14px;
+  min-width: 92px;
   font-size: 0.88rem;
   font-weight: 700;
   line-height: 1;

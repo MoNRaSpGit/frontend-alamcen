@@ -18,11 +18,11 @@ type AlamcenHomePageProps = {
 };
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("es-UY", {
-    style: "currency",
-    currency: "UYU",
+  const formattedValue = new Intl.NumberFormat("es-UY", {
     maximumFractionDigits: 0
   }).format(value);
+
+  return `pesos ${formattedValue}`;
 }
 
 export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
