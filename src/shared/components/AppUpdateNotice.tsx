@@ -1,35 +1,77 @@
 import { useEffect, useState } from "react";
-import { applyAppUpdate, onAppUpdateReady } from "../pwa/sw-updates";
+import { fetchPublishedFrontendBuildMeta, getCurrentFrontendBuildMeta } from "../config/build";
+import { applyAppUpdate } from "../pwa/sw-updates";
+
+const UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 1000;
 
 export function AppUpdateNotice() {
   const [isVisible, setIsVisible] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    return onAppUpdateReady(() => {
-      setIsVisible(true);
-    });
+    let mounted = true;
+
+    async function checkForUpdates() {
+      try {
+        const current = getCurrentFrontendBuildMeta();
+        const published = await fetchPublishedFrontendBuildMeta();
+        if (!mounted) {
+          return;
+        }
+
+        setIsVisible(Boolean(published.scriptSrc && current.scriptSrc && published.scriptSrc !== current.scriptSrc));
+      } catch {
+        if (mounted) {
+          setIsVisible(false);
+        }
+      }
+    }
+
+    void checkForUpdates();
+
+    const intervalId = window.setInterval(() => {
+      void checkForUpdates();
+    }, UPDATE_CHECK_INTERVAL_MS);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === "visible") {
+        void checkForUpdates();
+      }
+    };
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
+    return () => {
+      mounted = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+    };
   }, []);
 
-  if (!isVisible) {
+  function handleUpdate() {
+    setIsUpdating(true);
+    window.setTimeout(() => {
+      applyAppUpdate();
+    }, 500);
+  }
+
+  if (!isVisible && !isUpdating) {
     return null;
   }
 
   return (
     <div className="app-update-notice" role="status" aria-live="polite">
       <div className="app-update-copy">
-        <strong>Hay una nueva version disponible</strong>
-        <span>Actualiza la app para cargar los ultimos cambios.</span>
+        <strong>{isUpdating ? "Actualizando..." : "Hay una nueva version disponible"}</strong>
+        <span>{isUpdating ? "Aplicando la ultima version..." : "Actualiza la app para cargar los ultimos cambios."}</span>
       </div>
-      <button
-        type="button"
-        className="app-update-button"
-        onClick={() => {
-          setIsVisible(false);
-          applyAppUpdate();
-        }}
-      >
-        Actualizar
-      </button>
+      {!isUpdating ? (
+        <button type="button" className="app-update-button" onClick={handleUpdate}>
+          Actualizar
+        </button>
+      ) : null}
     </div>
   );
 }

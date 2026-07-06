@@ -47,6 +47,11 @@ self.addEventListener("fetch", (event) => {
     event.request.mode === "navigate" ||
     (event.request.headers.get("accept") || "").includes("text/html");
 
+  if (requestUrl.pathname.endsWith("/app-build.json") || requestUrl.pathname.endsWith("/index.html")) {
+    event.respondWith(fetch(event.request, { cache: "no-store" }));
+    return;
+  }
+
   if (isNavigationRequest) {
     event.respondWith(
       fetch(event.request)
