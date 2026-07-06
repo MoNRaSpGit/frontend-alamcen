@@ -199,6 +199,21 @@ export async function fetchAlamcenStatus() {
   return (await response.json()) as AlamcenModuleStatus;
 }
 
+export async function resetBackendProductLookupCache() {
+  const response = await fetchWithAuth(buildUrl("/alamcen/cache/product-lookup/reset"), {
+    method: "POST"
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response);
+  }
+
+  return (await response.json()) as {
+    ok: true;
+    clearedEntries: number;
+  };
+}
+
 export async function listProducts(options: { search?: string; limit?: number } = {}) {
   const searchParams = new URLSearchParams();
   if (options.search?.trim()) {

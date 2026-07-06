@@ -3,7 +3,15 @@ import { Menu, UserRound } from "lucide-react";
 import { toast } from "react-toastify";
 import { logoutSession } from "../auth/auth.client";
 import { AlamcenHomePage } from "./AlamcenHomePage";
-import { clearProductLookupCache, createPayment, fetchAlamcenStatus, fetchDashboard, listProducts, updateProduct } from "./alamcen.catalog.client";
+import {
+  clearProductLookupCache,
+  createPayment,
+  fetchAlamcenStatus,
+  fetchDashboard,
+  listProducts,
+  resetBackendProductLookupCache,
+  updateProduct
+} from "./alamcen.catalog.client";
 import { StoredAuthUser } from "../auth/auth.types";
 import { BarcodeProductLookup } from "./alamcen.types";
 
@@ -66,9 +74,15 @@ export function AlamcenWorkspace({ currentUser, onLoggedOut }: AlamcenWorkspaceP
     onLoggedOut();
   }
 
-  function handleResetProductCache() {
+  async function handleResetProductCache() {
     clearProductLookupCache();
-    toast.success("Cache de productos reiniciado.");
+    try {
+      const result = await resetBackendProductLookupCache();
+      toast.success(`Cache local y backend reiniciados (${result.clearedEntries}).`);
+    } catch (error) {
+      console.error(error);
+      toast.warn("Cache local reiniciado. No pudimos limpiar el backend.");
+    }
   }
 
   return (
