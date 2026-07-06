@@ -17,8 +17,8 @@ export function AppUpdateNotice() {
   return (
     <div className="app-update-notice" role="status" aria-live="polite">
       <div className="app-update-copy">
-        <strong>Hay una nueva actualizacion</strong>
-        <span>Recarga la app para usar la ultima version.</span>
+        <strong>Hay una nueva version disponible</strong>
+        <span>Actualiza la app para cargar los ultimos cambios.</span>
       </div>
       <button
         type="button"
