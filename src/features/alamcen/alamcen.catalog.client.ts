@@ -9,6 +9,7 @@ const PRODUCT_LOOKUP_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
 const PRODUCT_LOOKUP_CACHE_MAX_ENTRIES = 250;
 const PRODUCT_LOOKUP_PRIME_DAY_KEY = "alamcen.product-lookup-cache.prime-day.v1";
 const PRODUCT_LOOKUP_PRIME_LIMIT = 100;
+const PENDING_SALES_QUEUE_KEY = "alamcen.pending-sales-queue.v1";
 
 type CachedLookupEntry = {
   barcode: string;
@@ -22,8 +23,16 @@ type StoredLookupCache = {
   entries: CachedLookupEntry[];
 };
 
+type PendingQueuedSale = {
+  id: string;
+  queuedAt: string;
+  attempts: number;
+  payload: AlamcenSalePayload;
+};
+
 const inMemoryLookupCache = new Map<string, CachedLookupEntry>();
 const inflightLookupRequests = new Map<string, Promise<BarcodeProductLookup | null>>();
+let inflightSalesQueueFlush: Promise<void> | null = null;
 
 export type BarcodeLookupMetrics = {
   cacheHit: boolean;
@@ -131,6 +140,14 @@ function persistLookupCache() {
     dayKey: getCacheDayKey(),
     entries
   } satisfies StoredLookupCache);
+}
+
+function readPendingSalesQueue() {
+  return readJsonStorage<PendingQueuedSale[]>(PENDING_SALES_QUEUE_KEY, []);
+}
+
+function writePendingSalesQueue(queue: PendingQueuedSale[]) {
+  writeJsonStorage(PENDING_SALES_QUEUE_KEY, queue);
 }
 
 function getCachedLookup(barcode: string) {
@@ -500,6 +517,59 @@ export async function createSale(payload: AlamcenSalePayload) {
       createdAt: string;
     };
   };
+}
+
+export function queueSaleForBackgroundSync(payload: AlamcenSalePayload) {
+  const queuedSale: PendingQueuedSale = {
+    id: `${payload.externalId || "alamcen-sale"}-${Date.now()}`,
+    queuedAt: new Date().toISOString(),
+    attempts: 0,
+    payload
+  };
+
+  const queue = readPendingSalesQueue();
+  queue.push(queuedSale);
+  writePendingSalesQueue(queue);
+  void flushPendingSalesQueue().catch((error) => {
+    console.error("[alamcen-sales-queue] No pudimos guardar una venta en segundo plano.", error);
+  });
+  return queuedSale.id;
+}
+
+export async function flushPendingSalesQueue() {
+  if (inflightSalesQueueFlush) {
+    return inflightSalesQueueFlush;
+  }
+
+  inflightSalesQueueFlush = (async () => {
+    let queue = readPendingSalesQueue();
+
+    while (queue.length > 0) {
+      const [nextSale, ...rest] = queue;
+
+      try {
+        await createSale(nextSale.payload);
+        queue = rest;
+        writePendingSalesQueue(queue);
+      } catch (error) {
+        queue = [
+          {
+            ...nextSale,
+            attempts: nextSale.attempts + 1
+          },
+          ...rest
+        ];
+        writePendingSalesQueue(queue);
+        throw error;
+      }
+    }
+  })();
+
+  try {
+    await inflightSalesQueueFlush;
+  } finally {
+    inflightSalesQueueFlush = null;
+  }
 }
 
 export async function createPayment(payload: { externalId?: string; amount: number; description: string }) {

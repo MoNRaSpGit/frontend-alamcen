@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import {
   createManualProduct,
-  createSale,
   findProductByBarcodeDetailed,
+  flushPendingSalesQueue,
   primeProductLookupCache,
+  queueSaleForBackgroundSync,
   updateProduct,
   warmAlamcenScanner
 } from "./alamcen.catalog.client";
@@ -63,6 +64,10 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
 
   useEffect(() => {
     focusBarcodeInput();
+  }, []);
+
+  useEffect(() => {
+    void flushPendingSalesQueue().catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -223,7 +228,7 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
     setSaleMessage("");
 
     try {
-      await createSale({
+      const payload = {
         externalId: `alamcen-sale-${Date.now()}`,
         items: saleLines.map((line) => ({
           productId: line.productId > 0 ? line.productId : null,
@@ -233,14 +238,15 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
           quantity: line.quantity,
           thumbnailUrl: line.image
         }))
-      });
+      };
 
       setSaleLines([]);
       setBarcodeInput("");
       setLookupError("");
-      setSaleMessage("");
+      setSaleMessage("Venta enviada. Guardando en segundo plano.");
       setIsCheckoutConfirmOpen(false);
-      toast.success("Venta registrada correctamente.");
+      queueSaleForBackgroundSync(payload);
+      toast.success("Venta lista. Guardando en segundo plano.");
       onSaleRecorded();
       focusBarcodeInput();
       return true;
