@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import { LoginPage } from "../features/auth/LoginPage";
 import { autoLoginRamon, getAccessToken, getStoredUser } from "../features/auth/auth.client";
 import { AppUpdateNotice } from "../shared/components/AppUpdateNotice";
@@ -42,6 +43,7 @@ export function App() {
   return (
     <>
       <AppUpdateNotice />
+      <ToastContainer position="top-right" autoClose={2400} newestOnTop closeOnClick pauseOnFocusLoss={false} />
       {isBootstrappingSession ? (
         <main className="auth-screen">
           <section className="auth-card">

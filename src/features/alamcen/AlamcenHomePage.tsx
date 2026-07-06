@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import { createManualProduct, createSale, findProductByBarcode, updateProduct } from "./alamcen.catalog.client";
 import { getApiBaseUrl } from "../../shared/config/api";
 
@@ -249,8 +250,9 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       setSaleLines([]);
       setBarcodeInput("");
       setLookupError("");
-      setSaleMessage("Venta registrada correctamente.");
+      setSaleMessage("");
       setIsCheckoutConfirmOpen(false);
+      toast.success("Venta registrada correctamente.");
       onSaleRecorded();
       focusBarcodeInput();
       return true;

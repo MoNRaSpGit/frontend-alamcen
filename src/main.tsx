@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./app/App";
 import { registerAppServiceWorker } from "./shared/pwa/sw-updates";
+import "react-toastify/dist/ReactToastify.css";
 import "./styles/global.css";
 
 registerAppServiceWorker();
