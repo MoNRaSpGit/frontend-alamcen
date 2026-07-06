@@ -40,6 +40,7 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
   const [shouldRestoreBarcodeFocus, setShouldRestoreBarcodeFocus] = useState(false);
   const [saleMessage, setSaleMessage] = useState("");
   const [isSubmittingSale, setIsSubmittingSale] = useState(false);
+  const [isCheckoutConfirmOpen, setIsCheckoutConfirmOpen] = useState(false);
   const barcodeInputRef = useRef<HTMLInputElement | null>(null);
   const manualPriceInputRef = useRef<HTMLInputElement | null>(null);
   const editNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -224,41 +225,43 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
     }
   }
 
-  function handleCheckout() {
+  async function handleCheckout() {
     if (!saleLines.length || isSubmittingSale) {
-      return;
+      return false;
     }
 
     setIsSubmittingSale(true);
     setSaleMessage("");
 
-    createSale({
-      externalId: `alamcen-sale-${Date.now()}`,
-      items: saleLines.map((line) => ({
-        productId: line.productId > 0 ? line.productId : null,
-        isManual: line.productId <= 0,
-        nombre: line.name,
-        precioVenta: line.price,
-        quantity: line.quantity,
-        thumbnailUrl: line.image
-      }))
-    })
-      .then(() => {
-        setSaleLines([]);
-        setBarcodeInput("");
-        setLookupError("");
-        setSaleMessage("Venta registrada correctamente.");
-        onSaleRecorded();
-        focusBarcodeInput();
-      })
-      .catch((error) => {
-        console.error(error);
-        setSaleMessage(error instanceof Error ? error.message : "No pudimos registrar la venta.");
-        focusBarcodeInput();
-      })
-      .finally(() => {
-        setIsSubmittingSale(false);
+    try {
+      await createSale({
+        externalId: `alamcen-sale-${Date.now()}`,
+        items: saleLines.map((line) => ({
+          productId: line.productId > 0 ? line.productId : null,
+          isManual: line.productId <= 0,
+          nombre: line.name,
+          precioVenta: line.price,
+          quantity: line.quantity,
+          thumbnailUrl: line.image
+        }))
       });
+
+      setSaleLines([]);
+      setBarcodeInput("");
+      setLookupError("");
+      setSaleMessage("Venta registrada correctamente.");
+      setIsCheckoutConfirmOpen(false);
+      onSaleRecorded();
+      focusBarcodeInput();
+      return true;
+    } catch (error) {
+      console.error(error);
+      setSaleMessage(error instanceof Error ? error.message : "No pudimos registrar la venta.");
+      focusBarcodeInput();
+      return false;
+    } finally {
+      setIsSubmittingSale(false);
+    }
   }
 
   function handleRemoveLine(productId: number) {
@@ -375,153 +378,204 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       console.error(error);
     }
   }
-
   return (
     <main
       className="barcode-screen"
-      onClick={() => (!manualModalOpen && !editModalOpen ? barcodeInputRef.current?.focus() : null)}
+      onClick={() =>
+        (!manualModalOpen && !editModalOpen && !isCheckoutConfirmOpen ? barcodeInputRef.current?.focus() : null)
+      }
     >
       <section className="barcode-layout">
-        <form className="barcode-form" onSubmit={handleBarcodeSubmit}>
-          <input
-            id="barcode-input"
-            ref={barcodeInputRef}
-            className="barcode-input"
-            type="text"
-            inputMode="numeric"
-            value={barcodeInput}
-            placeholder="Escanea y presiona Enter"
-            onBlur={() => {
-              if (!manualModalOpen && !editModalOpen) {
-                focusBarcodeInput();
-              }
-            }}
-            onChange={(event) => setBarcodeInput(event.target.value)}
-          />
-          {lookupError ? <p className="barcode-error">{lookupError}</p> : null}
-          {saleMessage ? <p className="barcode-helper-text">{saleMessage}</p> : null}
-          <div className="barcode-manual-action">
+        <div className="scanner-input-dominant">
+          <form className="scanner-input-shell" onSubmit={handleBarcodeSubmit}>
+            <input
+              id="barcode-input"
+              ref={barcodeInputRef}
+              className="scanner-input-control"
+              type="text"
+              inputMode="numeric"
+              value={barcodeInput}
+              placeholder="Escanear aqui"
+              onBlur={() => {
+                if (!manualModalOpen && !editModalOpen && !isCheckoutConfirmOpen) {
+                  focusBarcodeInput();
+                }
+              }}
+              onChange={(event) => setBarcodeInput(event.target.value)}
+            />
+          </form>
+          {lookupError ? <p className="scanner-feedback scanner-feedback-error">{lookupError}</p> : null}
+          {saleMessage ? <p className="scanner-feedback scanner-feedback-ok">{saleMessage}</p> : null}
+          <div className="scanner-manual-actions">
             <button
               type="button"
-              className="barcode-manual-button"
+              className="scanner-manual-trigger"
               onClick={() => openManualProductModal("", "manual-button")}
             >
               Producto Manual
             </button>
           </div>
-        </form>
+        </div>
 
         {saleLines.length > 0 ? (
-        <section className="sale-panel">
-          <div className="sale-panel-header">
-            <strong>Productos</strong>
-          </div>
-
-          <div className="sale-table-wrap">
-            <table className="sale-table">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th className="sale-table-edit-head">Editar</th>
-                  <th className="sale-table-qty-head">Cant.</th>
-                  <th className="sale-table-total-head">Total</th>
-                  <th className="sale-table-remove-head" />
-                </tr>
-              </thead>
-              <tbody>
-                {saleLines.map((line) => (
-                  <tr key={line.productId} className="sale-row">
-                    <td>
-                      <button
-                        type="button"
-                        className="sale-line-main"
-                        onClick={() => handleIncreaseLine(line.productId)}
-                        aria-label={`Sumar una unidad de ${line.name}`}
-                      >
-                        <div className="product-thumb">
-                          {line.image ? (
-                            <img src={line.image} alt={line.name} />
-                          ) : (
-                            <div className="product-placeholder">{line.name.slice(0, 2).toUpperCase()}</div>
-                          )}
-                        </div>
-                        <div className="sale-line-copy">
-                          <strong>{line.name}</strong>
-                          <span>{formatCurrency(line.price)} c/u</span>
-                        </div>
-                      </button>
-                    </td>
-                    <td className="sale-table-edit-cell">
-                      <button type="button" className="sale-line-edit" onClick={() => openEditModal(line)}>
-                        Editar
-                      </button>
-                    </td>
-                    <td className="sale-table-qty-cell">{line.quantity}</td>
-                    <td className="sale-table-total-cell">{formatCurrency(line.subtotal)}</td>
-                    <td className="sale-table-remove-cell">
-                      <button
-                        type="button"
-                        className="sale-line-remove"
-                        aria-label={`Quitar ${line.name}`}
-                        onClick={() => handleRemoveLine(line.productId)}
-                      >
-                        x
-                      </button>
-                    </td>
+          <section className="scanner-panel-shell">
+            <div className="scanner-products-panel">
+              <table className="scanner-products-table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th className="scanner-col-center">Editar</th>
+                    <th className="scanner-col-end">Cant.</th>
+                    <th className="scanner-col-end">Total</th>
+                    <th className="scanner-col-end" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="sale-total-card">
-            <span className="sale-total-label">Total</span>
-            <strong className="sale-total-value">{formatCurrency(total)}</strong>
-          </div>
+                </thead>
+                <tbody>
+                  {saleLines.map((line) => (
+                    <tr key={line.productId} className="scanner-row-default">
+                      <td>
+                        <button
+                          type="button"
+                          className="scanner-line-main"
+                          onClick={() => handleIncreaseLine(line.productId)}
+                          aria-label={`Sumar una unidad de ${line.name}`}
+                        >
+                          {line.image ? (
+                            <div className="scanner-thumb-frame">
+                              <img src={line.image} alt={line.name} className="scanner-thumb" />
+                            </div>
+                          ) : (
+                            <div className="scanner-thumb-frame scanner-thumb-placeholder">
+                              <span className="scanner-thumb-placeholder-label">{line.name.slice(0, 2).toUpperCase()}</span>
+                            </div>
+                          )}
+                          <div className="scanner-line-copy">
+                            <div className="scanner-product-name">{line.name}</div>
+                            <div className="scanner-price-badge">{formatCurrency(line.price)} c/u</div>
+                          </div>
+                        </button>
+                      </td>
+                      <td className="scanner-col-center">
+                        <button type="button" className="scanner-edit-btn" onClick={() => openEditModal(line)}>
+                          Editar
+                        </button>
+                      </td>
+                      <td className="scanner-col-end scanner-line-qty">{line.quantity}</td>
+                      <td className="scanner-col-end scanner-line-total">{formatCurrency(line.subtotal)}</td>
+                      <td className="scanner-col-end">
+                        <button
+                          type="button"
+                          className="scanner-remove-btn"
+                          aria-label={`Quitar ${line.name}`}
+                          onClick={() => handleRemoveLine(line.productId)}
+                        >
+                          x
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <button type="button" className="checkout-button" onClick={handleCheckout} disabled={isSubmittingSale}>
-            {isSubmittingSale ? "Cobrando..." : "Cobrar"}
-          </button>
-        </section>
+            <div className="scanner-checkout">
+              <div className="scanner-total-row">
+                <span className="scanner-total-label">Total</span>
+                <span className="scanner-total">{formatCurrency(total)}</span>
+              </div>
+              <button
+                type="button"
+                className="scanner-charge-btn"
+                onClick={() => setIsCheckoutConfirmOpen(true)}
+                disabled={isSubmittingSale}
+              >
+                Cobrar
+              </button>
+            </div>
+          </section>
         ) : null}
       </section>
 
-      {manualModalOpen ? (
-        <div className="manual-modal-backdrop" onClick={closeManualProductModal}>
+      {isCheckoutConfirmOpen ? (
+        <div className="scanner-modal-overlay" onClick={() => setIsCheckoutConfirmOpen(false)}>
           <section
-            className="manual-modal"
+            className="scanner-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="checkout-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="scanner-modal-header">
+              <h2 id="checkout-title" className="scanner-modal-title">Confirmar cobro</h2>
+              <button
+                type="button"
+                className="scanner-modal-close"
+                onClick={() => setIsCheckoutConfirmOpen(false)}
+                aria-label="Cerrar"
+                disabled={isSubmittingSale}
+              >
+                x
+              </button>
+            </div>
+            <p className="scanner-modal-kicker">Total a cobrar</p>
+            <p className="scanner-modal-total">{formatCurrency(total)}</p>
+            <div className="scanner-modal-actions">
+              <button
+                type="button"
+                className="scanner-secondary-btn"
+                onClick={() => setIsCheckoutConfirmOpen(false)}
+                disabled={isSubmittingSale}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="scanner-primary-btn"
+                onClick={() => {
+                  handleCheckout().catch(() => {});
+                }}
+                disabled={isSubmittingSale}
+              >
+                {isSubmittingSale ? "Confirmando..." : "Confirmar"}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {manualModalOpen ? (
+        <div className="scanner-modal-overlay" onClick={closeManualProductModal}>
+          <section
+            className="scanner-modal-card"
             role="dialog"
             aria-modal="true"
             aria-labelledby="manual-product-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="manual-modal-header">
-              <strong id="manual-product-title">Ingrese valor</strong>
-              <button type="button" className="manual-modal-close" onClick={closeManualProductModal} aria-label="Cerrar">
-                ×
+            <div className="scanner-modal-header">
+              <h2 id="manual-product-title" className="scanner-modal-title">Producto manual</h2>
+              <button type="button" className="scanner-modal-close" onClick={closeManualProductModal} aria-label="Cerrar">
+                x
               </button>
             </div>
-
-            <div className="manual-modal-copy">
+            <div className="scanner-modal-copy">
               {manualModalMode === "barcode-miss" ? <span>Codigo leido: {manualBarcode}</span> : <span>Ingrese precio</span>}
-              <strong>Producto Manual</strong>
             </div>
-
-            <form className="manual-modal-form" onSubmit={handleManualProductSubmit}>
-              <label className="manual-modal-label" htmlFor="manual-price-input">
+            <form className="scanner-modal-form" onSubmit={handleManualProductSubmit}>
+              <label className="scanner-modal-label" htmlFor="manual-price-input">
                 Precio
               </label>
               <input
                 id="manual-price-input"
                 ref={manualPriceInputRef}
-                className="manual-modal-input"
+                className="scanner-modal-input"
                 type="text"
                 inputMode="decimal"
                 placeholder="0"
                 value={manualPriceInput}
                 onChange={(event) => setManualPriceInput(event.target.value)}
               />
-
-              <button type="submit" className="manual-modal-submit">
+              <button type="submit" className="scanner-primary-btn scanner-primary-btn-full">
                 Agregar
               </button>
             </form>
@@ -530,47 +584,44 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       ) : null}
 
       {editModalOpen ? (
-        <div className="manual-modal-backdrop" onClick={closeEditModal}>
+        <div className="scanner-modal-overlay" onClick={closeEditModal}>
           <section
-            className="manual-modal"
+            className="scanner-modal-card"
             role="dialog"
             aria-modal="true"
             aria-labelledby="edit-product-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="manual-modal-header">
-              <strong id="edit-product-title">Editar producto</strong>
-              <button type="button" className="manual-modal-close" onClick={closeEditModal} aria-label="Cerrar">
-                ×
+            <div className="scanner-modal-header">
+              <h2 id="edit-product-title" className="scanner-modal-title">Editar producto</h2>
+              <button type="button" className="scanner-modal-close" onClick={closeEditModal} aria-label="Cerrar">
+                x
               </button>
             </div>
-
-            <form className="manual-modal-form" onSubmit={handleEditProductSubmit}>
-              <label className="manual-modal-label" htmlFor="edit-name-input">
+            <form className="scanner-modal-form" onSubmit={handleEditProductSubmit}>
+              <label className="scanner-modal-label" htmlFor="edit-name-input">
                 Nombre
               </label>
               <input
                 id="edit-name-input"
                 ref={editNameInputRef}
-                className="manual-modal-input"
+                className="scanner-modal-input"
                 type="text"
                 value={editNameInput}
                 onChange={(event) => setEditNameInput(event.target.value)}
               />
-
-              <label className="manual-modal-label" htmlFor="edit-price-input">
+              <label className="scanner-modal-label" htmlFor="edit-price-input">
                 Precio
               </label>
               <input
                 id="edit-price-input"
-                className="manual-modal-input"
+                className="scanner-modal-input"
                 type="text"
                 inputMode="decimal"
                 value={editPriceInput}
                 onChange={(event) => setEditPriceInput(event.target.value)}
               />
-
-              <button type="submit" className="manual-modal-submit">
+              <button type="submit" className="scanner-primary-btn scanner-primary-btn-full">
                 Guardar
               </button>
             </form>
