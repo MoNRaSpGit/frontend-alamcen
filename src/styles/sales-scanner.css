@@ -360,6 +360,10 @@
   border-spacing: 0;
 }
 
+.scanner-products-mobile {
+  display: none;
+}
+
 .scanner-products-table thead th {
   padding: 12px 14px;
   font-size: 0.76rem;
@@ -1322,5 +1326,91 @@
   background: #fafcf8;
   display: grid;
   gap: 4px;
+}
+
+@media (max-width: 780px) {
+  .scanner-products-table {
+    display: none;
+  }
+
+  .scanner-products-mobile {
+    display: grid;
+    gap: 12px;
+  }
+
+  .scanner-mobile-card {
+    border: 1px solid #e6eaee;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(33, 37, 41, 0.08);
+    padding: 14px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .scanner-mobile-card-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 56px 96px;
+    gap: 10px 12px;
+    align-items: center;
+  }
+
+  .scanner-mobile-product {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    min-width: 0;
+    text-align: left;
+    color: #161616;
+    font: inherit;
+  }
+
+  .scanner-mobile-product-name {
+    display: block;
+    max-width: 100%;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .scanner-mobile-qty,
+  .scanner-mobile-price {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .scanner-mobile-qty {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .scanner-mobile-price {
+    justify-content: flex-end;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .scanner-mobile-remove {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #111;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .scanner-mobile-remove:hover,
+  .scanner-mobile-remove:focus-visible {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+  }
 }
 

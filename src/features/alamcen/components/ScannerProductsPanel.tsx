@@ -73,6 +73,42 @@ export function ScannerProductsPanel({
             ))}
           </tbody>
         </table>
+
+        <div className="scanner-products-mobile">
+          {saleLines.map((line) => (
+            <article key={line.productId} className="scanner-mobile-card">
+              <div className="scanner-mobile-card-top">
+                <button
+                  type="button"
+                  className="scanner-mobile-product"
+                  onClick={() => onIncreaseLine(line.productId)}
+                  aria-label={`Sumar una unidad de ${line.name}`}
+                  title={line.name}
+                >
+                  <span className="scanner-mobile-product-name">{line.name}</span>
+                </button>
+
+                <div className="scanner-mobile-columns">
+                  <span className="scanner-mobile-qty" title="Cantidad">
+                    {line.quantity}
+                  </span>
+                  <span className="scanner-mobile-price" title={formatCurrency(line.price)}>
+                    {formatCurrency(line.price)}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="scanner-mobile-remove"
+                aria-label={`Quitar ${line.name}`}
+                onClick={() => onRemoveLine(line.productId)}
+              >
+                Quitar
+              </button>
+            </article>
+          ))}
+        </div>
       </div>
 
       <div className="scanner-checkout">
