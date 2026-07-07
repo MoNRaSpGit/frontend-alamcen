@@ -11,6 +11,7 @@ type StockTabProps = {
 };
 
 export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpdateStock }: StockTabProps) {
+  const [activeTab, setActiveTab] = useState<"view" | "incoming">("view");
   const [searchInput, setSearchInput] = useState("");
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
@@ -101,24 +102,47 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
       </article>
 
       <article className="panel-card stock-search">
-        <form className="stock-search-form" onSubmit={handleSearch}>
-          <label className="stock-search-label">
-            <span>
-              <Search size={14} /> Buscar o escanear producto
-            </span>
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Barcode o nombre"
-            />
-          </label>
-          <button type="submit" className="stock-search-button">
-            <ScanBarcode size={16} />
-            Buscar
+        <div className="stock-subtabs">
+          <button
+            type="button"
+            className={activeTab === "view" ? "stock-subtab active" : "stock-subtab"}
+            onClick={() => setActiveTab("view")}
+          >
+            Ver stock
           </button>
-        </form>
-        {searchNote ? <p className="stock-search-note">{searchNote}</p> : null}
+          <button
+            type="button"
+            className={activeTab === "incoming" ? "stock-subtab active" : "stock-subtab"}
+            onClick={() => setActiveTab("incoming")}
+          >
+            Ingresar stock
+          </button>
+        </div>
+
+        {activeTab === "incoming" ? (
+          <>
+            <form className="stock-search-form" onSubmit={handleSearch}>
+              <label className="stock-search-label">
+                <span>
+                  <Search size={14} /> Buscar o escanear producto
+                </span>
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  placeholder="Barcode o nombre"
+                />
+              </label>
+              <button type="submit" className="stock-search-button">
+                <ScanBarcode size={16} />
+                Buscar
+              </button>
+            </form>
+            {searchNote ? <p className="stock-search-note">{searchNote}</p> : null}
+          </>
+        ) : (
+          <p className="stock-search-note">Acá solo se muestran los productos con stock menor a 10.</p>
+        )}
       </article>
 
       <article className="panel-card stock-summary">
@@ -154,7 +178,7 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
         </article>
       ) : null}
 
-      {!loading && selectedProduct && selectedProduct.quantity >= 10 ? (
+      {activeTab === "incoming" && !loading && selectedProduct ? (
         <article className={`stock-card ${getStockIntensity(selectedProduct.quantity)} stock-result`}>
           <div className="stock-card-head">
             <div>
@@ -178,7 +202,7 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
         </article>
       ) : null}
 
-      {!loading && lowStockItems.length ? (
+      {activeTab === "view" && !loading && lowStockItems.length ? (
         <div className="stock-grid">
           {lowStockItems.map((item) => {
             const intensity = getStockIntensity(item.quantity);

@@ -43,6 +43,27 @@
   gap: 12px;
 }
 
+.stock-subtabs {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stock-subtab {
+  border: 1px solid #d7dfcf;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #2d3927;
+  padding: 9px 14px;
+  font-weight: 800;
+}
+
+.stock-subtab.active {
+  background: #151515;
+  color: #ffffff;
+  border-color: #151515;
+}
+
 .stock-search-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
