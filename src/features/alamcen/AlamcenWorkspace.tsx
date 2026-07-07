@@ -15,7 +15,40 @@ type AlamcenWorkspaceProps = {
   onLoggedOut: () => void;
 };
 
-type WorkspaceTab = "scanner" | "panel" | "products";
+type WorkspaceTab = "scanner" | "panel" | "customers" | "products";
+
+const CUSTOMER_PREVIEW = [
+  {
+    id: "lucia",
+    name: "Lucia Almacen",
+    phone: "099 000 000",
+    debtTotal: 2450,
+    lastSale: "Hoy 14:20",
+    sales: [
+      { id: "lucia-sale-1", amount: 1250, items: "Yerba, azucar, leche", date: "Hoy 14:20" },
+      { id: "lucia-sale-2", amount: 1200, items: "Fiambre y pan", date: "Ayer 18:05" }
+    ],
+    payments: [{ id: "lucia-payment-1", amount: 1000, note: "Pago parcial", date: "Ayer 19:10" }]
+  },
+  {
+    id: "claudia",
+    name: "La Claudia",
+    phone: "098 111 222",
+    debtTotal: 780,
+    lastSale: "Ayer 11:12",
+    sales: [{ id: "claudia-sale-1", amount: 780, items: "Limpieza y bebidas", date: "Ayer 11:12" }],
+    payments: []
+  },
+  {
+    id: "oriol",
+    name: "Oriol",
+    phone: "097 333 444",
+    debtTotal: 0,
+    lastSale: "Sin deuda",
+    sales: [],
+    payments: [{ id: "oriol-payment-1", amount: 1500, note: "Cancelacion", date: "Lun 09:45" }]
+  }
+];
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-UY", {
@@ -130,6 +163,13 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
           >
             Panel de control
           </button>
+          <button
+            type="button"
+            className={activeTab === "customers" ? "workspace-tab active" : "workspace-tab"}
+            onClick={() => setActiveTab("customers")}
+          >
+            Clientes
+          </button>
 
           <div className="workspace-user-menu" ref={userMenuRef}>
             <button
@@ -174,6 +214,7 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
 
       {activeTab === "scanner" ? <AlamcenHomePage onSaleRecorded={() => setPanelRefreshKey((current) => current + 1)} /> : null}
       {activeTab === "panel" ? <PanelTab refreshKey={panelRefreshKey} onPaymentRecorded={() => setPanelRefreshKey((current) => current + 1)} /> : null}
+      {activeTab === "customers" ? <CustomersTab /> : null}
       {activeTab === "products" ? <ProductsTab /> : null}
     </main>
   );
@@ -535,6 +576,120 @@ export function LegacyPanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: 
             </div>
           )) : <p className="workspace-helper">Sin movimientos todavía.</p>}
         </div>
+      </article>
+    </section>
+  );
+}
+
+function CustomersTab() {
+  const [selectedCustomerId, setSelectedCustomerId] = useState(CUSTOMER_PREVIEW[0]?.id ?? "");
+  const selectedCustomer = CUSTOMER_PREVIEW.find((customer) => customer.id === selectedCustomerId) ?? CUSTOMER_PREVIEW[0];
+
+  return (
+    <section className="alamcen-customers-page">
+      <article className="alamcen-customers-card">
+        <p className="alamcen-customers-kicker">Clientes</p>
+        <h2>Alta rapida</h2>
+        <p className="alamcen-customers-note">Base visual lista para conectar con cuenta corriente.</p>
+        <form className="alamcen-customers-form">
+          <label>
+            <span>Nombre</span>
+            <input type="text" placeholder="Juan Perez" disabled />
+          </label>
+          <label>
+            <span>Telefono</span>
+            <input type="text" placeholder="099 000 000" disabled />
+          </label>
+          <button type="button" disabled>Guardar cliente</button>
+        </form>
+      </article>
+
+      <article className="alamcen-customers-card">
+        <div className="alamcen-customers-card-head">
+          <div>
+            <p className="alamcen-customers-kicker">Listado</p>
+            <h2>Cuenta corriente</h2>
+          </div>
+          <span className="alamcen-customers-count">{CUSTOMER_PREVIEW.length}</span>
+        </div>
+        <div className="alamcen-customers-list">
+          {CUSTOMER_PREVIEW.map((customer) => (
+            <button
+              type="button"
+              key={customer.id}
+              className={selectedCustomer?.id === customer.id ? "alamcen-customers-list-item active" : "alamcen-customers-list-item"}
+              onClick={() => setSelectedCustomerId(customer.id)}
+            >
+              <span>
+                <strong>{customer.name}</strong>
+                <small>{customer.phone}</small>
+              </span>
+              <span>
+                <strong>{formatCurrency(customer.debtTotal)}</strong>
+                <small>{customer.lastSale}</small>
+              </span>
+            </button>
+          ))}
+        </div>
+      </article>
+
+      <article className="alamcen-customers-card">
+        <p className="alamcen-customers-kicker">Detalle</p>
+        <h2>Estado del cliente</h2>
+        {selectedCustomer ? (
+          <>
+            <div className="alamcen-customers-balance">
+              <span>
+                <small>Saldo actual</small>
+                <strong>{selectedCustomer.name}</strong>
+              </span>
+              <strong>{formatCurrency(selectedCustomer.debtTotal)}</strong>
+            </div>
+
+            <div className="alamcen-customers-payment-box">
+              <div>
+                <small>Registrar pago</small>
+                <strong>Descontar deuda</strong>
+              </div>
+              <input type="text" placeholder="Monto" disabled />
+              <button type="button" disabled>Registrar pago</button>
+            </div>
+
+            <div className="alamcen-customers-history-head">
+              <span>Historial de ventas</span>
+              <strong>{selectedCustomer.sales.length}</strong>
+            </div>
+            <div className="alamcen-customers-history-list">
+              {selectedCustomer.sales.length ? selectedCustomer.sales.map((sale) => (
+                <div key={sale.id} className="alamcen-customers-history-row">
+                  <span>
+                    <strong>{formatCurrency(sale.amount)}</strong>
+                    <small>{sale.items}</small>
+                  </span>
+                  <small>{sale.date}</small>
+                </div>
+              )) : <p className="alamcen-customers-note">Sin ventas pendientes.</p>}
+            </div>
+
+            <div className="alamcen-customers-history-head">
+              <span>Historial de pagos</span>
+              <strong>{selectedCustomer.payments.length}</strong>
+            </div>
+            <div className="alamcen-customers-history-list">
+              {selectedCustomer.payments.length ? selectedCustomer.payments.map((payment) => (
+                <div key={payment.id} className="alamcen-customers-history-row payment">
+                  <span>
+                    <strong>{formatCurrency(payment.amount)}</strong>
+                    <small>{payment.note}</small>
+                  </span>
+                  <small>{payment.date}</small>
+                </div>
+              )) : <p className="alamcen-customers-note">Sin pagos registrados.</p>}
+            </div>
+          </>
+        ) : (
+          <p className="alamcen-customers-note">Selecciona un cliente para ver su estado.</p>
+        )}
       </article>
     </section>
   );
