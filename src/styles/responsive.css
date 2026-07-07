@@ -1,0 +1,113 @@
+.products-item-card {
+  border: 1px solid #edf0ea;
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: #fafcf8;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+}
+
+.products-item-card strong,
+.panel-list-row strong,
+.panel-metrics strong {
+  color: #171d14;
+}
+
+.products-item-card p {
+  margin: 4px 0 0;
+}
+
+@media (min-width: 760px) {
+  .alamcen-panel-metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .alamcen-panel-metrics-grid.summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .alamcen-customers-page {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .alamcen-panel-layout-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .alamcen-panel-layout-grid.single {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .workspace-topbar {
+    justify-content: flex-end;
+  }
+
+  .auth-actions {
+    flex-direction: column;
+  }
+
+  .workspace-topbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .workspace-tenant-badge {
+    max-width: 100%;
+    order: -1;
+  }
+
+  .products-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .alamcen-panel-hero {
+    padding: 16px;
+  }
+
+  .alamcen-panel-hero h1 {
+    font-size: 24px;
+  }
+
+  .alamcen-panel-status {
+    width: 100%;
+    border-radius: 14px;
+    flex-wrap: wrap;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .alamcen-panel-status span:last-child {
+    width: 100%;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .alamcen-panel-movement-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .alamcen-panel-movement-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .alamcen-customers-list-item,
+  .alamcen-customers-history-row,
+  .alamcen-customers-balance {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .alamcen-customers-list-item span:last-child {
+    text-align: left;
+    justify-items: start;
+  }
+}

@@ -11,12 +11,15 @@ import {
 } from "./alamcen.catalog.client";
 import { CUSTOMER_PREVIEW, DemoCustomer } from "./alamcen.customer-demo";
 import { BarcodeProductLookup } from "./alamcen.types";
+import { clearTrackedStock, loadTrackedStock, recordStockSale, TrackedStockItem } from "./alamcen.stock";
+import { StockTab } from "./StockTab";
+import { SaleLine } from "./alamcen.scanner.types";
 
 type AlamcenWorkspaceProps = {
   onLoggedOut: () => void;
 };
 
-type WorkspaceTab = "scanner" | "panel" | "customers" | "products";
+type WorkspaceTab = "scanner" | "panel" | "customers" | "products" | "stock";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-UY", {
@@ -75,7 +78,12 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   const [panelRefreshKey, setPanelRefreshKey] = useState(0);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [customers, setCustomers] = useState<DemoCustomer[]>(CUSTOMER_PREVIEW);
+  const [stockItems, setStockItems] = useState<TrackedStockItem[]>([]);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setStockItems(loadTrackedStock());
+  }, []);
 
   useEffect(() => {
     fetchAlamcenStatus()
@@ -139,6 +147,11 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
     );
   }
 
+  function handleSaleRecorded(saleLines: SaleLine[]) {
+    setStockItems(recordStockSale(saleLines));
+    setPanelRefreshKey((current) => current + 1);
+  }
+
   return (
     <main className="workspace-shell">
       <header className="workspace-topbar">
@@ -163,6 +176,13 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
             onClick={() => setActiveTab("customers")}
           >
             Clientes
+          </button>
+          <button
+            type="button"
+            className={activeTab === "stock" ? "workspace-tab active" : "workspace-tab"}
+            onClick={() => setActiveTab("stock")}
+          >
+            Stock
           </button>
 
           <div className="workspace-user-menu" ref={userMenuRef}>
@@ -210,12 +230,22 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
         <AlamcenHomePage
           customers={customers}
           onAccountSale={handleAccountSale}
-          onSaleRecorded={() => setPanelRefreshKey((current) => current + 1)}
+          onSaleRecorded={handleSaleRecorded}
         />
       </div>
       {activeTab === "panel" ? <PanelTab refreshKey={panelRefreshKey} onPaymentRecorded={() => setPanelRefreshKey((current) => current + 1)} /> : null}
       {activeTab === "customers" ? <CustomersTab customers={customers} onChangeCustomers={setCustomers} /> : null}
       {activeTab === "products" ? <ProductsTab /> : null}
+      {activeTab === "stock" ? (
+        <StockTab
+          items={stockItems}
+          onRefresh={() => setStockItems(loadTrackedStock())}
+          onClearDemo={() => {
+            clearTrackedStock();
+            setStockItems([]);
+          }}
+        />
+      ) : null}
     </main>
   );
 }

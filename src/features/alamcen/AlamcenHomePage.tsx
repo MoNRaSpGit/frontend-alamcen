@@ -30,7 +30,7 @@ import { DemoCustomer } from "./alamcen.customer-demo";
 type AlamcenHomePageProps = {
   customers: DemoCustomer[];
   onAccountSale: (customerId: string, total: number, itemsLabel: string) => void;
-  onSaleRecorded: () => void;
+  onSaleRecorded: (saleLines: SaleLine[]) => void;
 };
 
 export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: AlamcenHomePageProps) {
@@ -235,6 +235,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: Al
     setIsSubmittingSale(true);
 
     try {
+      const completedLines = saleLines.map((line) => ({ ...line }));
       const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId);
       const paymentLabel =
         paymentMethod === "cuenta" && selectedCustomer
@@ -271,7 +272,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: Al
       } else {
         toast.success("Venta confirmada en efectivo.");
       }
-      onSaleRecorded();
+      onSaleRecorded(completedLines);
       focusBarcodeInput();
       return true;
     } catch (error) {

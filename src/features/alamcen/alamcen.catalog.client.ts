@@ -241,13 +241,6 @@ export async function fetchAlamcenStatus() {
 export async function warmAlamcenScanner() {
   const startedAt = performance.now();
 
-  const statusStartedAt = performance.now();
-  const { response: statusResponse, metrics: statusAuth } = await fetchWithAuthDetailed(buildUrl("/alamcen/status"));
-  const statusMs = Math.round(performance.now() - statusStartedAt);
-  if (!statusResponse.ok) {
-    throw await buildApiError(statusResponse);
-  }
-
   const scannerStartedAt = performance.now();
   const { response: scannerResponse, metrics: scannerAuth } = await fetchWithAuthDetailed(
     buildUrl(`/alamcen/productos/barcode/${encodeURIComponent("__warmup__")}`)
@@ -260,8 +253,8 @@ export async function warmAlamcenScanner() {
   await parseOptionalJson<BarcodeProductLookup>(scannerResponse);
 
   return {
-    statusMs,
-    statusAuth,
+    statusMs: 0,
+    statusAuth: null,
     scannerRouteMs,
     scannerRouteStatus: scannerResponse.status,
     scannerRouteAuth: scannerAuth,

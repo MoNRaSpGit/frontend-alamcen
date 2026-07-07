@@ -1,0 +1,160 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Aptos", sans-serif;
+  background: #ffffff;
+  color: #111111;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #ffffff;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input:disabled,
+button:disabled {
+  cursor: not-allowed;
+}
+
+.app-update-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 1000;
+  width: min(560px, calc(100vw - 24px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid #d9ded4;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 40px rgba(15, 15, 15, 0.16);
+  transform: translateX(-50%);
+}
+
+.app-update-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.app-update-copy strong {
+  color: #161616;
+  font-size: 0.98rem;
+}
+
+.app-update-copy span {
+  color: #5a6750;
+  font-size: 0.9rem;
+}
+
+.app-update-button {
+  border: 0;
+  border-radius: 999px;
+  background: #151515;
+  color: #ffffff;
+  padding: 11px 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.barcode-screen {
+  min-height: 100vh;
+  display: block;
+  padding: 40px 24px 24px;
+  background: #ffffff;
+}
+
+.barcode-layout {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 22px;
+}
+
+.barcode-form {
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+
+.barcode-label {
+  display: block;
+  margin-bottom: 12px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.barcode-input {
+  width: 100%;
+  border: 1px solid #d7d7d7;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 18px 20px;
+  font-size: 1.1rem;
+  color: #111111;
+  outline: none;
+  box-shadow: 0 10px 30px rgba(15, 15, 15, 0.06);
+}
+
+.barcode-input:focus {
+  border-color: #7d7d7d;
+}
+
+.barcode-error {
+  margin: 12px 0 0;
+  text-align: center;
+  color: #a33d2d;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.barcode-helper-text {
+  margin: 10px 0 0;
+  text-align: center;
+  color: #66725f;
+  font-size: 0.9rem;
+}
+
+.barcode-manual-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.barcode-manual-button {
+  min-width: 220px;
+  border: 1px solid #d7ddd1;
+  border-radius: 999px;
+  background: #f6f8f2;
+  color: #33402d;
+  padding: 12px 18px;
+  font-weight: 700;
+}
+
+.barcode-manual-button:hover {
+  background: #eef3e7;
+}
+
+.barcode-manual-button:focus-visible {
+  outline: 2px solid #6b8260;
+  outline-offset: 2px;
+}
+

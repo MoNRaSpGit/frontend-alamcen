@@ -1,0 +1,228 @@
+.alamcen-customers-page {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.alamcen-customers-card {
+  height: 100%;
+  padding: 18px;
+  border: 1px solid #d9dee6;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(215, 226, 255, 0.45), transparent 35%),
+    linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.alamcen-customers-card h2 {
+  margin: 0 0 14px;
+  font-size: 20px;
+  color: #0f172a;
+}
+
+.alamcen-customers-kicker {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.alamcen-customers-note {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.alamcen-customers-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.alamcen-customers-form label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.alamcen-customers-form input,
+.alamcen-customers-payment-box input {
+  width: 100%;
+  border: 1px solid #d1d8e4;
+  border-radius: 12px;
+  padding: 11px 12px;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.alamcen-customers-form button,
+.alamcen-customers-payment-box button {
+  border: 0;
+  border-radius: 12px;
+  background: #111827;
+  color: #fff;
+  padding: 11px 13px;
+  font-weight: 900;
+}
+
+.alamcen-customers-form button:disabled,
+.alamcen-customers-payment-box button:disabled {
+  opacity: 0.55;
+}
+
+.alamcen-customers-card-head,
+.alamcen-customers-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.alamcen-customers-count,
+.alamcen-customers-history-head strong {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #111827;
+  color: #fff;
+  font-weight: 900;
+}
+
+.alamcen-customers-list,
+.alamcen-customers-history-list {
+  display: grid;
+  gap: 10px;
+}
+
+.alamcen-customers-list-item {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid #d7deea;
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.alamcen-customers-list-item:hover,
+.alamcen-customers-list-item:focus,
+.alamcen-customers-list-item.active {
+  transform: translateY(-1px);
+  border-color: #111827;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+}
+
+.alamcen-customers-list-item span,
+.alamcen-customers-history-row span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.alamcen-customers-list-item span:last-child {
+  text-align: right;
+  justify-items: end;
+}
+
+.alamcen-customers-list-item strong,
+.alamcen-customers-history-row strong {
+  color: #0f172a;
+}
+
+.alamcen-customers-list-item small,
+.alamcen-customers-history-row small,
+.alamcen-customers-payment-box small,
+.alamcen-customers-balance small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.alamcen-customers-balance {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff9ea 0%, #ffe8b9 100%);
+  margin-bottom: 14px;
+}
+
+.alamcen-customers-balance span {
+  display: grid;
+  gap: 3px;
+}
+
+.alamcen-customers-balance > strong {
+  color: #8a4b00;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.alamcen-customers-payment-box {
+  padding: 14px;
+  border: 1px solid #dbe3ee;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top right, rgba(220, 234, 255, 0.45), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.alamcen-customers-payment-box div {
+  display: grid;
+  gap: 3px;
+}
+
+.alamcen-customers-history-head {
+  margin: 16px 0 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.alamcen-customers-history-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 13px;
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.alamcen-customers-history-row.payment {
+  background: linear-gradient(180deg, #f4fbf6 0%, #edf8f0 100%);
+}
+
+.products-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.products-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
