@@ -173,40 +173,16 @@
 }
 
 .stock-quantity {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 900;
   color: #1f271a;
 }
 
-.stock-progress {
-  height: 10px;
-  border-radius: 999px;
-  background: #e6ebe0;
-  overflow: hidden;
-}
-
-.stock-progress-fill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #92bf5f 0%, #d8bf49 55%, #d95858 100%);
-}
-
-.stock-card-footer {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+.stock-card-note {
+  margin: 0;
   color: #54604a;
-}
-
-.stock-card-footer span {
-  font-weight: 800;
-  color: #2b3625;
-}
-
-.stock-card-footer small {
-  text-align: right;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .stock-empty {

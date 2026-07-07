@@ -73,33 +73,24 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo }: Sto
         <div className="stock-grid">
           {items.map((item) => {
             const intensity = getStockIntensity(item.quantity);
-            const progress = Math.max(0, Math.min(100, (item.quantity / item.initialQuantity) * 100));
-            const lastChange = item.lastSoldAt
-              ? new Intl.DateTimeFormat("es-UY", {
-                  dateStyle: "short",
-                  timeStyle: "short"
-                }).format(new Date(item.lastSoldAt))
-              : "Sin cambios";
 
             return (
               <article key={item.productId} className={`stock-card ${intensity}`}>
                 <div className="stock-card-head">
                   <div>
                     <p className="stock-card-name">{item.name}</p>
-                    <p className="stock-card-meta">Base inicial: {item.initialQuantity}</p>
+                    <p className="stock-card-meta">
+                      Stock inicial {item.initialQuantity} - stock actual {item.quantity}
+                    </p>
                   </div>
                   <span className={`stock-badge ${intensity}`}>{getStockLabel(item.quantity)}</span>
                 </div>
 
                 <div className="stock-card-body">
                   <div className="stock-quantity">{item.quantity}</div>
-                  <div className="stock-progress" aria-hidden="true">
-                    <span className="stock-progress-fill" style={{ width: `${progress}%` }} />
-                  </div>
-                  <div className="stock-card-footer">
-                    <span>{item.quantity} unidades</span>
-                    <small>{lastChange}</small>
-                  </div>
+                  <p className="stock-card-note">
+                    Inicial {item.initialQuantity} - Actual {item.quantity}
+                  </p>
                 </div>
               </article>
             );
