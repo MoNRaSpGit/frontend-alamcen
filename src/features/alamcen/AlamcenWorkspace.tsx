@@ -76,6 +76,7 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("scanner");
   const [statusError, setStatusError] = useState("");
   const [panelRefreshKey, setPanelRefreshKey] = useState(0);
+  const [scannerFocusKey, setScannerFocusKey] = useState(0);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [customers, setCustomers] = useState<DemoCustomer[]>(CUSTOMER_PREVIEW);
   const [stockItems, setStockItems] = useState<TrackedStockItem[]>([]);
@@ -159,7 +160,10 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
           <button
             type="button"
             className={activeTab === "scanner" ? "workspace-tab active" : "workspace-tab"}
-            onClick={() => setActiveTab("scanner")}
+            onClick={() => {
+              setActiveTab("scanner");
+              setScannerFocusKey((current) => current + 1);
+            }}
           >
             Caja
           </button>
@@ -231,6 +235,7 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
           customers={customers}
           onAccountSale={handleAccountSale}
           onSaleRecorded={handleSaleRecorded}
+          focusRequestId={scannerFocusKey}
         />
       </div>
       {activeTab === "panel" ? <PanelTab refreshKey={panelRefreshKey} onPaymentRecorded={() => setPanelRefreshKey((current) => current + 1)} /> : null}

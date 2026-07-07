@@ -31,9 +31,10 @@ type AlamcenHomePageProps = {
   customers: DemoCustomer[];
   onAccountSale: (customerId: string, total: number, itemsLabel: string) => void;
   onSaleRecorded: (saleLines: SaleLine[]) => void;
+  focusRequestId?: number;
 };
 
-export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: AlamcenHomePageProps) {
+export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focusRequestId = 0 }: AlamcenHomePageProps) {
   const [barcodeInput, setBarcodeInput] = useState("");
   const [lookupError, setLookupError] = useState("");
   const [saleLines, setSaleLines] = useState<SaleLine[]>([]);
@@ -69,6 +70,14 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: Al
   useEffect(() => {
     focusBarcodeInput();
   }, []);
+
+  useEffect(() => {
+    if (!focusRequestId) {
+      return;
+    }
+
+    focusBarcodeInput();
+  }, [focusRequestId]);
 
   useEffect(() => {
     void flushPendingSalesQueue().catch(() => {});
