@@ -22,9 +22,10 @@ import {
 import { getApiBaseUrl } from "../../shared/config/api";
 import { ScannerInputPanel } from "./components/ScannerInputPanel";
 import { ScannerProductsPanel } from "./components/ScannerProductsPanel";
-import { ScannerCheckoutConfirmModal } from "./components/ScannerCheckoutConfirmModal";
+import { ScannerCheckoutConfirmModal, ScannerPaymentMethod } from "./components/ScannerCheckoutConfirmModal";
 import { ScannerProductModal } from "./components/ScannerProductModal";
 import { logScannerWarmup, logScanResult, logScanUi, warnWarmupFailure } from "./alamcen.diagnostics";
+import { CUSTOMER_PREVIEW } from "./alamcen.customer-demo";
 
 type AlamcenHomePageProps = {
   onSaleRecorded: () => void;
@@ -46,6 +47,8 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
   const [saleMessage, setSaleMessage] = useState("");
   const [isSubmittingSale, setIsSubmittingSale] = useState(false);
   const [isCheckoutConfirmOpen, setIsCheckoutConfirmOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<ScannerPaymentMethod>("efectivo");
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const barcodeInputRef = useRef<HTMLInputElement | null>(null);
   const manualPriceInputRef = useRef<HTMLInputElement | null>(null);
   const editNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -224,12 +227,22 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       return false;
     }
 
+    if (paymentMethod === "cuenta" && !selectedCustomerId) {
+      return false;
+    }
+
     setIsSubmittingSale(true);
     setSaleMessage("");
 
     try {
+      const selectedCustomer = CUSTOMER_PREVIEW.find((customer) => customer.id === selectedCustomerId);
+      const paymentLabel =
+        paymentMethod === "cuenta" && selectedCustomer
+          ? `cuenta de ${selectedCustomer.name}`
+          : paymentMethod;
       const payload = {
         externalId: `alamcen-sale-${Date.now()}`,
+        notes: `Metodo de cobro demo: ${paymentLabel}`,
         items: saleLines.map((line) => ({
           productId: line.productId > 0 ? line.productId : null,
           isManual: line.productId <= 0,
@@ -243,10 +256,16 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       setSaleLines([]);
       setBarcodeInput("");
       setLookupError("");
-      setSaleMessage("Venta enviada. Guardando en segundo plano.");
+      setSaleMessage(
+        paymentMethod === "cuenta" && selectedCustomer
+          ? `Venta cargada a cuenta de ${selectedCustomer.name}. Guardando en segundo plano.`
+          : `Venta cobrada por ${paymentLabel}. Guardando en segundo plano.`
+      );
       setIsCheckoutConfirmOpen(false);
+      setPaymentMethod("efectivo");
+      setSelectedCustomerId("");
       queueSaleForBackgroundSync(payload);
-      toast.success("Venta lista. Guardando en segundo plano.");
+      toast.success(paymentMethod === "cuenta" && selectedCustomer ? "Venta cargada a cuenta." : "Venta lista. Guardando en segundo plano.");
       onSaleRecorded();
       focusBarcodeInput();
       return true;
@@ -379,10 +398,15 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
         isOpen={isCheckoutConfirmOpen}
         total={total}
         isSubmittingSale={isSubmittingSale}
+        paymentMethod={paymentMethod}
+        customers={CUSTOMER_PREVIEW}
+        selectedCustomerId={selectedCustomerId}
         onClose={() => setIsCheckoutConfirmOpen(false)}
         onConfirm={() => {
           void handleCheckout();
         }}
+        onChangePaymentMethod={setPaymentMethod}
+        onChangeCustomer={setSelectedCustomerId}
       />
 
       <ScannerProductModal
