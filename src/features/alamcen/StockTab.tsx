@@ -1,68 +1,117 @@
 import { FormEvent, useMemo, useState } from "react";
 import { Edit3, LoaderCircle, Package2, RefreshCw, ScanBarcode, Search } from "lucide-react";
-import { findTrackedStockItem, getStockIntensity, getStockLabel, TrackedStockItem } from "./alamcen.stock";
+import { findProductByBarcodeDetailed } from "./alamcen.catalog.client";
+import { BarcodeProductLookup } from "./alamcen.types";
+import { findTrackedStockItem, getStockIntensity, getStockLabel, StockUpdateInput, TrackedStockItem } from "./alamcen.stock";
 
 type StockTabProps = {
   items: TrackedStockItem[];
   loading?: boolean;
   onRefresh?: () => void;
   onClearDemo?: () => void;
-  onUpdateStock: (productId: number, quantity: number) => void;
+  onUpdateStock: (payload: StockUpdateInput) => void;
 };
+
+type StockTarget = {
+  productId: number;
+  name: string;
+  barcode: string | null;
+  image: string | null;
+  quantity: number;
+};
+
+function normalizeQuery(value: string | null | undefined) {
+  return String(value || "").trim().replace(/\s+/g, "");
+}
+
+function toTargetFromTracked(item: TrackedStockItem): StockTarget {
+  return {
+    productId: item.productId,
+    name: item.name,
+    barcode: item.barcode,
+    image: item.image,
+    quantity: item.quantity
+  };
+}
+
+function toTargetFromBackend(product: BarcodeProductLookup): StockTarget {
+  return {
+    productId: product.id,
+    name: product.nombre,
+    barcode: product.barcodeNormalized || product.barcode || null,
+    image: product.imagen,
+    quantity: product.stockActual
+  };
+}
 
 export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpdateStock }: StockTabProps) {
   const [activeTab, setActiveTab] = useState<"view" | "incoming">("view");
   const [searchInput, setSearchInput] = useState("");
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [selectedTarget, setSelectedTarget] = useState<StockTarget | null>(null);
+  const [editingTarget, setEditingTarget] = useState<StockTarget | null>(null);
   const [quantityDraft, setQuantityDraft] = useState("");
   const [searchNote, setSearchNote] = useState("");
+  const [searching, setSearching] = useState(false);
 
   const lowStockItems = useMemo(() => items.filter((item) => item.quantity < 10), [items]);
   const criticalCount = items.filter((item) => getStockIntensity(item.quantity) === "critical").length;
   const warningCount = items.filter((item) => getStockIntensity(item.quantity) === "warning").length;
   const normalCount = items.filter((item) => getStockIntensity(item.quantity) === "normal").length;
 
-  const editingProduct = useMemo(() => items.find((item) => item.productId === editingProductId) || null, [items, editingProductId]);
-  const selectedProduct = useMemo(() => items.find((item) => item.productId === selectedProductId) || null, [items, selectedProductId]);
-
-  function normalizeQuery(value: string | null | undefined) {
-    return String(value || "").trim().replace(/\s+/g, "");
-  }
-
-  function openEdit(product: TrackedStockItem) {
-    setEditingProductId(product.productId);
-    setQuantityDraft(String(product.quantity));
+  function openEdit(target: StockTarget) {
+    setEditingTarget(target);
+    setQuantityDraft(String(target.quantity));
   }
 
   function closeEdit() {
-    setEditingProductId(null);
+    setEditingTarget(null);
     setQuantityDraft("");
   }
 
-  function handleSearch(event: FormEvent<HTMLFormElement>) {
+  async function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const match = findTrackedStockItem(items, searchInput);
+    const normalizedSearch = normalizeQuery(searchInput);
+    if (!normalizedSearch) {
+      return;
+    }
+
+    setSearching(true);
     setSearchNote("");
 
-    if (!match) {
-      setSelectedProductId(null);
-      setSearchNote("No encontramos un producto con ese codigo o nombre.");
-      return;
-    }
+    try {
+      const localMatch = findTrackedStockItem(items, searchInput);
+      if (localMatch) {
+        const target = toTargetFromTracked(localMatch);
+        setSelectedTarget(target);
+        setSearchNote(`Encontrado: ${target.name}.`);
+        if (normalizeQuery(target.barcode) === normalizedSearch || /^\d+$/.test(normalizedSearch)) {
+          openEdit(target);
+        }
+        return;
+      }
 
-    setSelectedProductId(match.productId);
-    if (normalizeQuery(match.barcode) && normalizeQuery(match.barcode) === normalizeQuery(searchInput)) {
-      openEdit(match);
-      setSearchNote(`Encontrado: ${match.name}.`);
-      return;
-    }
+      const { product } = await findProductByBarcodeDetailed(normalizedSearch);
+      if (!product) {
+        setSelectedTarget(null);
+        setSearchNote("No encontramos un producto con ese codigo.");
+        return;
+      }
 
-    setSearchNote(`Encontrado: ${match.name}.`);
+      const target = toTargetFromBackend(product);
+      setSelectedTarget(target);
+      setSearchNote(`Encontrado: ${target.name}.`);
+      openEdit(target);
+    } catch (error) {
+      console.error(error);
+      setSelectedTarget(null);
+      setSearchNote(error instanceof Error ? error.message : "No pudimos buscar el producto.");
+    } finally {
+      setSearching(false);
+    }
   }
 
   function handleSaveEdit() {
-    if (!editingProduct) {
+    if (!editingTarget) {
       return;
     }
 
@@ -71,11 +120,18 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
       return;
     }
 
-    onUpdateStock(editingProduct.productId, Math.floor(parsedQuantity));
-    setSelectedProductId(null);
+    onUpdateStock({
+      productId: editingTarget.productId,
+      quantity: Math.floor(parsedQuantity),
+      name: editingTarget.name,
+      barcode: editingTarget.barcode,
+      image: editingTarget.image
+    });
+
+    setSelectedTarget(null);
     setSearchInput("");
     closeEdit();
-    setSearchNote(`Stock actualizado para ${editingProduct.name}.`);
+    setSearchNote(`Stock actualizado para ${editingTarget.name}.`);
   }
 
   return (
@@ -83,8 +139,8 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
       <article className="panel-card stock-hero">
         <div>
           <p className="stock-kicker">Stock visual</p>
-          <h2>Seguimiento de productos vendidos</h2>
-          <p className="stock-helper">Arranca en 10 unidades la primera vez que se vende un producto y baja con cada confirmacion.</p>
+          <h2>Seguimiento de productos</h2>
+          <p className="stock-helper">La vista muestra solo stock menor a 10. En ingresar stock podés buscar cualquier producto por código.</p>
         </div>
         <div className="stock-hero-actions">
           {onRefresh ? (
@@ -133,9 +189,9 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
                   placeholder="Barcode o nombre"
                 />
               </label>
-              <button type="submit" className="stock-search-button">
+              <button type="submit" className="stock-search-button" disabled={searching}>
                 <ScanBarcode size={16} />
-                Buscar
+                {searching ? "Buscando..." : "Buscar"}
               </button>
             </form>
             {searchNote ? <p className="stock-search-note">{searchNote}</p> : null}
@@ -178,35 +234,10 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
         </article>
       ) : null}
 
-      {activeTab === "incoming" && !loading && selectedProduct ? (
-        <article className={`stock-card ${getStockIntensity(selectedProduct.quantity)} stock-result`}>
-          <div className="stock-card-head">
-            <div>
-              <p className="stock-card-name">{selectedProduct.name}</p>
-              <p className="stock-card-meta">Stock actual {selectedProduct.quantity}</p>
-              {selectedProduct.barcode ? <p className="stock-card-meta barcode">Barcode {selectedProduct.barcode}</p> : null}
-            </div>
-            <div className="stock-card-head-actions">
-              <span className={`stock-badge ${getStockIntensity(selectedProduct.quantity)}`}>{getStockLabel(selectedProduct.quantity)}</span>
-              <button type="button" className="stock-edit-button" onClick={() => openEdit(selectedProduct)}>
-                <Edit3 size={14} />
-                Actualizar
-              </button>
-            </div>
-          </div>
-
-          <div className="stock-card-body">
-            <div className="stock-quantity">{selectedProduct.quantity}</div>
-            <p className="stock-card-note">Stock actual {selectedProduct.quantity}</p>
-          </div>
-        </article>
-      ) : null}
-
       {activeTab === "view" && !loading && lowStockItems.length ? (
         <div className="stock-grid">
           {lowStockItems.map((item) => {
             const intensity = getStockIntensity(item.quantity);
-
             return (
               <article key={item.productId} className={`stock-card ${intensity}`}>
                 <div className="stock-card-head">
@@ -217,7 +248,7 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
                   </div>
                   <div className="stock-card-head-actions">
                     <span className={`stock-badge ${intensity}`}>{getStockLabel(item.quantity)}</span>
-                    <button type="button" className="stock-edit-button" onClick={() => openEdit(item)}>
+                    <button type="button" className="stock-edit-button" onClick={() => openEdit(toTargetFromTracked(item))}>
                       <Edit3 size={14} />
                       Actualizar
                     </button>
@@ -234,7 +265,31 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
         </div>
       ) : null}
 
-      {editingProduct ? (
+      {activeTab === "incoming" && selectedTarget ? (
+        <article className={`stock-card ${getStockIntensity(selectedTarget.quantity)} stock-result`}>
+          <div className="stock-card-head">
+            <div>
+              <p className="stock-card-name">{selectedTarget.name}</p>
+              <p className="stock-card-meta">Stock actual {selectedTarget.quantity}</p>
+              {selectedTarget.barcode ? <p className="stock-card-meta barcode">Barcode {selectedTarget.barcode}</p> : null}
+            </div>
+            <div className="stock-card-head-actions">
+              <span className={`stock-badge ${getStockIntensity(selectedTarget.quantity)}`}>{getStockLabel(selectedTarget.quantity)}</span>
+              <button type="button" className="stock-edit-button" onClick={() => openEdit(selectedTarget)}>
+                <Edit3 size={14} />
+                Actualizar
+              </button>
+            </div>
+          </div>
+
+          <div className="stock-card-body">
+            <div className="stock-quantity">{selectedTarget.quantity}</div>
+            <p className="stock-card-note">Stock actual {selectedTarget.quantity}</p>
+          </div>
+        </article>
+      ) : null}
+
+      {editingTarget ? (
         <div className="manual-modal-backdrop" onClick={closeEdit}>
           <section className="manual-modal stock-edit-modal" onClick={(event) => event.stopPropagation()}>
             <div className="manual-modal-header">
@@ -244,8 +299,8 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
               </button>
             </div>
             <div className="manual-modal-copy">
-              <span>{editingProduct.name}</span>
-              <strong>{editingProduct.barcode || "Sin barcode"}</strong>
+              <span>{editingTarget.name}</span>
+              <strong>{editingTarget.barcode || "Sin barcode"}</strong>
             </div>
             <div className="manual-modal-form">
               <label className="manual-modal-label">Stock actual</label>

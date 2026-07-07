@@ -16,6 +16,14 @@ export type TrackedStockItem = {
   lastUpdatedAt: string;
 };
 
+export type StockUpdateInput = {
+  productId: number;
+  quantity: number;
+  name?: string;
+  barcode?: string | null;
+  image?: string | null;
+};
+
 type StoredStockPayload = {
   items: TrackedStockItem[];
 };
@@ -130,12 +138,12 @@ export function loadTrackedStock() {
   return normalizeItems(readStock());
 }
 
-export function updateTrackedStockItem(productId: number, quantity: number) {
+export function updateTrackedStockItem(payload: StockUpdateInput) {
   const nowIso = new Date().toISOString();
-  const normalizedQuantity = Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+  const normalizedQuantity = Number.isFinite(payload.quantity) ? Math.max(0, Math.floor(payload.quantity)) : 0;
   const currentItems = readStock();
   const nextItems = currentItems.map((item) =>
-    item.productId === productId
+    item.productId === payload.productId
       ? {
           ...item,
           quantity: normalizedQuantity,
@@ -144,8 +152,27 @@ export function updateTrackedStockItem(productId: number, quantity: number) {
       : item
   );
 
-  writeStock(nextItems);
-  return normalizeItems(nextItems);
+  if (nextItems.some((item) => item.productId === payload.productId)) {
+    writeStock(nextItems);
+    return normalizeItems(nextItems);
+  }
+
+  const nextWithUpsert = [
+    {
+      productId: payload.productId,
+      barcode: normalizeBarcode(payload.barcode),
+      name: payload.name || `Producto ${payload.productId}`,
+      image: payload.image ?? null,
+      quantity: normalizedQuantity,
+      initialQuantity: normalizedQuantity,
+      lastSoldAt: null,
+      lastUpdatedAt: nowIso
+    },
+    ...nextItems
+  ];
+
+  writeStock(nextWithUpsert);
+  return normalizeItems(nextWithUpsert);
 }
 
 export function findTrackedStockItem(items: TrackedStockItem[], query: string) {
