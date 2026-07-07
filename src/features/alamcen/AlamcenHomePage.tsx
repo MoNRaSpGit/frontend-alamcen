@@ -26,6 +26,7 @@ import { ScannerCheckoutConfirmModal, ScannerPaymentMethod } from "./components/
 import { ScannerProductModal } from "./components/ScannerProductModal";
 import { logScannerWarmup, logScanResult, logScanUi, warnWarmupFailure } from "./alamcen.diagnostics";
 import { DemoCustomer } from "./alamcen.customer-demo";
+import { recordCheckoutPaymentMethod } from "./alamcen.payment-metrics";
 
 type AlamcenHomePageProps = {
   customers: DemoCustomer[];
@@ -273,6 +274,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
         const itemsLabel = saleLines.map((line) => `${line.name} x${line.quantity}`).join(", ");
         onAccountSale(selectedCustomer.id, total, itemsLabel || "Venta en cuenta");
       }
+      recordCheckoutPaymentMethod(total, paymentMethod);
       queueSaleForBackgroundSync(payload);
       if (paymentMethod === "cuenta" && selectedCustomer) {
         toast.success(`Venta cargada a cuenta de ${selectedCustomer.name}.`);

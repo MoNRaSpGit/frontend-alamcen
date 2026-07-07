@@ -14,6 +14,7 @@ import { BarcodeProductLookup } from "./alamcen.types";
 import { clearTrackedStock, loadTrackedStock, recordStockSale, TrackedStockItem } from "./alamcen.stock";
 import { StockTab } from "./StockTab";
 import { SaleLine } from "./alamcen.scanner.types";
+import { loadTodayPaymentMetrics } from "./alamcen.payment-metrics";
 
 type AlamcenWorkspaceProps = {
   onLoggedOut: () => void;
@@ -259,6 +260,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dashboard, setDashboard] = useState<Awaited<ReturnType<typeof fetchDashboard>>["dashboard"] | null>(null);
+  const [paymentMetrics, setPaymentMetrics] = useState({ tarjeta: 0, cuenta: 0 });
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -278,6 +280,10 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
       .finally(() => {
         setLoading(false);
       });
+  }, [refreshKey]);
+
+  useEffect(() => {
+    setPaymentMetrics(loadTodayPaymentMetrics());
   }, [refreshKey]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -360,31 +366,25 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
           {error ? <span className="alamcen-panel-error">{error}</span> : null}
         </div>
         {dashboard ? (
-          <div className="alamcen-panel-metrics-grid summary">
-            {SHOW_PANEL_EXTRAS ? (
-              <MetricCard title="Caja inicial" value={formatCurrency(dashboard.metrics.initialCash)} hint="Monto configurado para abrir el dia." />
-            ) : null}
-            <MetricCard title="Ventas del dia" value={formatCurrency(dashboard.metrics.salesToday)} hint="Total vendido desde la caja." highlight />
-            {SHOW_PANEL_EXTRAS ? (
-              <>
-                <MetricCard title="Pagos realizados" value={formatCurrency(dashboard.metrics.paymentsTotal)} hint="Egresos registrados manualmente." />
-                <MetricCard title="Monto actual" value={formatCurrency(dashboard.metrics.currentAmount)} hint="Caja inicial + ventas - pagos." />
-              </>
-            ) : null}
-            <article className="alamcen-panel-metric-card comparison">
-              <p className="alamcen-panel-metric-title">Comparativa</p>
-              <div className="alamcen-panel-comparison-row">
-                <span>vs ayer</span>
-                <strong className={comparisonVsYesterday >= 0 ? "positive" : "negative"}>{formatPercent(comparisonVsYesterday)}</strong>
-              </div>
-              <div className="alamcen-panel-comparison-values">
-                <span>Hoy {formatCurrency(dashboard.comparison.today)}</span>
-                <span>Ayer {formatCurrency(dashboard.comparison.yesterday)}</span>
-              </div>
-            </article>
-            {SHOW_PANEL_EXTRAS ? (
-              <MetricCard title="Record" value={formatCurrency(dashboard.comparison.record)} hint="Mejor caja diaria registrada." />
-            ) : null}
+          <div className="alamcen-panel-summary-columns">
+            <div className="alamcen-panel-summary-column">
+              <MetricCard title="Ventas del dia" value={formatCurrency(dashboard.metrics.salesToday)} hint="Total vendido desde la caja." highlight />
+              <MetricCard title="Ventas con tarjeta" value={formatCurrency(paymentMetrics.tarjeta)} hint="Cobros confirmados con tarjeta." />
+            </div>
+            <div className="alamcen-panel-summary-column">
+              <article className="alamcen-panel-metric-card comparison">
+                <p className="alamcen-panel-metric-title">Comparativa</p>
+                <div className="alamcen-panel-comparison-row">
+                  <span>vs ayer</span>
+                  <strong className={comparisonVsYesterday >= 0 ? "positive" : "negative"}>{formatPercent(comparisonVsYesterday)}</strong>
+                </div>
+                <div className="alamcen-panel-comparison-values">
+                  <span>Hoy {formatCurrency(dashboard.comparison.today)}</span>
+                  <span>Ayer {formatCurrency(dashboard.comparison.yesterday)}</span>
+                </div>
+              </article>
+              <MetricCard title="Ventas a credito" value={formatCurrency(paymentMetrics.cuenta)} hint="Ventas cargadas a cuenta." />
+            </div>
           </div>
         ) : null}
       </article>
