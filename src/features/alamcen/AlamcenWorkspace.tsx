@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeftRight, CreditCard, HandCoins, Menu, Trophy, UserRound, Wallet } from "lucide-react";
 import { logoutSession } from "../auth/auth.client";
 import { AlamcenHomePage } from "./AlamcenHomePage";
@@ -9,7 +9,7 @@ import {
   listProducts,
   updateProduct
 } from "./alamcen.catalog.client";
-import { CUSTOMER_PREVIEW } from "./alamcen.customer-demo";
+import { CUSTOMER_PREVIEW, DemoCustomer } from "./alamcen.customer-demo";
 import { BarcodeProductLookup } from "./alamcen.types";
 
 type AlamcenWorkspaceProps = {
@@ -74,6 +74,7 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   const [statusError, setStatusError] = useState("");
   const [panelRefreshKey, setPanelRefreshKey] = useState(0);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [customers, setCustomers] = useState<DemoCustomer[]>(CUSTOMER_PREVIEW);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -111,6 +112,31 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   async function handleLogout() {
     await logoutSession();
     onLoggedOut();
+  }
+
+  function handleAccountSale(customerId: string, total: number, itemsLabel: string) {
+    const saleTime = new Date().toLocaleTimeString("es-UY", { hour: "2-digit", minute: "2-digit" });
+
+    setCustomers((current) =>
+      current.map((customer) =>
+        customer.id === customerId
+          ? {
+              ...customer,
+              debtTotal: customer.debtTotal + total,
+              lastSale: `Hoy ${saleTime}`,
+              sales: [
+                {
+                  id: `account-sale-${Date.now()}`,
+                  amount: total,
+                  items: itemsLabel,
+                  date: `Hoy ${saleTime}`
+                },
+                ...customer.sales
+              ]
+            }
+          : customer
+      )
+    );
   }
 
   return (
@@ -180,9 +206,15 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
       </header>
       {statusError ? <p className="workspace-error">{statusError}</p> : null}
 
-      {activeTab === "scanner" ? <AlamcenHomePage onSaleRecorded={() => setPanelRefreshKey((current) => current + 1)} /> : null}
+      <div className={activeTab === "scanner" ? "workspace-tab-panel active" : "workspace-tab-panel hidden"}>
+        <AlamcenHomePage
+          customers={customers}
+          onAccountSale={handleAccountSale}
+          onSaleRecorded={() => setPanelRefreshKey((current) => current + 1)}
+        />
+      </div>
       {activeTab === "panel" ? <PanelTab refreshKey={panelRefreshKey} onPaymentRecorded={() => setPanelRefreshKey((current) => current + 1)} /> : null}
-      {activeTab === "customers" ? <CustomersTab /> : null}
+      {activeTab === "customers" ? <CustomersTab customers={customers} onChangeCustomers={setCustomers} /> : null}
       {activeTab === "products" ? <ProductsTab /> : null}
     </main>
   );
@@ -549,8 +581,13 @@ export function LegacyPanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: 
   );
 }
 
-function CustomersTab() {
-  const [customers, setCustomers] = useState(CUSTOMER_PREVIEW);
+function CustomersTab({
+  customers,
+  onChangeCustomers
+}: {
+  customers: DemoCustomer[];
+  onChangeCustomers: Dispatch<SetStateAction<DemoCustomer[]>>;
+}) {
   const [selectedCustomerId, setSelectedCustomerId] = useState(CUSTOMER_PREVIEW[0]?.id ?? "");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -574,7 +611,7 @@ function CustomersTab() {
       payments: []
     };
 
-    setCustomers((current) => [nextCustomer, ...current]);
+    onChangeCustomers((current) => [nextCustomer, ...current]);
     setSelectedCustomerId(nextCustomer.id);
     setCustomerName("");
     setCustomerPhone("");
@@ -591,7 +628,7 @@ function CustomersTab() {
       return;
     }
 
-    setCustomers((current) =>
+    onChangeCustomers((current) =>
       current.map((customer) =>
         customer.id === selectedCustomer.id
           ? {

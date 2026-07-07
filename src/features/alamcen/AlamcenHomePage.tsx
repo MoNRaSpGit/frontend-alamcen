@@ -25,13 +25,15 @@ import { ScannerProductsPanel } from "./components/ScannerProductsPanel";
 import { ScannerCheckoutConfirmModal, ScannerPaymentMethod } from "./components/ScannerCheckoutConfirmModal";
 import { ScannerProductModal } from "./components/ScannerProductModal";
 import { logScannerWarmup, logScanResult, logScanUi, warnWarmupFailure } from "./alamcen.diagnostics";
-import { CUSTOMER_PREVIEW } from "./alamcen.customer-demo";
+import { DemoCustomer } from "./alamcen.customer-demo";
 
 type AlamcenHomePageProps = {
+  customers: DemoCustomer[];
+  onAccountSale: (customerId: string, total: number, itemsLabel: string) => void;
   onSaleRecorded: () => void;
 };
 
-export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
+export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: AlamcenHomePageProps) {
   const [barcodeInput, setBarcodeInput] = useState("");
   const [lookupError, setLookupError] = useState("");
   const [saleLines, setSaleLines] = useState<SaleLine[]>([]);
@@ -235,7 +237,7 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
     setSaleMessage("");
 
     try {
-      const selectedCustomer = CUSTOMER_PREVIEW.find((customer) => customer.id === selectedCustomerId);
+      const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId);
       const paymentLabel =
         paymentMethod === "cuenta" && selectedCustomer
           ? `cuenta de ${selectedCustomer.name}`
@@ -264,6 +266,10 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
       setIsCheckoutConfirmOpen(false);
       setPaymentMethod("efectivo");
       setSelectedCustomerId("");
+      if (paymentMethod === "cuenta" && selectedCustomer) {
+        const itemsLabel = saleLines.map((line) => `${line.name} x${line.quantity}`).join(", ");
+        onAccountSale(selectedCustomer.id, total, itemsLabel || "Venta en cuenta");
+      }
       queueSaleForBackgroundSync(payload);
       toast.success(paymentMethod === "cuenta" && selectedCustomer ? "Venta cargada a cuenta." : "Venta lista. Guardando en segundo plano.");
       onSaleRecorded();
@@ -399,7 +405,7 @@ export function AlamcenHomePage({ onSaleRecorded }: AlamcenHomePageProps) {
         total={total}
         isSubmittingSale={isSubmittingSale}
         paymentMethod={paymentMethod}
-        customers={CUSTOMER_PREVIEW}
+        customers={customers}
         selectedCustomerId={selectedCustomerId}
         onClose={() => setIsCheckoutConfirmOpen(false)}
         onConfirm={() => {

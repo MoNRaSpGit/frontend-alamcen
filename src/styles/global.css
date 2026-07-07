@@ -1448,6 +1448,10 @@ button:disabled {
   margin: 0 auto 18px;
 }
 
+.workspace-tab-panel.hidden {
+  display: none;
+}
+
 .panel-grid {
   width: min(1100px, 100%);
   margin: 0 auto;
