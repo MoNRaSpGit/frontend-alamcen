@@ -10,6 +10,7 @@ export type TrackedStockItem = {
   barcode: string | null;
   name: string;
   image: string | null;
+  price: number | null;
   quantity: number;
   initialQuantity: number;
   lastSoldAt: string | null;
@@ -22,6 +23,7 @@ export type StockUpdateInput = {
   name?: string;
   barcode?: string | null;
   image?: string | null;
+  price?: number | null;
 };
 
 type StoredStockPayload = {
@@ -77,6 +79,7 @@ function readStock(): TrackedStockItem[] {
         ...item,
         barcode: typeof item.barcode === "string" ? item.barcode : null,
         image: typeof item.image === "string" ? item.image : null,
+        price: typeof item.price === "number" ? item.price : null,
         lastSoldAt: typeof item.lastSoldAt === "string" ? item.lastSoldAt : null,
         lastUpdatedAt: typeof item.lastUpdatedAt === "string" ? item.lastUpdatedAt : new Date().toISOString()
       }));
@@ -108,6 +111,7 @@ function upsertSaleLine(items: TrackedStockItem[], line: SaleLine, nowIso: strin
         barcode: normalizeBarcode(line.barcode),
         name: line.name,
         image: line.image,
+        price: line.price,
         quantity: Math.max(0, DEFAULT_INITIAL_STOCK - line.quantity),
         initialQuantity: DEFAULT_INITIAL_STOCK,
         lastSoldAt: nowIso,
@@ -127,6 +131,7 @@ function upsertSaleLine(items: TrackedStockItem[], line: SaleLine, nowIso: strin
       barcode: item.barcode || normalizeBarcode(line.barcode),
       name: line.name,
       image: line.image ?? item.image,
+      price: line.price,
       quantity: Math.max(0, item.quantity - line.quantity),
       lastSoldAt: nowIso,
       lastUpdatedAt: nowIso
@@ -144,9 +149,10 @@ export function updateTrackedStockItem(payload: StockUpdateInput) {
   const currentItems = readStock();
   const nextItems = currentItems.map((item) =>
     item.productId === payload.productId
-      ? {
+        ? {
           ...item,
           quantity: normalizedQuantity,
+          price: typeof payload.price === "number" ? payload.price : item.price ?? null,
           lastUpdatedAt: nowIso
         }
       : item
@@ -163,6 +169,7 @@ export function updateTrackedStockItem(payload: StockUpdateInput) {
       barcode: normalizeBarcode(payload.barcode),
       name: payload.name || `Producto ${payload.productId}`,
       image: payload.image ?? null,
+      price: typeof payload.price === "number" ? payload.price : null,
       quantity: normalizedQuantity,
       initialQuantity: normalizedQuantity,
       lastSoldAt: null,

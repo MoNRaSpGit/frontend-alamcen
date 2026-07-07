@@ -17,8 +17,19 @@ type StockTarget = {
   name: string;
   barcode: string | null;
   image: string | null;
+  price: number | null;
   quantity: number;
 };
+
+function formatPrice(value: number | null) {
+  if (!Number.isFinite(value ?? NaN)) {
+    return "Precio no cargado";
+  }
+
+  return new Intl.NumberFormat("es-UY", {
+    maximumFractionDigits: 0
+  }).format(value as number);
+}
 
 function normalizeQuery(value: string | null | undefined) {
   return String(value || "").trim().replace(/\s+/g, "");
@@ -30,6 +41,7 @@ function toTargetFromTracked(item: TrackedStockItem): StockTarget {
     name: item.name,
     barcode: item.barcode,
     image: item.image,
+    price: item.price,
     quantity: item.quantity
   };
 }
@@ -40,6 +52,7 @@ function toTargetFromBackend(product: BarcodeProductLookup): StockTarget {
     name: product.nombre,
     barcode: product.barcodeNormalized || product.barcode || null,
     image: product.imagen,
+    price: product.precioVenta,
     quantity: product.stockActual
   };
 }
@@ -125,7 +138,8 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
       quantity: Math.floor(parsedQuantity),
       name: editingTarget.name,
       barcode: editingTarget.barcode,
-      image: editingTarget.image
+      image: editingTarget.image,
+      price: editingTarget.price
     });
 
     setSelectedTarget(null);
@@ -285,6 +299,21 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
           <div className="stock-card-body">
             <div className="stock-quantity">{selectedTarget.quantity}</div>
             <p className="stock-card-note">Stock actual {selectedTarget.quantity}</p>
+          </div>
+
+          <div className="stock-result-mobile">
+            <div className="stock-result-mobile-media">
+              {selectedTarget.image ? (
+                <img src={selectedTarget.image} alt={selectedTarget.name} className="stock-result-mobile-image" />
+              ) : (
+                <div className="stock-result-mobile-placeholder">{selectedTarget.name.slice(0, 2).toUpperCase()}</div>
+              )}
+            </div>
+            <div className="stock-result-mobile-copy">
+              <p className="stock-result-mobile-name">{selectedTarget.name}</p>
+              <p className="stock-result-mobile-price">Precio {formatPrice(selectedTarget.price)}</p>
+              <p className="stock-result-mobile-qty">Cantidad {selectedTarget.quantity}</p>
+            </div>
           </div>
         </article>
       ) : null}
