@@ -403,9 +403,42 @@
   padding: 0;
   margin: 0;
   background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
   min-width: 0;
   text-align: left;
+}
+
+.scanner-thumb-frame {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.scanner-thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+
+.scanner-thumb-placeholder {
+  background: linear-gradient(145deg, #f2f4f6, #e9ecef);
+}
+
+.scanner-thumb-placeholder-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #6c757d;
 }
 
 .scanner-line-copy {
@@ -426,8 +459,40 @@
   text-overflow: ellipsis;
 }
 
+.scanner-price-badge {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f5132;
+  background-color: rgba(25, 135, 84, 0.18);
+}
+
 .scanner-line-qty,
 .scanner-line-price {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.scanner-edit-btn {
+  border: 1px solid #ced4da;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #33402d;
+  padding: 8px 16px;
+  min-width: 96px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.scanner-edit-btn:hover,
+.scanner-edit-btn:focus-visible {
+  background: #f8f9fa;
+}
+
+.scanner-line-total {
   font-weight: 700;
   white-space: nowrap;
 }

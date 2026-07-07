@@ -182,6 +182,13 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
     setBarcodeInput("");
   }
 
+  function openEditModal(line: SaleLine) {
+    setEditingLineId(line.productId);
+    setEditNameInput(line.name);
+    setEditPriceInput(String(line.price));
+    setEditModalOpen(true);
+  }
+
   function closeEditModal() {
     setEditModalOpen(false);
     setEditingLineId(null);
@@ -397,6 +404,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
           total={total}
           isSubmittingSale={isSubmittingSale}
           onIncreaseLine={handleIncreaseLine}
+          onOpenEdit={openEditModal}
           onRemoveLine={handleRemoveLine}
           onOpenCheckout={() => setIsCheckoutConfirmOpen(true)}
         />

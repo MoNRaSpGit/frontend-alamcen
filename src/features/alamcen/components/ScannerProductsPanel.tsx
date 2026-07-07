@@ -6,6 +6,7 @@ type ScannerProductsPanelProps = {
   total: number;
   isSubmittingSale: boolean;
   onIncreaseLine: (productId: number) => void;
+  onOpenEdit: (line: SaleLine) => void;
   onRemoveLine: (productId: number) => void;
   onOpenCheckout: () => void;
 };
@@ -15,6 +16,7 @@ export function ScannerProductsPanel({
   total,
   isSubmittingSale,
   onIncreaseLine,
+  onOpenEdit,
   onRemoveLine,
   onOpenCheckout
 }: ScannerProductsPanelProps) {
@@ -29,7 +31,9 @@ export function ScannerProductsPanel({
           <thead>
             <tr>
               <th>Producto</th>
+              <th className="scanner-col-center">Editar</th>
               <th className="scanner-col-end">Cant.</th>
+              <th className="scanner-col-end">Total</th>
               <th className="scanner-col-end">Precio</th>
               <th className="scanner-col-end" />
             </tr>
@@ -44,15 +48,33 @@ export function ScannerProductsPanel({
                     onClick={() => onIncreaseLine(line.productId)}
                     aria-label={`Sumar una unidad de ${line.name}`}
                   >
+                    {line.image ? (
+                      <div className="scanner-thumb-frame">
+                        <img src={line.image} alt={line.name} className="scanner-thumb" loading="lazy" decoding="async" />
+                      </div>
+                    ) : (
+                      <div className="scanner-thumb-frame scanner-thumb-placeholder">
+                        <span className="scanner-thumb-placeholder-label">{line.name.slice(0, 2).toUpperCase()}</span>
+                      </div>
+                    )}
                     <div className="scanner-line-copy">
                       <div className="scanner-product-name" title={line.name}>
                         {line.name}
                       </div>
+                      <div className="scanner-price-badge">{formatCurrency(line.price)} c/u</div>
                     </div>
+                  </button>
+                </td>
+                <td className="scanner-col-center scanner-mobile-stat" data-label="Editar">
+                  <button type="button" className="scanner-edit-btn" onClick={() => onOpenEdit(line)}>
+                    Editar
                   </button>
                 </td>
                 <td className="scanner-col-end scanner-line-qty scanner-mobile-stat" data-label="Cant.">
                   {line.quantity}
+                </td>
+                <td className="scanner-col-end scanner-line-total scanner-mobile-stat" data-label="Total">
+                  {formatCurrency(line.subtotal)}
                 </td>
                 <td className="scanner-col-end scanner-line-price scanner-mobile-stat" data-label="Precio">
                   <span className="scanner-price-truncate" title={formatCurrency(line.price)}>
