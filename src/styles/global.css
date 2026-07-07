@@ -1758,6 +1758,10 @@ button:disabled {
 
 .alamcen-panel-block-header {
   margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .alamcen-panel-block-header h3 {
@@ -1788,14 +1792,13 @@ button:disabled {
 }
 
 .alamcen-panel-movements-toggle {
-  width: 100%;
-  margin-top: 10px;
+  flex: 0 0 auto;
   border: 1px solid #111827;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #ffffff;
   color: #111827;
-  padding: 9px 12px;
-  font-size: 13px;
+  padding: 5px 8px;
+  font-size: 12px;
   font-weight: 900;
 }
 

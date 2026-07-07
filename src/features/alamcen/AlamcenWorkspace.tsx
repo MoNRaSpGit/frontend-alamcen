@@ -374,8 +374,15 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
         <div className="alamcen-panel-left-stack">
           <article className="alamcen-panel-block accent-blue">
             <div className="alamcen-panel-block-header">
-              <h3><ArrowLeftRight size={17} /> Movimientos</h3>
-              <p>Ultimas ventas y pagos registrados.</p>
+              <div>
+                <h3><ArrowLeftRight size={17} /> Movimientos</h3>
+                <p>Ultimas ventas y pagos registrados.</p>
+              </div>
+              {allMovements.length > 3 ? (
+                <button type="button" className="alamcen-panel-movements-toggle" onClick={handleToggleMovements}>
+                  {nextMovementButtonLabel}
+                </button>
+              ) : null}
             </div>
             <div className="alamcen-panel-block-body">
               <div className="alamcen-panel-movements-list">
@@ -426,11 +433,6 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
                   </div>
                 )}
               </div>
-              {allMovements.length > 3 ? (
-                <button type="button" className="alamcen-panel-movements-toggle" onClick={handleToggleMovements}>
-                  {nextMovementButtonLabel}
-                </button>
-              ) : null}
             </div>
           </article>
         </div>
