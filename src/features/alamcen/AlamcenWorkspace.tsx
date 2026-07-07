@@ -582,25 +582,96 @@ export function LegacyPanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: 
 }
 
 function CustomersTab() {
+  const [customers, setCustomers] = useState(CUSTOMER_PREVIEW);
   const [selectedCustomerId, setSelectedCustomerId] = useState(CUSTOMER_PREVIEW[0]?.id ?? "");
-  const selectedCustomer = CUSTOMER_PREVIEW.find((customer) => customer.id === selectedCustomerId) ?? CUSTOMER_PREVIEW[0];
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId) ?? customers[0];
+
+  function handleCreateCustomer(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextName = customerName.trim();
+    if (!nextName) {
+      return;
+    }
+
+    const nextCustomer = {
+      id: `customer-${Date.now()}`,
+      name: nextName,
+      phone: customerPhone.trim() || "Sin telefono",
+      debtTotal: 0,
+      lastSale: "Cliente nuevo",
+      sales: [],
+      payments: []
+    };
+
+    setCustomers((current) => [nextCustomer, ...current]);
+    setSelectedCustomerId(nextCustomer.id);
+    setCustomerName("");
+    setCustomerPhone("");
+  }
+
+  function handleRegisterCustomerPayment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedCustomer) {
+      return;
+    }
+
+    const parsedAmount = Number(paymentAmount.replace(",", "."));
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      return;
+    }
+
+    setCustomers((current) =>
+      current.map((customer) =>
+        customer.id === selectedCustomer.id
+          ? {
+              ...customer,
+              debtTotal: Math.max(0, customer.debtTotal - parsedAmount),
+              lastSale: "Pago recien registrado",
+              payments: [
+                {
+                  id: `payment-${Date.now()}`,
+                  amount: parsedAmount,
+                  note: "Pago registrado en demo",
+                  date: new Date().toLocaleTimeString("es-UY", { hour: "2-digit", minute: "2-digit" })
+                },
+                ...customer.payments
+              ]
+            }
+          : customer
+      )
+    );
+    setPaymentAmount("");
+  }
 
   return (
     <section className="alamcen-customers-page">
       <article className="alamcen-customers-card">
         <p className="alamcen-customers-kicker">Clientes</p>
         <h2>Alta rapida</h2>
-        <p className="alamcen-customers-note">Base visual lista para conectar con cuenta corriente.</p>
-        <form className="alamcen-customers-form">
+        <p className="alamcen-customers-note">Demo visual: permite mostrar el flujo sin guardar en base de datos.</p>
+        <form className="alamcen-customers-form" onSubmit={handleCreateCustomer}>
           <label>
             <span>Nombre</span>
-            <input type="text" placeholder="Juan Perez" disabled />
+            <input
+              type="text"
+              placeholder="Juan Perez"
+              value={customerName}
+              onChange={(event) => setCustomerName(event.target.value)}
+            />
           </label>
           <label>
             <span>Telefono</span>
-            <input type="text" placeholder="099 000 000" disabled />
+            <input
+              type="text"
+              placeholder="099 000 000"
+              value={customerPhone}
+              onChange={(event) => setCustomerPhone(event.target.value)}
+            />
           </label>
-          <button type="button" disabled>Guardar cliente</button>
+          <button type="submit" disabled={!customerName.trim()}>Guardar cliente</button>
         </form>
       </article>
 
@@ -610,10 +681,10 @@ function CustomersTab() {
             <p className="alamcen-customers-kicker">Listado</p>
             <h2>Cuenta corriente</h2>
           </div>
-          <span className="alamcen-customers-count">{CUSTOMER_PREVIEW.length}</span>
+          <span className="alamcen-customers-count">{customers.length}</span>
         </div>
         <div className="alamcen-customers-list">
-          {CUSTOMER_PREVIEW.map((customer) => (
+          {customers.map((customer) => (
             <button
               type="button"
               key={customer.id}
@@ -646,14 +717,20 @@ function CustomersTab() {
               <strong>{formatCurrency(selectedCustomer.debtTotal)}</strong>
             </div>
 
-            <div className="alamcen-customers-payment-box">
+            <form className="alamcen-customers-payment-box" onSubmit={handleRegisterCustomerPayment}>
               <div>
                 <small>Registrar pago</small>
                 <strong>Descontar deuda</strong>
               </div>
-              <input type="text" placeholder="Monto" disabled />
-              <button type="button" disabled>Registrar pago</button>
-            </div>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="Monto"
+                value={paymentAmount}
+                onChange={(event) => setPaymentAmount(event.target.value)}
+              />
+              <button type="submit" disabled={!paymentAmount.trim()}>Registrar pago</button>
+            </form>
 
             <div className="alamcen-customers-history-head">
               <span>Historial de ventas</span>
