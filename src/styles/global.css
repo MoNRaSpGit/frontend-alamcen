@@ -1563,6 +1563,10 @@ button:disabled {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 
+.alamcen-panel-metrics-grid.summary {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
 .alamcen-panel-metric-card {
   border: 1px solid #dbe2eb;
   border-radius: 12px;
@@ -1638,6 +1642,10 @@ button:disabled {
   display: grid;
   gap: 12px;
   align-items: start;
+}
+
+.alamcen-panel-layout-grid.single {
+  grid-template-columns: 1fr;
 }
 
 .alamcen-panel-block {
@@ -1911,11 +1919,19 @@ button:disabled {
   .alamcen-panel-metrics-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .alamcen-panel-metrics-grid.summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 1040px) {
   .alamcen-panel-layout-grid {
     grid-template-columns: 2fr 1fr;
+  }
+
+  .alamcen-panel-layout-grid.single {
+    grid-template-columns: 1fr;
   }
 }
 

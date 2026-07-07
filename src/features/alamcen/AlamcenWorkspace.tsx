@@ -66,6 +66,8 @@ function MetricCard({
   );
 }
 
+const SHOW_PANEL_EXTRAS = false;
+
 export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("scanner");
   const [statusError, setStatusError] = useState("");
@@ -244,7 +246,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
         <div>
           <p className="alamcen-panel-hero-kicker">Caja diaria</p>
           <h1>Panel de control</h1>
-          <p>Ventas, pagos y productos mas movidos del dia.</p>
+          <p>Ventas del dia, comparativa y ultimos movimientos.</p>
         </div>
         <div className="alamcen-panel-status">
           <span>Estado</span>
@@ -262,11 +264,17 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
           {error ? <span className="alamcen-panel-error">{error}</span> : null}
         </div>
         {dashboard ? (
-          <div className="alamcen-panel-metrics-grid">
-            <MetricCard title="Caja inicial" value={formatCurrency(dashboard.metrics.initialCash)} hint="Monto configurado para abrir el dia." />
+          <div className="alamcen-panel-metrics-grid summary">
+            {SHOW_PANEL_EXTRAS ? (
+              <MetricCard title="Caja inicial" value={formatCurrency(dashboard.metrics.initialCash)} hint="Monto configurado para abrir el dia." />
+            ) : null}
             <MetricCard title="Ventas del dia" value={formatCurrency(dashboard.metrics.salesToday)} hint="Total vendido desde la caja." highlight />
-            <MetricCard title="Pagos realizados" value={formatCurrency(dashboard.metrics.paymentsTotal)} hint="Egresos registrados manualmente." />
-            <MetricCard title="Monto actual" value={formatCurrency(dashboard.metrics.currentAmount)} hint="Caja inicial + ventas - pagos." />
+            {SHOW_PANEL_EXTRAS ? (
+              <>
+                <MetricCard title="Pagos realizados" value={formatCurrency(dashboard.metrics.paymentsTotal)} hint="Egresos registrados manualmente." />
+                <MetricCard title="Monto actual" value={formatCurrency(dashboard.metrics.currentAmount)} hint="Caja inicial + ventas - pagos." />
+              </>
+            ) : null}
             <article className="alamcen-panel-metric-card comparison">
               <p className="alamcen-panel-metric-title">Comparativa</p>
               <div className="alamcen-panel-comparison-row">
@@ -278,12 +286,14 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
                 <span>Ayer {formatCurrency(dashboard.comparison.yesterday)}</span>
               </div>
             </article>
-            <MetricCard title="Record" value={formatCurrency(dashboard.comparison.record)} hint="Mejor caja diaria registrada." />
+            {SHOW_PANEL_EXTRAS ? (
+              <MetricCard title="Record" value={formatCurrency(dashboard.comparison.record)} hint="Mejor caja diaria registrada." />
+            ) : null}
           </div>
         ) : null}
       </article>
 
-      {dashboard ? (
+      {SHOW_PANEL_EXTRAS && dashboard ? (
         <article className="alamcen-panel-section">
           <div className="alamcen-panel-section-header">
             <div>
@@ -299,7 +309,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
         </article>
       ) : null}
 
-      <div className="alamcen-panel-layout-grid">
+      <div className={SHOW_PANEL_EXTRAS ? "alamcen-panel-layout-grid" : "alamcen-panel-layout-grid single"}>
         <div className="alamcen-panel-left-stack">
           <article className="alamcen-panel-block accent-blue">
             <div className="alamcen-panel-block-header">
@@ -359,6 +369,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
           </article>
         </div>
 
+        {SHOW_PANEL_EXTRAS ? (
         <div className="alamcen-panel-right-stack">
           <article className="alamcen-panel-block accent-violet">
             <div className="alamcen-panel-block-header">
@@ -416,6 +427,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
             </div>
           </article>
         </div>
+        ) : null}
       </div>
     </section>
   );
