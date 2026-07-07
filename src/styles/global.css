@@ -1787,6 +1787,18 @@ button:disabled {
   gap: 8px;
 }
 
+.alamcen-panel-movements-toggle {
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid #111827;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #111827;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
 .alamcen-panel-movement-row {
   display: flex;
   align-items: center;

@@ -228,6 +228,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [expandedMovementId, setExpandedMovementId] = useState<string | null>(null);
+  const [movementLimit, setMovementLimit] = useState(3);
 
   useEffect(() => {
     setLoading(true);
@@ -278,8 +279,27 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
     dashboard && dashboard.comparison.yesterday > 0
       ? ((dashboard.comparison.today - dashboard.comparison.yesterday) / dashboard.comparison.yesterday) * 100
       : 0;
-  const visibleMovements = dashboard?.movements.slice(0, 8) ?? [];
+  const allMovements = dashboard?.movements ?? [];
+  const visibleMovements = allMovements.slice(0, movementLimit);
   const visibleRanking = dashboard?.ranking.slice(0, 8) ?? [];
+  const hasMoreMovements = movementLimit < allMovements.length;
+  const nextMovementButtonLabel =
+    !allMovements.length
+      ? ""
+      : hasMoreMovements && movementLimit === 3
+        ? "Mostrar 3 mas"
+        : hasMoreMovements
+          ? "Mostrar todo"
+          : "Mostrar menos";
+
+  function handleToggleMovements() {
+    if (!hasMoreMovements) {
+      setMovementLimit(3);
+      return;
+    }
+
+    setMovementLimit((current) => (current === 3 ? Math.min(6, allMovements.length) : allMovements.length));
+  }
 
   return (
     <section className="alamcen-panel-page">
@@ -406,6 +426,11 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
                   </div>
                 )}
               </div>
+              {allMovements.length > 3 ? (
+                <button type="button" className="alamcen-panel-movements-toggle" onClick={handleToggleMovements}>
+                  {nextMovementButtonLabel}
+                </button>
+              ) : null}
             </div>
           </article>
         </div>
