@@ -399,49 +399,21 @@
   padding: 0;
   margin: 0;
   background: transparent;
-  display: flex;
-  align-items: center;
-  gap: 12px;
   width: 100%;
   min-width: 0;
   text-align: left;
 }
 
-.scanner-thumb-frame {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
-  border: 1px solid #dee2e6;
-  background-color: #fff;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.scanner-thumb {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-}
-
-.scanner-thumb-placeholder {
-  background: linear-gradient(145deg, #f2f4f6, #e9ecef);
-}
-
-.scanner-thumb-placeholder-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #6c757d;
-}
-
 .scanner-line-copy {
   min-width: 0;
+  display: grid;
+  align-items: center;
+  width: 100%;
 }
 
 .scanner-product-name {
+  display: block;
+  max-width: 100%;
   font-size: 1.04rem;
   font-weight: 600;
   color: #161616;
@@ -450,25 +422,24 @@
   text-overflow: ellipsis;
 }
 
-.scanner-price-badge {
+.scanner-line-qty,
+.scanner-line-price {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.scanner-line-price {
+  width: 108px;
+  max-width: 108px;
+}
+
+.scanner-price-truncate {
   display: inline-block;
-  margin-top: 0.25rem;
-  padding: 0.16rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #0f5132;
-  background-color: rgba(25, 135, 84, 0.18);
-}
-
-.scanner-line-qty {
-  font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.scanner-line-total {
-  font-weight: 700;
-  white-space: nowrap;
+  vertical-align: bottom;
 }
 
 .scanner-remove-btn {
@@ -811,18 +782,14 @@
   }
 
   .scanner-line-main {
-    align-items: flex-start;
-    gap: 12px;
+    min-height: 44px;
   }
 
   .scanner-line-copy {
-    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .scanner-product-name {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: initial;
     line-height: 1.25;
   }
 
@@ -846,7 +813,7 @@
   }
 
   .scanner-line-qty,
-  .scanner-line-total {
+  .scanner-line-price {
     font-size: 1rem;
   }
 

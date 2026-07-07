@@ -30,7 +30,7 @@ export function ScannerProductsPanel({
             <tr>
               <th>Producto</th>
               <th className="scanner-col-end">Cant.</th>
-              <th className="scanner-col-end">Total</th>
+              <th className="scanner-col-end">Precio</th>
               <th className="scanner-col-end" />
             </tr>
           </thead>
@@ -44,32 +44,20 @@ export function ScannerProductsPanel({
                     onClick={() => onIncreaseLine(line.productId)}
                     aria-label={`Sumar una unidad de ${line.name}`}
                   >
-                    {line.image ? (
-                      <div className="scanner-thumb-frame">
-                        <img
-                          src={line.image}
-                          alt={line.name}
-                          className="scanner-thumb"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    ) : (
-                      <div className="scanner-thumb-frame scanner-thumb-placeholder">
-                        <span className="scanner-thumb-placeholder-label">{line.name.slice(0, 2).toUpperCase()}</span>
-                      </div>
-                    )}
                     <div className="scanner-line-copy">
-                      <div className="scanner-product-name">{line.name}</div>
-                      <div className="scanner-price-badge">{formatCurrency(line.price)} c/u</div>
+                      <div className="scanner-product-name" title={line.name}>
+                        {line.name}
+                      </div>
                     </div>
                   </button>
                 </td>
                 <td className="scanner-col-end scanner-line-qty scanner-mobile-stat" data-label="Cant.">
                   {line.quantity}
                 </td>
-                <td className="scanner-col-end scanner-line-total scanner-mobile-stat" data-label="Total">
-                  {formatCurrency(line.subtotal)}
+                <td className="scanner-col-end scanner-line-price scanner-mobile-stat" data-label="Precio">
+                  <span className="scanner-price-truncate" title={formatCurrency(line.price)}>
+                    {formatCurrency(line.price)}
+                  </span>
                 </td>
                 <td className="scanner-col-end scanner-mobile-actions" data-label="Quitar">
                   <button
