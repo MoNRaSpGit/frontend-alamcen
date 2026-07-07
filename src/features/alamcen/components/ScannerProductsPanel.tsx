@@ -34,7 +34,6 @@ export function ScannerProductsPanel({
               <th className="scanner-col-center">Editar</th>
               <th className="scanner-col-end">Cant.</th>
               <th className="scanner-col-end">Total</th>
-              <th className="scanner-col-end">Precio</th>
               <th className="scanner-col-end" />
             </tr>
           </thead>
@@ -75,11 +74,6 @@ export function ScannerProductsPanel({
                 </td>
                 <td className="scanner-col-end scanner-line-total scanner-mobile-stat" data-label="Total">
                   {formatCurrency(line.subtotal)}
-                </td>
-                <td className="scanner-col-end scanner-line-price scanner-mobile-stat" data-label="Precio">
-                  <span className="scanner-price-truncate" title={formatCurrency(line.price)}>
-                    {formatCurrency(line.price)}
-                  </span>
                 </td>
                 <td className="scanner-col-end scanner-mobile-actions" data-label="Quitar">
                   <button

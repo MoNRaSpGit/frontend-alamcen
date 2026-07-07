@@ -460,14 +460,21 @@
 }
 
 .scanner-price-badge {
-  display: inline-block;
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  justify-content: flex-start;
   margin-top: 0.25rem;
-  padding: 0.16rem 0.5rem;
+  padding: 0.14rem 0.42rem;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #0f5132;
   background-color: rgba(25, 135, 84, 0.18);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .scanner-line-qty,
@@ -1459,6 +1466,11 @@
     text-align: right;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .scanner-price-badge {
+    padding: 0.12rem 0.4rem;
+    font-size: 0.75rem;
   }
 
   .scanner-mobile-remove {
