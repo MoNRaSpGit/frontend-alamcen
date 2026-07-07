@@ -1350,7 +1350,7 @@
 
   .scanner-mobile-card-top {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 56px 96px;
+    grid-template-columns: minmax(0, 1fr) 48px 92px;
     gap: 10px 12px;
     align-items: center;
   }
@@ -1368,7 +1368,7 @@
   .scanner-mobile-product-name {
     display: block;
     max-width: 100%;
-    font-size: 1rem;
+    font-size: 0.98rem;
     font-weight: 600;
     line-height: 1.25;
     white-space: nowrap;

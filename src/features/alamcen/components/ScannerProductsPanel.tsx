@@ -87,15 +87,12 @@ export function ScannerProductsPanel({
                 >
                   <span className="scanner-mobile-product-name">{line.name}</span>
                 </button>
-
-                <div className="scanner-mobile-columns">
-                  <span className="scanner-mobile-qty" title="Cantidad">
-                    {line.quantity}
-                  </span>
-                  <span className="scanner-mobile-price" title={formatCurrency(line.price)}>
-                    {formatCurrency(line.price)}
-                  </span>
-                </div>
+                <span className="scanner-mobile-qty" title="Cantidad">
+                  {line.quantity}
+                </span>
+                <span className="scanner-mobile-price" title={formatCurrency(line.price)}>
+                  {formatCurrency(line.price)}
+                </span>
               </div>
 
               <button
