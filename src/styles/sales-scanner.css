@@ -762,8 +762,11 @@
 
   .scanner-row-default {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 12px 14px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "product qty price"
+      "remove remove remove";
+    gap: 10px 12px;
     padding: 14px;
     border: 1px solid #e6eaee;
     border-radius: 16px;
@@ -778,7 +781,8 @@
   }
 
   .scanner-product-cell {
-    grid-column: 1 / -1;
+    grid-area: product;
+    min-width: 0;
   }
 
   .scanner-line-main {
@@ -797,10 +801,20 @@
     text-align: left;
   }
 
+  .scanner-line-qty {
+    grid-area: qty;
+  }
+
+  .scanner-line-price {
+    grid-area: price;
+  }
+
   .scanner-mobile-actions {
+    grid-area: remove;
     display: grid !important;
     gap: 6px;
     align-content: start;
+    justify-items: end;
   }
 
   .scanner-mobile-actions::before {
@@ -815,10 +829,6 @@
   .scanner-line-qty,
   .scanner-line-price {
     font-size: 1rem;
-  }
-
-  .scanner-mobile-actions {
-    justify-items: end;
   }
 
   .scanner-remove-btn {
