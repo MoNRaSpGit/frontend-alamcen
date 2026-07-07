@@ -61,6 +61,14 @@
     justify-content: flex-end;
   }
 
+  .workspace-topbar-actions > .workspace-tab:not(:first-child) {
+    display: none;
+  }
+
+  .workspace-user-dropdown {
+    min-width: 220px;
+  }
+
   .workspace-tenant-badge {
     max-width: 100%;
     order: -1;

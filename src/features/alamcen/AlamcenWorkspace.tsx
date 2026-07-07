@@ -21,6 +21,10 @@ type AlamcenWorkspaceProps = {
 };
 
 type WorkspaceTab = "scanner" | "panel" | "customers" | "products" | "stock";
+type WorkspaceNavItem = {
+  key: Exclude<WorkspaceTab, "scanner">;
+  label: string;
+};
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-UY", {
@@ -72,6 +76,12 @@ function MetricCard({
 }
 
 const SHOW_PANEL_EXTRAS = false;
+const MOBILE_MENU_ITEMS: WorkspaceNavItem[] = [
+  { key: "panel", label: "Panel de control" },
+  { key: "customers", label: "Clientes" },
+  { key: "stock", label: "Stock" },
+  { key: "products", label: "Productos" }
+];
 
 export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("scanner");
@@ -168,27 +178,6 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
           >
             Caja
           </button>
-          <button
-            type="button"
-            className={activeTab === "panel" ? "workspace-tab active" : "workspace-tab"}
-            onClick={() => setActiveTab("panel")}
-          >
-            Panel de control
-          </button>
-          <button
-            type="button"
-            className={activeTab === "customers" ? "workspace-tab active" : "workspace-tab"}
-            onClick={() => setActiveTab("customers")}
-          >
-            Clientes
-          </button>
-          <button
-            type="button"
-            className={activeTab === "stock" ? "workspace-tab active" : "workspace-tab"}
-            onClick={() => setActiveTab("stock")}
-          >
-            Stock
-          </button>
 
           <div className="workspace-user-menu" ref={userMenuRef}>
             <button
@@ -204,16 +193,19 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
 
             {isUserMenuOpen ? (
               <div className="workspace-user-dropdown">
-                <button
-                  type="button"
-                  className={activeTab === "products" ? "workspace-user-dropdown-item active" : "workspace-user-dropdown-item"}
-                  onClick={() => {
-                    setActiveTab("products");
-                    setIsUserMenuOpen(false);
-                  }}
-                >
-                  Productos
-                </button>
+                {MOBILE_MENU_ITEMS.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={activeTab === item.key ? "workspace-user-dropdown-item active" : "workspace-user-dropdown-item"}
+                    onClick={() => {
+                      setActiveTab(item.key);
+                      setIsUserMenuOpen(false);
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
                 <button
                   type="button"
                   className="workspace-user-dropdown-item"
