@@ -4,7 +4,6 @@ type UpdateHandler = () => void;
 
 let waitingWorker: ServiceWorker | null = null;
 let alreadyReloading = false;
-let updatePollId: number | null = null;
 
 // Keep the update flow resilient even when an older PWA install has stale state.
 function isLocalHostname(hostname: string) {
@@ -46,12 +45,6 @@ export function registerAppServiceWorker() {
         const registration = await navigator.serviceWorker.register(swUrl);
 
         void registration.update().catch(() => {});
-
-        if (updatePollId === null) {
-          updatePollId = window.setInterval(() => {
-            void registration.update().catch(() => {});
-          }, 2 * 60 * 1000);
-        }
 
         if (registration.waiting) {
           notifyUpdateReady(registration.waiting);
