@@ -46,7 +46,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: Al
   const [editPriceInput, setEditPriceInput] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [shouldRestoreBarcodeFocus, setShouldRestoreBarcodeFocus] = useState(false);
-  const [saleMessage, setSaleMessage] = useState("");
   const [isSubmittingSale, setIsSubmittingSale] = useState(false);
   const [isCheckoutConfirmOpen, setIsCheckoutConfirmOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<ScannerPaymentMethod>("efectivo");
@@ -234,7 +233,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: Al
     }
 
     setIsSubmittingSale(true);
-    setSaleMessage("");
 
     try {
       const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId);
@@ -258,11 +256,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: Al
       setSaleLines([]);
       setBarcodeInput("");
       setLookupError("");
-      setSaleMessage(
-        paymentMethod === "cuenta" && selectedCustomer
-          ? `Venta cargada a cuenta de ${selectedCustomer.name}. Guardando en segundo plano.`
-          : `Venta cobrada por ${paymentLabel}. Guardando en segundo plano.`
-      );
       setIsCheckoutConfirmOpen(false);
       setPaymentMethod("efectivo");
       setSelectedCustomerId("");
@@ -271,13 +264,19 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: Al
         onAccountSale(selectedCustomer.id, total, itemsLabel || "Venta en cuenta");
       }
       queueSaleForBackgroundSync(payload);
-      toast.success(paymentMethod === "cuenta" && selectedCustomer ? "Venta cargada a cuenta." : "Venta lista. Guardando en segundo plano.");
+      if (paymentMethod === "cuenta" && selectedCustomer) {
+        toast.success(`Venta cargada a cuenta de ${selectedCustomer.name}.`);
+      } else if (paymentMethod === "tarjeta") {
+        toast.success("Venta confirmada con tarjeta.");
+      } else {
+        toast.success("Venta confirmada en efectivo.");
+      }
       onSaleRecorded();
       focusBarcodeInput();
       return true;
     } catch (error) {
       console.error(error);
-      setSaleMessage(error instanceof Error ? error.message : "No pudimos registrar la venta.");
+      toast.error(error instanceof Error ? error.message : "No pudimos registrar la venta.");
       focusBarcodeInput();
       return false;
     } finally {
@@ -378,7 +377,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded }: Al
         <ScannerInputPanel
           barcodeInput={barcodeInput}
           lookupError={lookupError}
-          saleMessage={saleMessage}
           isCheckoutConfirmOpen={isCheckoutConfirmOpen}
           manualModalOpen={manualModalOpen}
           editModalOpen={editModalOpen}

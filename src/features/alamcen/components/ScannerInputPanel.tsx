@@ -3,7 +3,6 @@ import type { FormEvent, RefObject } from "react";
 type ScannerInputPanelProps = {
   barcodeInput: string;
   lookupError: string;
-  saleMessage: string;
   isCheckoutConfirmOpen: boolean;
   manualModalOpen: boolean;
   editModalOpen: boolean;
@@ -17,7 +16,6 @@ type ScannerInputPanelProps = {
 export function ScannerInputPanel({
   barcodeInput,
   lookupError,
-  saleMessage,
   isCheckoutConfirmOpen,
   manualModalOpen,
   editModalOpen,
@@ -47,7 +45,6 @@ export function ScannerInputPanel({
         />
       </form>
       {lookupError ? <p className="scanner-feedback scanner-feedback-error">{lookupError}</p> : null}
-      {saleMessage ? <p className="scanner-feedback scanner-feedback-ok">{saleMessage}</p> : null}
       <div className="scanner-manual-actions">
         <button type="button" className="scanner-manual-trigger" onClick={onOpenManual}>
           Producto Manual
