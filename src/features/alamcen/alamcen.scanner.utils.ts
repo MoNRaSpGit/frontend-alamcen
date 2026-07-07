@@ -2,6 +2,8 @@ import { SaleLine } from "./alamcen.scanner.types";
 
 type LookupProduct = {
   id: number;
+  barcode?: string | null;
+  barcodeNormalized?: string | null;
   nombre: string;
   precioVenta: number;
   imagen: string | null;
@@ -47,6 +49,7 @@ export function appendProductToSale(current: SaleLine[], product: LookupProduct)
   return [
     {
       productId: product.id,
+      barcode: product.barcodeNormalized || product.barcode || null,
       name: product.nombre,
       price: product.precioVenta,
       quantity: 1,
@@ -73,6 +76,7 @@ export function applyEditedProduct(current: SaleLine[], productId: number, paylo
 export function appendLocalManualProduct(current: SaleLine[], price: number) {
   return appendProductToSale(current, {
     id: Date.now() * -1,
+    barcode: null,
     nombre: "Producto Manual",
     precioVenta: price,
     imagen: null,

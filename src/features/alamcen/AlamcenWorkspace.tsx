@@ -11,7 +11,7 @@ import {
 } from "./alamcen.catalog.client";
 import { CUSTOMER_PREVIEW, DemoCustomer } from "./alamcen.customer-demo";
 import { BarcodeProductLookup } from "./alamcen.types";
-import { clearTrackedStock, loadTrackedStock, recordStockSale, TrackedStockItem } from "./alamcen.stock";
+import { clearTrackedStock, loadTrackedStock, recordStockSale, TrackedStockItem, updateTrackedStockItem } from "./alamcen.stock";
 import { StockTab } from "./StockTab";
 import { SaleLine } from "./alamcen.scanner.types";
 import { loadTodayPaymentMetrics } from "./alamcen.payment-metrics";
@@ -246,6 +246,7 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
         <StockTab
           items={stockItems}
           onRefresh={() => setStockItems(loadTrackedStock())}
+          onUpdateStock={(productId, quantity) => setStockItems(updateTrackedStockItem(productId, quantity))}
           onClearDemo={() => {
             clearTrackedStock();
             setStockItems([]);

@@ -7,6 +7,7 @@ export type StockIntensity = "normal" | "warning" | "critical";
 
 export type TrackedStockItem = {
   productId: number;
+  barcode: string | null;
   name: string;
   image: string | null;
   quantity: number;
@@ -33,6 +34,10 @@ function normalizeItems(items: TrackedStockItem[]) {
   });
 }
 
+function normalizeBarcode(value: string | null | undefined) {
+  return String(value || "").trim().replace(/\s+/g, "");
+}
+
 function readStock(): TrackedStockItem[] {
   if (!canUseStorage()) {
     return [];
@@ -55,12 +60,14 @@ function readStock(): TrackedStockItem[] {
       .filter((item): item is TrackedStockItem => {
         return Boolean(item)
           && typeof item.productId === "number"
+          && ("barcode" in item ? typeof item.barcode === "string" || item.barcode === null : true)
           && typeof item.name === "string"
           && typeof item.quantity === "number"
           && typeof item.initialQuantity === "number";
       })
       .map((item) => ({
         ...item,
+        barcode: typeof item.barcode === "string" ? item.barcode : null,
         image: typeof item.image === "string" ? item.image : null,
         lastSoldAt: typeof item.lastSoldAt === "string" ? item.lastSoldAt : null,
         lastUpdatedAt: typeof item.lastUpdatedAt === "string" ? item.lastUpdatedAt : new Date().toISOString()
@@ -90,6 +97,7 @@ function upsertSaleLine(items: TrackedStockItem[], line: SaleLine, nowIso: strin
     return [
       {
         productId: line.productId,
+        barcode: normalizeBarcode(line.barcode),
         name: line.name,
         image: line.image,
         quantity: Math.max(0, DEFAULT_INITIAL_STOCK - line.quantity),
@@ -108,6 +116,7 @@ function upsertSaleLine(items: TrackedStockItem[], line: SaleLine, nowIso: strin
 
     return {
       ...item,
+      barcode: item.barcode || normalizeBarcode(line.barcode),
       name: line.name,
       image: line.image ?? item.image,
       quantity: Math.max(0, item.quantity - line.quantity),
@@ -119,6 +128,39 @@ function upsertSaleLine(items: TrackedStockItem[], line: SaleLine, nowIso: strin
 
 export function loadTrackedStock() {
   return normalizeItems(readStock());
+}
+
+export function updateTrackedStockItem(productId: number, quantity: number) {
+  const nowIso = new Date().toISOString();
+  const normalizedQuantity = Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+  const currentItems = readStock();
+  const nextItems = currentItems.map((item) =>
+    item.productId === productId
+      ? {
+          ...item,
+          quantity: normalizedQuantity,
+          lastUpdatedAt: nowIso
+        }
+      : item
+  );
+
+  writeStock(nextItems);
+  return normalizeItems(nextItems);
+}
+
+export function findTrackedStockItem(items: TrackedStockItem[], query: string) {
+  const normalizedQuery = normalizeBarcode(query);
+  if (!normalizedQuery) {
+    return null;
+  }
+
+  const byBarcode = items.find((item) => normalizeBarcode(item.barcode) === normalizedQuery);
+  if (byBarcode) {
+    return byBarcode;
+  }
+
+  const loweredQuery = normalizedQuery.toLowerCase();
+  return items.find((item) => item.name.toLowerCase().includes(loweredQuery)) || null;
 }
 
 export function recordStockSale(lines: SaleLine[]) {

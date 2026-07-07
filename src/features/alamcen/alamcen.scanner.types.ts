@@ -1,5 +1,6 @@
 export type SaleLine = {
   productId: number;
+  barcode?: string | null;
   name: string;
   price: number;
   quantity: number;
