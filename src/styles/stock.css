@@ -186,6 +186,10 @@
   box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.18), 0 12px 24px rgba(27, 36, 21, 0.04);
 }
 
+.stock-card.stock-result {
+  border-style: dashed;
+}
+
 .stock-card-head {
   display: flex;
   align-items: flex-start;
