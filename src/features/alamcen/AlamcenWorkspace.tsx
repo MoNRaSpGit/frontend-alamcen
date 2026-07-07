@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Menu, UserRound } from "lucide-react";
+import { ArrowLeftRight, CreditCard, HandCoins, Menu, Trophy, UserRound, Wallet } from "lucide-react";
 import { logoutSession } from "../auth/auth.client";
 import { AlamcenHomePage } from "./AlamcenHomePage";
 import {
@@ -23,6 +23,47 @@ function formatCurrency(value: number) {
     currency: "UYU",
     maximumFractionDigits: 0
   }).format(value);
+}
+
+function formatDateTime(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return { date: "-", time: "" };
+  }
+
+  return {
+    date: date.toLocaleDateString("es-UY", { day: "2-digit", month: "2-digit" }),
+    time: date.toLocaleTimeString("es-UY", { hour: "2-digit", minute: "2-digit" })
+  };
+}
+
+function formatPercent(value: number) {
+  if (!Number.isFinite(value)) {
+    return "0%";
+  }
+
+  return `${value >= 0 ? "+" : ""}${value.toFixed(0)}%`;
+}
+
+function MetricCard({
+  title,
+  value,
+  hint,
+  highlight = false
+}: {
+  title: string;
+  value: string;
+  hint: string;
+  highlight?: boolean;
+}) {
+  return (
+    <article className={highlight ? "alamcen-panel-metric-card highlight" : "alamcen-panel-metric-card"}>
+      <p className="alamcen-panel-metric-title">{title}</p>
+      <p className="alamcen-panel-metric-value">{value}</p>
+      <p className="alamcen-panel-metric-hint">{hint}</p>
+    </article>
+  );
 }
 
 export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
@@ -137,6 +178,250 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
 }
 
 function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPaymentRecorded: () => void }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [dashboard, setDashboard] = useState<Awaited<ReturnType<typeof fetchDashboard>>["dashboard"] | null>(null);
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [expandedMovementId, setExpandedMovementId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchDashboard()
+      .then((payload) => {
+        setDashboard(payload.dashboard);
+        setError("");
+      })
+      .catch((nextError) => {
+        setError(nextError instanceof Error ? nextError.message : "No pudimos cargar el panel.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [refreshKey]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const parsedAmount = Number(amount.replace(",", "."));
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0 || !description.trim()) {
+      setError("Ingresa monto valido y descripcion.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await createPayment({
+        externalId: `alamcen-payment-${Date.now()}`,
+        amount: parsedAmount,
+        description: description.trim()
+      });
+      setAmount("");
+      setDescription("");
+      setError("");
+      onPaymentRecorded();
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "No pudimos registrar el pago.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return <section className="alamcen-panel-card">Cargando panel...</section>;
+  }
+
+  const comparisonVsYesterday =
+    dashboard && dashboard.comparison.yesterday > 0
+      ? ((dashboard.comparison.today - dashboard.comparison.yesterday) / dashboard.comparison.yesterday) * 100
+      : 0;
+  const visibleMovements = dashboard?.movements.slice(0, 8) ?? [];
+  const visibleRanking = dashboard?.ranking.slice(0, 8) ?? [];
+
+  return (
+    <section className="alamcen-panel-page">
+      <div className="alamcen-panel-hero">
+        <div>
+          <p className="alamcen-panel-hero-kicker">Caja diaria</p>
+          <h1>Panel de control</h1>
+          <p>Ventas, pagos y productos mas movidos del dia.</p>
+        </div>
+        <div className="alamcen-panel-status">
+          <span>Estado</span>
+          <strong>Abierta</strong>
+          <span>{new Date().toLocaleDateString("es-UY", { weekday: "long", day: "2-digit", month: "long" })}</span>
+        </div>
+      </div>
+
+      <article className="alamcen-panel-section">
+        <div className="alamcen-panel-section-header">
+          <div>
+            <h2>Caja diaria</h2>
+            <p>Resumen rapido para saber como viene la jornada.</p>
+          </div>
+          {error ? <span className="alamcen-panel-error">{error}</span> : null}
+        </div>
+        {dashboard ? (
+          <div className="alamcen-panel-metrics-grid">
+            <MetricCard title="Caja inicial" value={formatCurrency(dashboard.metrics.initialCash)} hint="Monto configurado para abrir el dia." />
+            <MetricCard title="Ventas del dia" value={formatCurrency(dashboard.metrics.salesToday)} hint="Total vendido desde la caja." highlight />
+            <MetricCard title="Pagos realizados" value={formatCurrency(dashboard.metrics.paymentsTotal)} hint="Egresos registrados manualmente." />
+            <MetricCard title="Monto actual" value={formatCurrency(dashboard.metrics.currentAmount)} hint="Caja inicial + ventas - pagos." />
+            <article className="alamcen-panel-metric-card comparison">
+              <p className="alamcen-panel-metric-title">Comparativa</p>
+              <div className="alamcen-panel-comparison-row">
+                <span>vs ayer</span>
+                <strong className={comparisonVsYesterday >= 0 ? "positive" : "negative"}>{formatPercent(comparisonVsYesterday)}</strong>
+              </div>
+              <div className="alamcen-panel-comparison-values">
+                <span>Hoy {formatCurrency(dashboard.comparison.today)}</span>
+                <span>Ayer {formatCurrency(dashboard.comparison.yesterday)}</span>
+              </div>
+            </article>
+            <MetricCard title="Record" value={formatCurrency(dashboard.comparison.record)} hint="Mejor caja diaria registrada." />
+          </div>
+        ) : null}
+      </article>
+
+      {dashboard ? (
+        <article className="alamcen-panel-section">
+          <div className="alamcen-panel-section-header">
+            <div>
+              <h2>Medios de cobro</h2>
+              <p>Base para ordenar la lectura de caja.</p>
+            </div>
+          </div>
+          <div className="alamcen-panel-metrics-grid compact">
+            <MetricCard title="Efectivo estimado" value={formatCurrency(dashboard.metrics.currentAmount)} hint="Disponible luego de pagos registrados." />
+            <MetricCard title="Ventas" value={formatCurrency(dashboard.metrics.salesToday)} hint="Ingresos por tickets confirmados." />
+            <MetricCard title="Pagos" value={formatCurrency(dashboard.metrics.paymentsTotal)} hint="Salidas cargadas desde el panel." />
+          </div>
+        </article>
+      ) : null}
+
+      <div className="alamcen-panel-layout-grid">
+        <div className="alamcen-panel-left-stack">
+          <article className="alamcen-panel-block accent-blue">
+            <div className="alamcen-panel-block-header">
+              <h3><ArrowLeftRight size={17} /> Movimientos</h3>
+              <p>Ultimas ventas y pagos registrados.</p>
+            </div>
+            <div className="alamcen-panel-block-body">
+              <div className="alamcen-panel-movements-list">
+                {visibleMovements.length ? visibleMovements.map((movement) => {
+                  const movementTime = formatDateTime(movement.createdAt);
+                  const isPayment = movement.detail.kind === "payment";
+                  const isExpanded = expandedMovementId === movement.id;
+                  return (
+                    <div key={movement.id}>
+                      <div className={isPayment ? "alamcen-panel-movement-row payment" : "alamcen-panel-movement-row sale"}>
+                        <div>
+                          <p>{movement.type}</p>
+                          <span>{movementTime.date} {movementTime.time}</span>
+                        </div>
+                        <div className="alamcen-panel-movement-actions">
+                          <strong className={isPayment ? "negative" : "positive"}>
+                            {isPayment ? "-" : "+"}{formatCurrency(movement.amount)}
+                          </strong>
+                          <button type="button" onClick={() => setExpandedMovementId(isExpanded ? null : movement.id)}>
+                            {isExpanded ? "Ocultar" : "Detalle"}
+                          </button>
+                        </div>
+                      </div>
+                      {isExpanded ? (
+                        <div className="alamcen-panel-movement-detail">
+                          {movement.detail.kind === "sale" ? (
+                            movement.detail.items?.length ? (
+                              <ul>
+                                {movement.detail.items.map((item) => (
+                                  <li key={`${movement.id}-${item.name}`}>
+                                    <span>{item.name} x{item.quantity}</span>
+                                    <strong>{formatCurrency(item.lineTotal)}</strong>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : <span>Venta sin detalle de productos.</span>
+                          ) : (
+                            <span>{movement.detail.description || "Pago registrado"}</span>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                }) : (
+                  <div className="alamcen-panel-empty">
+                    <strong>Sin movimientos todavia.</strong>
+                    <span>Cuando confirmes ventas o pagos van a aparecer aca.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div className="alamcen-panel-right-stack">
+          <article className="alamcen-panel-block accent-violet">
+            <div className="alamcen-panel-block-header">
+              <h3><Trophy size={17} /> Ranking</h3>
+              <p>Productos que mas se movieron.</p>
+            </div>
+            <div className="alamcen-panel-block-body">
+              {visibleRanking.length ? (
+                <ol className="alamcen-panel-ranking-list">
+                  {visibleRanking.map((item, index) => (
+                    <li key={item.key}>
+                      <div>
+                        <span className="alamcen-panel-ranking-position">#{index + 1}</span>
+                        {item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" /> : <span className="alamcen-panel-ranking-thumb">IMG</span>}
+                        <span>{item.name}</span>
+                      </div>
+                      <strong>{item.qty}</strong>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <div className="alamcen-panel-empty">
+                  <strong>Todavia no hay ranking.</strong>
+                  <span>Se completa con las ventas del dia.</span>
+                </div>
+              )}
+            </div>
+          </article>
+
+          <article className="alamcen-panel-block accent-orange">
+            <div className="alamcen-panel-block-header">
+              <h3><HandCoins size={17} /> Registrar pago</h3>
+              <p>Carga egresos de caja sin salir del panel.</p>
+            </div>
+            <div className="alamcen-panel-block-body">
+              <form className="alamcen-panel-payment-form" onSubmit={handleSubmit}>
+                <input type="text" inputMode="decimal" placeholder="Monto" value={amount} onChange={(event) => setAmount(event.target.value)} />
+                <input type="text" placeholder="Descripcion" value={description} onChange={(event) => setDescription(event.target.value)} />
+                <button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar pago"}</button>
+              </form>
+            </div>
+          </article>
+
+          <article className="alamcen-panel-block accent-green">
+            <div className="alamcen-panel-block-header">
+              <h3><Wallet size={17} /> Caja</h3>
+              <p>Vista rapida del saldo disponible.</p>
+            </div>
+            <div className="alamcen-panel-live-banner">
+              <div>
+                <span>Monto actual</span>
+                <strong>{dashboard ? formatCurrency(dashboard.metrics.currentAmount) : formatCurrency(0)}</strong>
+              </div>
+              <CreditCard size={24} />
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function LegacyPanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPaymentRecorded: () => void }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dashboard, setDashboard] = useState<Awaited<ReturnType<typeof fetchDashboard>>["dashboard"] | null>(null);
