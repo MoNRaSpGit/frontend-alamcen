@@ -211,7 +211,7 @@
   border-style: dashed;
 }
 
-.stock-result-mobile {
+.stock-card-mobile {
   display: none;
 }
 
@@ -330,19 +330,19 @@
     grid-template-columns: 1fr;
   }
 
-  .stock-result.stock-card .stock-card-head,
-  .stock-result.stock-card .stock-card-body {
+  .stock-card .stock-card-head,
+  .stock-card .stock-card-body {
     display: none;
   }
 
-  .stock-result-mobile {
+  .stock-card-mobile {
     display: grid;
     grid-template-columns: 84px minmax(0, 1fr);
     gap: 12px;
     align-items: center;
   }
 
-  .stock-result-mobile-media {
+  .stock-card-mobile-media {
     width: 84px;
     height: 84px;
     border-radius: 16px;
@@ -351,14 +351,14 @@
     border: 1px solid #dce3d4;
   }
 
-  .stock-result-mobile-image {
+  .stock-card-mobile-image {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .stock-result-mobile-placeholder {
+  .stock-card-mobile-placeholder {
     width: 100%;
     height: 100%;
     display: grid;
@@ -368,28 +368,28 @@
     color: #4a5640;
   }
 
-  .stock-result-mobile-copy {
+  .stock-card-mobile-copy {
     display: grid;
     gap: 4px;
     min-width: 0;
   }
 
-  .stock-result-mobile-name {
+  .stock-card-mobile-name {
     margin: 0;
     color: #1f271a;
     font-size: 1rem;
     font-weight: 900;
   }
 
-  .stock-result-mobile-price,
-  .stock-result-mobile-qty {
+  .stock-card-mobile-price,
+  .stock-card-mobile-qty {
     margin: 0;
     color: #5a644d;
     font-size: 0.94rem;
     font-weight: 800;
   }
 
-  .stock-result .stock-edit-button {
+  .stock-card .stock-edit-button {
     display: none;
   }
 }

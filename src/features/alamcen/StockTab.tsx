@@ -21,6 +21,25 @@ type StockTarget = {
   quantity: number;
 };
 
+function StockCompactView({ item }: { item: StockTarget }) {
+  return (
+    <div className="stock-card-mobile">
+      <div className="stock-card-mobile-media">
+        {item.image ? (
+          <img src={item.image} alt={item.name} className="stock-card-mobile-image" />
+        ) : (
+          <div className="stock-card-mobile-placeholder">{item.name.slice(0, 2).toUpperCase()}</div>
+        )}
+      </div>
+      <div className="stock-card-mobile-copy">
+        <p className="stock-card-mobile-name">{item.name}</p>
+        <p className="stock-card-mobile-price">Precio {formatPrice(item.price)}</p>
+        <p className="stock-card-mobile-qty">Cantidad {item.quantity}</p>
+      </div>
+    </div>
+  );
+}
+
 function formatPrice(value: number | null) {
   if (!Number.isFinite(value ?? NaN)) {
     return "Precio no cargado";
@@ -252,6 +271,7 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
         <div className="stock-grid">
           {lowStockItems.map((item) => {
             const intensity = getStockIntensity(item.quantity);
+            const target = toTargetFromTracked(item);
             return (
               <article key={item.productId} className={`stock-card ${intensity}`}>
                 <div className="stock-card-head">
@@ -273,6 +293,8 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
                   <div className="stock-quantity">{item.quantity}</div>
                   <p className="stock-card-note">Stock actual {item.quantity}</p>
                 </div>
+
+                <StockCompactView item={target} />
               </article>
             );
           })}
@@ -301,20 +323,7 @@ export function StockTab({ items, loading = false, onRefresh, onClearDemo, onUpd
             <p className="stock-card-note">Stock actual {selectedTarget.quantity}</p>
           </div>
 
-          <div className="stock-result-mobile">
-            <div className="stock-result-mobile-media">
-              {selectedTarget.image ? (
-                <img src={selectedTarget.image} alt={selectedTarget.name} className="stock-result-mobile-image" />
-              ) : (
-                <div className="stock-result-mobile-placeholder">{selectedTarget.name.slice(0, 2).toUpperCase()}</div>
-              )}
-            </div>
-            <div className="stock-result-mobile-copy">
-              <p className="stock-result-mobile-name">{selectedTarget.name}</p>
-              <p className="stock-result-mobile-price">Precio {formatPrice(selectedTarget.price)}</p>
-              <p className="stock-result-mobile-qty">Cantidad {selectedTarget.quantity}</p>
-            </div>
-          </div>
+          <StockCompactView item={selectedTarget} />
         </article>
       ) : null}
 
