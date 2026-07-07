@@ -6,7 +6,6 @@ type ScannerProductsPanelProps = {
   total: number;
   isSubmittingSale: boolean;
   onIncreaseLine: (productId: number) => void;
-  onOpenEdit: (line: SaleLine) => void;
   onRemoveLine: (productId: number) => void;
   onOpenCheckout: () => void;
 };
@@ -16,7 +15,6 @@ export function ScannerProductsPanel({
   total,
   isSubmittingSale,
   onIncreaseLine,
-  onOpenEdit,
   onRemoveLine,
   onOpenCheckout
 }: ScannerProductsPanelProps) {
@@ -31,7 +29,6 @@ export function ScannerProductsPanel({
           <thead>
             <tr>
               <th>Producto</th>
-              <th className="scanner-col-center">Editar</th>
               <th className="scanner-col-end">Cant.</th>
               <th className="scanner-col-end">Total</th>
               <th className="scanner-col-end" />
@@ -66,11 +63,6 @@ export function ScannerProductsPanel({
                       <div className="scanner-product-name">{line.name}</div>
                       <div className="scanner-price-badge">{formatCurrency(line.price)} c/u</div>
                     </div>
-                  </button>
-                </td>
-                <td className="scanner-col-center scanner-mobile-stat" data-label="Editar">
-                  <button type="button" className="scanner-edit-btn" onClick={() => onOpenEdit(line)}>
-                    Editar
                   </button>
                 </td>
                 <td className="scanner-col-end scanner-line-qty scanner-mobile-stat" data-label="Cant.">

@@ -461,22 +461,6 @@
   background-color: rgba(25, 135, 84, 0.18);
 }
 
-.scanner-edit-btn {
-  border: 1px solid #ced4da;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #33402d;
-  padding: 8px 16px;
-  min-width: 96px;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-.scanner-edit-btn:hover,
-.scanner-edit-btn:focus-visible {
-  background: #f8f9fa;
-}
-
 .scanner-line-qty {
   font-weight: 700;
   white-space: nowrap;
@@ -842,19 +826,16 @@
     line-height: 1.25;
   }
 
-  .scanner-col-center,
   .scanner-col-end {
     text-align: left;
   }
 
-  .scanner-mobile-stat,
   .scanner-mobile-actions {
     display: grid !important;
     gap: 6px;
     align-content: start;
   }
 
-  .scanner-mobile-stat::before,
   .scanner-mobile-actions::before {
     content: attr(data-label);
     font-size: 0.72rem;
@@ -867,12 +848,6 @@
   .scanner-line-qty,
   .scanner-line-total {
     font-size: 1rem;
-  }
-
-  .scanner-edit-btn {
-    min-width: 88px;
-    min-height: 40px;
-    padding: 8px 14px;
   }
 
   .scanner-mobile-actions {
