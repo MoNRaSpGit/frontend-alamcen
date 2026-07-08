@@ -144,7 +144,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
     }
 
     requestAnimationFrame(() => {
-      if (manualNameInputRef.current) {
+      if (manualModalMode !== "manual-button" && manualNameInputRef.current) {
         manualNameInputRef.current.focus();
         manualNameInputRef.current.select();
       } else {
@@ -329,7 +329,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
 
     try {
       if (manualModalMode === "manual-button") {
-        setSaleLines((current) => appendLocalManualProduct(current, parsedPrice, manualNameInput));
+        setSaleLines((current) => appendLocalManualProduct(current, parsedPrice));
       } else {
         const product = await createManualProduct(manualBarcode, parsedPrice, manualNameInput.trim() || undefined);
         setSaleLines((current) => appendProductToSale(current, product));
@@ -452,8 +452,13 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       <ScannerProductModal
         isOpen={manualModalOpen}
         title={manualModalMode === "barcode-miss" ? "Producto no encontrado" : "Producto manual"}
-        helperText={manualModalMode === "barcode-miss" ? `Codigo leido: ${manualBarcode}` : "Nombre opcional. Si lo dejas vacio se guardara como S/N."}
+        helperText={
+          manualModalMode === "barcode-miss"
+            ? `Codigo leido: ${manualBarcode}`
+            : "Solo precio. Se agrega como producto manual."
+        }
         submitLabel="Agregar"
+        showNameInput={manualModalMode === "barcode-miss"}
         nameInput={manualNameInput}
         priceInput={manualPriceInput}
         nameInputRef={manualNameInputRef}
