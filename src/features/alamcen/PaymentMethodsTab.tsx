@@ -48,7 +48,7 @@ export function PaymentMethodsTab() {
       <header className="alamcen-payment-methods-hero">
         <p className="alamcen-payment-methods-kicker">Almacen</p>
         <h1>Metodos de pago</h1>
-        <p>Tabla de referencia para mostrar planes y equipamiento al cliente.</p>
+        <p>Resumen general de planes y complementos para presentar al cliente.</p>
       </header>
 
       <article className="alamcen-payment-methods-card">
