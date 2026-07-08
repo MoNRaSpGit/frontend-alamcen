@@ -80,7 +80,7 @@ describe("alamcen.scanner.utils", () => {
 
     expect(result[0]).toMatchObject({
       productId: -1234,
-      name: "Producto Manual",
+      name: "Producto manual",
       price: 99,
       quantity: 1,
       subtotal: 99,

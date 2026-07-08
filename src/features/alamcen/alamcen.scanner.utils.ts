@@ -73,11 +73,11 @@ export function applyEditedProduct(current: SaleLine[], productId: number, paylo
   );
 }
 
-export function appendLocalManualProduct(current: SaleLine[], price: number, name = "S/N") {
+export function appendLocalManualProduct(current: SaleLine[], price: number, name = "Producto manual") {
   return appendProductToSale(current, {
     id: Date.now() * -1,
     barcode: null,
-    nombre: name.trim() || "S/N",
+    nombre: name.trim() || "Producto manual",
     precioVenta: price,
     imagen: null,
     tieneImagen: false
