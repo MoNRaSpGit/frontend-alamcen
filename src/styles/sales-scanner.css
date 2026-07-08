@@ -590,18 +590,22 @@
   width: 100%;
   min-height: 68px;
   padding: 0.95rem 2.2rem;
-  border: 1px solid #111;
+  border: 1px solid #1f2a1f;
   border-radius: 14px;
-  background-color: #111;
+  background: linear-gradient(180deg, #1f2a1f 0%, #111111 100%);
   color: #fff;
   font-size: 1.08rem;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.16);
 }
 
 .scanner-charge-btn:hover,
 .scanner-charge-btn:focus-visible {
-  background-color: #000;
-  border-color: #000;
+  background: linear-gradient(180deg, #2b382b 0%, #161616 100%);
+  border-color: #111111;
+  box-shadow: 0 12px 26px rgba(17, 17, 17, 0.2);
+  transform: translateY(-1px);
 }
 
 .scanner-modal-overlay {
