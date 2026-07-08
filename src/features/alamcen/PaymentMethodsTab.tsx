@@ -17,16 +17,9 @@ const PAYMENT_PLANS: PaymentPlanRow[] = [
   {
     plan: "M2",
     includes: "Todo lo de M1 + Modulo de impresion",
-    softwarePrice: "$350",
+    softwarePrice: "$425",
     equipment: "+ Impresora",
-    totalWithEquipment: "$500"
-  },
-  {
-    plan: "M3",
-    includes: "Todo lo de M2 + Carga inicial de datos",
-    softwarePrice: "$350",
-    equipment: "+ Impresora + Carga de datos",
-    totalWithEquipment: "$550"
+    totalWithEquipment: "$725"
   }
 ];
 
