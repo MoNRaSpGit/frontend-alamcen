@@ -35,7 +35,7 @@ export function ScannerInputPanel({
           type="text"
           inputMode="numeric"
           value={barcodeInput}
-          placeholder="Escanear aqui"
+          placeholder="Escanear o escribir codigo"
           onBlur={() => {
             if (!manualModalOpen && !editModalOpen && !isCheckoutConfirmOpen) {
               onBlurBarcode();
@@ -43,6 +43,9 @@ export function ScannerInputPanel({
           }}
           onChange={(event) => onChangeBarcode(event.target.value)}
         />
+        <button type="submit" className="scanner-search-trigger">
+          Buscar
+        </button>
       </form>
       {lookupError ? <p className="scanner-feedback scanner-feedback-error">{lookupError}</p> : null}
       <div className="scanner-manual-actions">
