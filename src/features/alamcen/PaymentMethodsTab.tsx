@@ -71,7 +71,6 @@ function ToggleCard({
 export function PaymentMethodsTab() {
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
-  const [includeEquipment, setIncludeEquipment] = useState(false);
 
   const printingEnabled = selectedModules.includes("printing");
 
@@ -82,14 +81,6 @@ export function PaymentMethodsTab() {
 
     setSelectedEquipment((current) => current.filter((id) => id !== "printer"));
   }, [printingEnabled]);
-
-  useEffect(() => {
-    if (includeEquipment) {
-      return;
-    }
-
-    setSelectedEquipment([]);
-  }, [includeEquipment]);
 
   const total = useMemo(() => {
     const moduleTotal = MODULE_OPTIONS.filter((option) => selectedModules.includes(option.id)).reduce(
@@ -122,10 +113,6 @@ export function PaymentMethodsTab() {
   }
 
   function togglePrinter() {
-    if (!includeEquipment) {
-      setIncludeEquipment(true);
-    }
-
     if (!printingEnabled) {
       setSelectedModules((current) => [...current, "printing"]);
     }
@@ -156,30 +143,19 @@ export function PaymentMethodsTab() {
             <div>
               <h2>Agregar equipamiento</h2>
             </div>
-            <button
-              type="button"
-              className={`pricing-pill ${includeEquipment ? "selected" : ""}`}
-              onClick={() => setIncludeEquipment((current) => !current)}
-            >
-              {includeEquipment ? "Si" : "No"}
-            </button>
           </div>
 
-          {includeEquipment ? (
-            <div className="pricing-grid">
-              {EQUIPMENT_OPTIONS.map((option) => (
-                <ToggleCard
-                  key={option.id}
-                  option={option}
-                  selected={isSelected(selectedEquipment, option.id)}
-                  disabled={option.requires === "printing" && !printingEnabled}
-                  onClick={option.id === "printer" ? togglePrinter : () => toggleSelection(selectedEquipment, setSelectedEquipment, option.id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="pricing-muted-copy">Sin equipamiento.</p>
-          )}
+          <div className="pricing-grid">
+            {EQUIPMENT_OPTIONS.map((option) => (
+              <ToggleCard
+                key={option.id}
+                option={option}
+                selected={isSelected(selectedEquipment, option.id)}
+                disabled={option.requires === "printing" && !printingEnabled}
+                onClick={option.id === "printer" ? togglePrinter : () => toggleSelection(selectedEquipment, setSelectedEquipment, option.id)}
+              />
+            ))}
+          </div>
         </div>
 
         <div className="pricing-inline-section">
