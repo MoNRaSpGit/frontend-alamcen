@@ -668,6 +668,24 @@
   transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
 }
 
+.scanner-payment-method-btn-cash {
+  border-color: #cfd7cf;
+  background: #f7faf7;
+  color: #1f2937;
+}
+
+.scanner-payment-method-btn-card {
+  border-color: #b7d2f0;
+  background: #edf6ff;
+  color: #1d4ed8;
+}
+
+.scanner-payment-method-btn-account {
+  border-color: #f0d39a;
+  background: #fff7e8;
+  color: #9a5b00;
+}
+
 .scanner-payment-method-btn input {
   position: absolute;
   opacity: 0;
@@ -675,10 +693,26 @@
 }
 
 .scanner-payment-method-btn-active {
-  border-color: #111827;
-  background: #111827;
-  color: #fff;
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.14);
+  transform: translateY(-1px);
+}
+
+.scanner-payment-method-btn-active.scanner-payment-method-btn-cash {
+  border-color: #475569;
+  background: #e5efe3;
+  color: #0f172a;
+}
+
+.scanner-payment-method-btn-active.scanner-payment-method-btn-card {
+  border-color: #2563eb;
+  background: #dbeafe;
+  color: #0f172a;
+}
+
+.scanner-payment-method-btn-active.scanner-payment-method-btn-account {
+  border-color: #d97706;
+  background: #fdecc8;
+  color: #111827;
 }
 
 .scanner-account-customer-box {

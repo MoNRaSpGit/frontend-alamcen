@@ -40,6 +40,19 @@ export function ScannerCheckoutConfirmModal({
     { value: "cuenta", label: "Cuenta" }
   ];
 
+  function getPaymentButtonClass(value: ScannerPaymentMethod) {
+    const baseClass = "scanner-payment-method-btn";
+    const variantClass =
+      value === "tarjeta"
+        ? "scanner-payment-method-btn-card"
+        : value === "cuenta"
+          ? "scanner-payment-method-btn-account"
+          : "scanner-payment-method-btn-cash";
+    const activeClass = paymentMethod === value ? "scanner-payment-method-btn-active" : "";
+
+    return [baseClass, variantClass, activeClass].filter(Boolean).join(" ");
+  }
+
   return (
     <div className="scanner-modal-overlay" onClick={onClose}>
       <section
@@ -69,11 +82,7 @@ export function ScannerCheckoutConfirmModal({
             {paymentOptions.map((option) => (
               <label
                 key={option.value}
-                className={
-                  paymentMethod === option.value
-                    ? "scanner-payment-method-btn scanner-payment-method-btn-active"
-                    : "scanner-payment-method-btn"
-                }
+                className={getPaymentButtonClass(option.value)}
               >
                 <input
                   type="radio"
