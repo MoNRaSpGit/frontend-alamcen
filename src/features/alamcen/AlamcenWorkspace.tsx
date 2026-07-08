@@ -2,6 +2,7 @@ import { Dispatch, FormEvent, SetStateAction, useEffect, useMemo, useRef, useSta
 import { ArrowLeftRight, CreditCard, HandCoins, Menu, Trophy, UserRound, Wallet } from "lucide-react";
 import { logoutSession } from "../auth/auth.client";
 import { AlamcenHomePage } from "./AlamcenHomePage";
+import { PaymentMethodsTab } from "./PaymentMethodsTab";
 import {
   createPayment,
   fetchAlamcenStatus,
@@ -20,7 +21,7 @@ type AlamcenWorkspaceProps = {
   onLoggedOut: () => void;
 };
 
-type WorkspaceTab = "scanner" | "panel" | "customers" | "products" | "stock";
+type WorkspaceTab = "scanner" | "panel" | "customers" | "products" | "stock" | "payment-methods";
 type WorkspaceNavItem = {
   key: Exclude<WorkspaceTab, "scanner">;
   label: string;
@@ -79,6 +80,7 @@ const SHOW_PANEL_EXTRAS = false;
 const MOBILE_MENU_ITEMS: WorkspaceNavItem[] = [
   { key: "panel", label: "Panel de control" },
   { key: "customers", label: "Clientes" },
+  { key: "payment-methods", label: "Metodo de pago" },
   { key: "stock", label: "Stock" },
   { key: "products", label: "Productos" }
 ];
@@ -179,6 +181,14 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
             Caja
           </button>
 
+          <button
+            type="button"
+            className={activeTab === "payment-methods" ? "workspace-tab active" : "workspace-tab"}
+            onClick={() => setActiveTab("payment-methods")}
+          >
+            Metodo de pago
+          </button>
+
           <div className="workspace-user-menu" ref={userMenuRef}>
             <button
               type="button"
@@ -233,6 +243,7 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
       </div>
       {activeTab === "panel" ? <PanelTab refreshKey={panelRefreshKey} onPaymentRecorded={() => setPanelRefreshKey((current) => current + 1)} /> : null}
       {activeTab === "customers" ? <CustomersTab customers={customers} onChangeCustomers={setCustomers} /> : null}
+      {activeTab === "payment-methods" ? <PaymentMethodsTab /> : null}
       {activeTab === "products" ? <ProductsTab /> : null}
       {activeTab === "stock" ? (
         <StockTab
