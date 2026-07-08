@@ -6,7 +6,6 @@ import {
   flushPendingSalesQueue,
   primeProductLookupCache,
   queueSaleForBackgroundSync,
-  updateProduct,
   warmAlamcenScanner
 } from "./alamcen.catalog.client";
 import { ManualModalMode, SaleLine } from "./alamcen.scanner.types";
@@ -350,32 +349,13 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       return;
     }
 
-    try {
-      if (editingLineId > 0) {
-        const product = await updateProduct(editingLineId, {
-          nombre: normalizedName,
-          precioVenta: parsedPrice
-        });
-
-        setSaleLines((current) =>
-          applyEditedProduct(current, editingLineId, {
-            nombre: product.nombre,
-            precioVenta: product.precioVenta
-          })
-        );
-      } else {
-        setSaleLines((current) =>
-          applyEditedProduct(current, editingLineId, {
-            nombre: normalizedName,
-            precioVenta: parsedPrice
-          })
-        );
-      }
-
-      closeEditModal();
-    } catch (error) {
-      console.error(error);
-    }
+    setSaleLines((current) =>
+      applyEditedProduct(current, editingLineId, {
+        nombre: normalizedName,
+        precioVenta: parsedPrice
+      })
+    );
+    closeEditModal();
   }
 
   return (
