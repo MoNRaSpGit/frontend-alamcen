@@ -6,7 +6,8 @@ import {
   flushPendingSalesQueue,
   primeProductLookupCache,
   queueSaleForBackgroundSync,
-  warmAlamcenScanner
+  warmAlamcenScanner,
+  updateProduct
 } from "./alamcen.catalog.client";
 import { ManualModalMode, SaleLine } from "./alamcen.scanner.types";
 import {
@@ -360,13 +361,23 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       return;
     }
 
-    setSaleLines((current) =>
-      applyEditedProduct(current, editingLineId, {
+    try {
+      const updatedProduct = await updateProduct(editingLineId, {
         nombre: normalizedName,
         precioVenta: parsedPrice
-      })
-    );
-    closeEditModal();
+      });
+
+      setSaleLines((current) =>
+        applyEditedProduct(current, editingLineId, {
+          nombre: updatedProduct.nombre,
+          precioVenta: updatedProduct.precioVenta
+        })
+      );
+      closeEditModal();
+    } catch (error) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : "No pudimos guardar el cambio.");
+    }
   }
 
   return (
