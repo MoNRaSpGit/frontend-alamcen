@@ -15,7 +15,6 @@ import { BarcodeProductLookup } from "./alamcen.types";
 import { clearTrackedStock, loadTrackedStock, recordStockSale, TrackedStockItem, updateTrackedStockItem, StockUpdateInput } from "./alamcen.stock";
 import { StockTab } from "./StockTab";
 import { SaleLine } from "./alamcen.scanner.types";
-import { loadTodayPaymentMetrics } from "./alamcen.payment-metrics";
 
 type AlamcenWorkspaceProps = {
   onLoggedOut: () => void;
@@ -77,6 +76,7 @@ function MetricCard({
 }
 
 const SHOW_PANEL_EXTRAS = false;
+const ESTIMATED_PROFIT_RATE = 0.3;
 const WORKSPACE_MENU_ITEMS: WorkspaceNavItem[] = [
   { key: "panel", label: "Panel de control" },
   { key: "customers", label: "Clientes" },
@@ -254,7 +254,6 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dashboard, setDashboard] = useState<Awaited<ReturnType<typeof fetchDashboard>>["dashboard"] | null>(null);
-  const [paymentMetrics, setPaymentMetrics] = useState({ tarjeta: 0, cuenta: 0 });
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -274,10 +273,6 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
       .finally(() => {
         setLoading(false);
       });
-  }, [refreshKey]);
-
-  useEffect(() => {
-    setPaymentMetrics(loadTodayPaymentMetrics());
   }, [refreshKey]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -314,6 +309,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
     dashboard && dashboard.comparison.yesterday > 0
       ? ((dashboard.comparison.today - dashboard.comparison.yesterday) / dashboard.comparison.yesterday) * 100
       : 0;
+  const estimatedProfit = dashboard ? dashboard.metrics.salesToday * ESTIMATED_PROFIT_RATE : 0;
   const allMovements = dashboard?.movements ?? [];
   const visibleMovements = allMovements.slice(0, movementLimit);
   const visibleRanking = dashboard?.ranking.slice(0, 8) ?? [];
@@ -363,7 +359,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
           <div className="alamcen-panel-summary-columns">
             <div className="alamcen-panel-summary-column">
               <MetricCard title="Ventas del dia" value={formatCurrency(dashboard.metrics.salesToday)} hint="Total vendido desde la caja." highlight />
-              <MetricCard title="Ventas con tarjeta" value={formatCurrency(paymentMetrics.tarjeta)} hint="Cobros confirmados con tarjeta." />
+              <MetricCard title="Pagos" value={formatCurrency(dashboard.metrics.paymentsTotal)} hint="Egresos cargados en el panel." />
             </div>
             <div className="alamcen-panel-summary-column">
               <article className="alamcen-panel-metric-card comparison">
@@ -377,7 +373,11 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
                   <span>Ayer {formatCurrency(dashboard.comparison.yesterday)}</span>
                 </div>
               </article>
-              <MetricCard title="Ventas a credito" value={formatCurrency(paymentMetrics.cuenta)} hint="Ventas cargadas a cuenta." />
+              <MetricCard
+                title="Ganancia estimada"
+                value={formatCurrency(estimatedProfit)}
+                hint={`Calculada al ${Math.round(ESTIMATED_PROFIT_RATE * 100)}% de la venta del dia.`}
+              />
             </div>
           </div>
         ) : null}
