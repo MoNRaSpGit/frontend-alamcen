@@ -181,14 +181,6 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
             Caja
           </button>
 
-          <button
-            type="button"
-            className={activeTab === "payment-methods" ? "workspace-tab active" : "workspace-tab"}
-            onClick={() => setActiveTab("payment-methods")}
-          >
-            Metodo de pago
-          </button>
-
           <div className="workspace-user-menu" ref={userMenuRef}>
             <button
               type="button"
