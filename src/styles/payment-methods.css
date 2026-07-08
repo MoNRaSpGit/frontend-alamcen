@@ -149,6 +149,44 @@
   gap: 12px;
 }
 
+.pricing-builder-card {
+  display: grid;
+  gap: 18px;
+}
+
+.pricing-inline-section {
+  display: grid;
+  gap: 12px;
+}
+
+.pricing-inline-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pricing-pill {
+  min-width: 72px;
+  border: 1px solid #d6dde7;
+  border-radius: 999px;
+  background: #fff;
+  padding: 10px 16px;
+  font-weight: 800;
+  color: #102033;
+}
+
+.pricing-pill.selected {
+  border-color: #166534;
+  background: #f5fbf7;
+  color: #166534;
+}
+
+.pricing-muted-copy {
+  margin: 0;
+  color: #64748b;
+}
+
 .payment-toggle-card {
   min-height: 118px;
   border: 1px solid #e2e8f0;
@@ -185,6 +223,7 @@
 .pricing-summary-card {
   display: grid;
   gap: 12px;
+  padding-top: 4px;
 }
 
 .pricing-summary-head {
@@ -249,6 +288,10 @@
   }
 
   .pricing-summary-head {
+    flex-direction: column;
+  }
+
+  .pricing-inline-head {
     flex-direction: column;
   }
 

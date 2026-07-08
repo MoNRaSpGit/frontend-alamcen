@@ -86,6 +86,7 @@ export function PaymentMethodsTab() {
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  const [includeEquipment, setIncludeEquipment] = useState(false);
 
   const printingEnabled = selectedModules.includes("printing");
 
@@ -96,6 +97,14 @@ export function PaymentMethodsTab() {
 
     setSelectedEquipment((current) => current.filter((id) => id !== "printer"));
   }, [printingEnabled]);
+
+  useEffect(() => {
+    if (includeEquipment) {
+      return;
+    }
+
+    setSelectedEquipment([]);
+  }, [includeEquipment]);
 
   const total = useMemo(() => {
     const moduleTotal = MODULE_OPTIONS.filter((option) => selectedModules.includes(option.id)).reduce(
@@ -138,6 +147,10 @@ export function PaymentMethodsTab() {
   }
 
   function togglePrinter() {
+    if (!includeEquipment) {
+      setIncludeEquipment(true);
+    }
+
     if (!printingEnabled) {
       setSelectedModules((current) => [...current, "printing"]);
     }
@@ -155,7 +168,7 @@ export function PaymentMethodsTab() {
         <p>Primeros 2 meses. Empezas con el plan base y vas sumando modulos o equipo segun lo que el cliente quiera.</p>
       </header>
 
-      <article className="alamcen-payment-methods-card pricing-base-card">
+      <article className="alamcen-payment-methods-card pricing-builder-card">
         <div className="alamcen-payment-methods-card-head">
           <div>
             <p className="alamcen-payment-methods-kicker">Base fija</p>
@@ -168,94 +181,105 @@ export function PaymentMethodsTab() {
           <span>{BASE_PLAN.includes}</span>
           <small>Este plan queda activo por defecto y no se desmarca.</small>
         </div>
-      </article>
 
-      <article className="alamcen-payment-methods-card">
-        <div className="alamcen-payment-methods-card-head">
-          <div>
-            <p className="alamcen-payment-methods-kicker">Modulos</p>
-            <h2>Sumas de software</h2>
+        <div className="pricing-inline-section">
+          <div className="pricing-inline-head">
+            <div>
+              <p className="alamcen-payment-methods-kicker">Equipamiento</p>
+              <h2>Si o no</h2>
+            </div>
+            <button
+              type="button"
+              className={`pricing-pill ${includeEquipment ? "selected" : ""}`}
+              onClick={() => setIncludeEquipment((current) => !current)}
+            >
+              {includeEquipment ? "Si" : "No"}
+            </button>
+          </div>
+
+          {includeEquipment ? (
+            <div className="pricing-grid">
+              {EQUIPMENT_OPTIONS.map((option) => (
+                <ToggleCard
+                  key={option.id}
+                  option={option}
+                  selected={isSelected(selectedEquipment, option.id)}
+                  disabled={option.requires === "printing" && !printingEnabled}
+                  onClick={option.id === "printer" ? togglePrinter : () => toggleSelection(selectedEquipment, setSelectedEquipment, option.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="pricing-muted-copy">Si no elegis equipamiento, solo queda el plan base y los modulos.</p>
+          )}
+        </div>
+
+        <div className="pricing-inline-section">
+          <div className="pricing-inline-head">
+            <div>
+              <p className="alamcen-payment-methods-kicker">Modulos</p>
+              <h2>Sumas de software</h2>
+            </div>
+          </div>
+
+          <div className="pricing-grid">
+            {MODULE_OPTIONS.map((option) => (
+              <ToggleCard
+                key={option.id}
+                option={option}
+                selected={isSelected(selectedModules, option.id)}
+                onClick={() => toggleSelection(selectedModules, setSelectedModules, option.id)}
+              />
+            ))}
           </div>
         </div>
 
-        <div className="pricing-grid">
-          {MODULE_OPTIONS.map((option) => (
-            <ToggleCard
-              key={option.id}
-              option={option}
-              selected={isSelected(selectedModules, option.id)}
-              onClick={() => toggleSelection(selectedModules, setSelectedModules, option.id)}
-            />
-          ))}
-        </div>
-      </article>
+        <div className="pricing-inline-section">
+          <div className="pricing-inline-head">
+            <div>
+              <p className="alamcen-payment-methods-kicker">Extras</p>
+              <h2>Carga de datos</h2>
+            </div>
+          </div>
 
-      <article className="alamcen-payment-methods-card">
-        <div className="alamcen-payment-methods-card-head">
-          <div>
-            <p className="alamcen-payment-methods-kicker">Equipamiento</p>
-            <h2>Se suma al plan elegido</h2>
+          <div className="pricing-grid">
+            {EXTRA_SERVICES.map((option) => (
+              <ToggleCard
+                key={option.id}
+                option={option}
+                selected={isSelected(selectedExtras, option.id)}
+                onClick={() => toggleSelection(selectedExtras, setSelectedExtras, option.id)}
+              />
+            ))}
           </div>
         </div>
 
-        <div className="pricing-grid">
-          {EQUIPMENT_OPTIONS.map((option) => (
-            <ToggleCard
-              key={option.id}
-              option={option}
-              selected={isSelected(selectedEquipment, option.id)}
-              disabled={option.requires === "printing" && !printingEnabled}
-              onClick={option.id === "printer" ? togglePrinter : () => toggleSelection(selectedEquipment, setSelectedEquipment, option.id)}
-            />
-          ))}
-        </div>
-      </article>
+        <div className="pricing-summary-card">
+          <div className="pricing-summary-head">
+            <div>
+              <p className="alamcen-payment-methods-kicker">Resumen</p>
+              <h2>Total estimado</h2>
+            </div>
+            <strong className="pricing-summary-total">{currency(total)}</strong>
+          </div>
 
-      <article className="alamcen-payment-methods-card">
-        <div className="alamcen-payment-methods-card-head">
-          <div>
-            <p className="alamcen-payment-methods-kicker">Extras</p>
-            <h2>Carga de datos</h2>
-          </div>
-        </div>
-
-        <div className="pricing-grid">
-          {EXTRA_SERVICES.map((option) => (
-            <ToggleCard
-              key={option.id}
-              option={option}
-              selected={isSelected(selectedExtras, option.id)}
-              onClick={() => toggleSelection(selectedExtras, setSelectedExtras, option.id)}
-            />
-          ))}
-        </div>
-      </article>
-
-      <article className="alamcen-payment-methods-card pricing-summary-card">
-        <div className="pricing-summary-head">
-          <div>
-            <p className="alamcen-payment-methods-kicker">Resumen</p>
-            <h2>Total estimado</h2>
-          </div>
-          <strong className="pricing-summary-total">{currency(total)}</strong>
-        </div>
-
-        <div className="pricing-summary-list">
-          <div>
-            <span>Base</span>
-            <strong>{currency(BASE_PLAN.price)}</strong>
-          </div>
-          <div>
-            <span>Modulos</span>
-            <strong>{selectedModuleTotal ? currency(selectedModuleTotal) : "$0"}</strong>
-          </div>
-          <div>
-            <span>Equipamiento</span>
-            <strong>{selectedEquipmentTotal ? currency(selectedEquipmentTotal) : "$0"}</strong>
-          </div>
-          <div>
-            <span>Extras</span>
-            <strong>{selectedExtrasTotal ? currency(selectedExtrasTotal) : "$0"}</strong>
+          <div className="pricing-summary-list">
+            <div>
+              <span>Base</span>
+              <strong>{currency(BASE_PLAN.price)}</strong>
+            </div>
+            <div>
+              <span>Modulos</span>
+              <strong>{selectedModuleTotal ? currency(selectedModuleTotal) : "$0"}</strong>
+            </div>
+            <div>
+              <span>Equipamiento</span>
+              <strong>{selectedEquipmentTotal ? currency(selectedEquipmentTotal) : "$0"}</strong>
+            </div>
+            <div>
+              <span>Extras</span>
+              <strong>{selectedExtrasTotal ? currency(selectedExtrasTotal) : "$0"}</strong>
+            </div>
           </div>
         </div>
       </article>
