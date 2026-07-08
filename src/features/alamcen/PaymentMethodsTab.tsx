@@ -21,12 +21,6 @@ const MODULE_OPTIONS: Option[] = [
     label: "Modulo de impresion",
     price: 125,
     note: "Se suma al plan base"
-  },
-  {
-    id: "stock",
-    label: "Modulo stock",
-    price: 125,
-    note: "Se suma al plan base"
   }
 ];
 
