@@ -1,80 +1,44 @@
-type PaymentPlan = {
-  module: string;
+type PaymentPlanRow = {
+  plan: string;
   includes: string;
-  monthly: string;
-  note?: string;
+  softwarePrice: string;
+  equipment: string;
+  totalWithEquipment: string;
 };
 
-const WITHOUT_MATERIALS: PaymentPlan[] = [
+const PAYMENT_PLANS: PaymentPlanRow[] = [
   {
-    module: "Modulo 1",
-    includes: "Caja",
-    monthly: "$350",
-    note: "Primeros 2 meses"
+    plan: "M1",
+    includes: "Caja + Clientes + Panel",
+    softwarePrice: "$350",
+    equipment: "+ Scanner",
+    totalWithEquipment: "$500"
   },
   {
-    module: "Modulo 2",
-    includes: "Caja + Cliente",
-    monthly: "$400",
-    note: "Primeros 2 meses"
+    plan: "M2",
+    includes: "Todo lo de M1 + Módulo de impresión",
+    softwarePrice: "$350",
+    equipment: "+ Impresora",
+    totalWithEquipment: "$500"
   },
   {
-    module: "Modulo 3",
-    includes: "Caja + Cliente + Imprimir",
-    monthly: "$500",
-    note: "Primeros 2 meses"
+    plan: "M3",
+    includes: "Todo lo de M2 + Carga inicial de datos",
+    softwarePrice: "$350",
+    equipment: "+ Impresora + Carga de datos",
+    totalWithEquipment: "$550"
   }
 ];
 
-const WITH_MATERIALS: PaymentPlan[] = [
-  {
-    module: "Modulo 1",
-    includes: "Caja + Scanner",
-    monthly: "$450",
-    note: "Primeros 2 meses"
-  },
-  {
-    module: "Modulo 2",
-    includes: "Caja + Scanner + Cliente",
-    monthly: "$500",
-    note: "Primeros 2 meses"
-  },
-  {
-    module: "Modulo 3",
-    includes: "Caja + Scanner + Cliente + Impresora",
-    monthly: "$700",
-    note: "Primeros 2 meses"
-  }
-];
-
-function PlanTable({ title, subtitle, plans }: { title: string; subtitle: string; plans: PaymentPlan[] }) {
+function PaymentRow({ row }: { row: PaymentPlanRow }) {
   return (
-    <article className="alamcen-payment-methods-card">
-      <div className="alamcen-payment-methods-card-head">
-        <div>
-          <p className="alamcen-payment-methods-kicker">{subtitle}</p>
-          <h2>{title}</h2>
-        </div>
-      </div>
-
-      <div className="alamcen-payment-methods-table">
-        <div className="alamcen-payment-methods-table-head">
-          <span>Modulo</span>
-          <span>Incluye</span>
-          <span>Mensual</span>
-          <span>Detalle</span>
-        </div>
-
-        {plans.map((plan) => (
-          <div key={`${title}-${plan.module}-${plan.includes}`} className="alamcen-payment-methods-row">
-            <strong>{plan.module}</strong>
-            <span>{plan.includes}</span>
-            <span className="alamcen-payment-methods-price">{plan.monthly}</span>
-            <span>{plan.note ?? "Primeros 2 meses"}</span>
-          </div>
-        ))}
-      </div>
-    </article>
+    <div className="alamcen-payment-methods-row">
+      <strong className="alamcen-payment-methods-plan">{row.plan}</strong>
+      <span className="alamcen-payment-methods-includes">{row.includes}</span>
+      <span className="alamcen-payment-methods-price">{row.softwarePrice}</span>
+      <span className="alamcen-payment-methods-equipment">{row.equipment}</span>
+      <span className="alamcen-payment-methods-total">{row.totalWithEquipment}</span>
+    </div>
   );
 }
 
@@ -82,17 +46,26 @@ export function PaymentMethodsTab() {
   return (
     <section className="alamcen-payment-methods-page">
       <header className="alamcen-payment-methods-hero">
-        <div>
-          <p className="alamcen-payment-methods-kicker">Almacen</p>
-          <h1>Metodos de pago</h1>
-          <p>Propuesta visual de los planes disponibles para presentar al cliente.</p>
-        </div>
+        <p className="alamcen-payment-methods-kicker">Almacen</p>
+        <h1>Metodos de pago</h1>
+        <p>Tabla de referencia para mostrar planes y equipamiento al cliente.</p>
       </header>
 
-      <div className="alamcen-payment-methods-grid">
-        <PlanTable title="Sin materiales" subtitle="Planes base" plans={WITHOUT_MATERIALS} />
-        <PlanTable title="Con materiales" subtitle="Planes con equipo" plans={WITH_MATERIALS} />
-      </div>
+      <article className="alamcen-payment-methods-card">
+        <div className="alamcen-payment-methods-table">
+          <div className="alamcen-payment-methods-table-head">
+            <span>Plan</span>
+            <span>Incluye</span>
+            <span>Precio (Software)</span>
+            <span>Equipamiento</span>
+            <span>Con equipamiento</span>
+          </div>
+
+          {PAYMENT_PLANS.map((row) => (
+            <PaymentRow key={row.plan} row={row} />
+          ))}
+        </div>
+      </article>
     </section>
   );
 }
