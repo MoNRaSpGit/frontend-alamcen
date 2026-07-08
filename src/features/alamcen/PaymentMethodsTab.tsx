@@ -20,7 +20,7 @@ const WITHOUT_MATERIALS: PaymentPlan[] = [
   },
   {
     module: "Modulo 3",
-    includes: "Caja + Cliente + Impresora",
+    includes: "Caja + Cliente + Imprimir",
     monthly: "$500",
     note: "Primeros 2 meses"
   }
