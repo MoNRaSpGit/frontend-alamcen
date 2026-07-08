@@ -420,7 +420,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
 
       <ScannerProductModal
         isOpen={manualModalOpen}
-        title="Producto manual"
+        title={manualModalMode === "barcode-miss" ? "Producto no encontrado" : "Producto manual"}
         helperText={manualModalMode === "barcode-miss" ? `Codigo leido: ${manualBarcode}` : "Nombre opcional. Si lo dejas vacio se guardara como S/N."}
         submitLabel="Agregar"
         nameInput={manualNameInput}
