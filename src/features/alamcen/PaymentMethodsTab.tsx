@@ -18,7 +18,7 @@ const MODULE_OPTIONS: Option[] = [
   {
     id: "printing",
     label: "Modulo de impresion",
-    price: 125
+    price: 75
   }
 ];
 
