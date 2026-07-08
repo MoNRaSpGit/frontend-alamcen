@@ -6,6 +6,12 @@ type PaymentPlanRow = {
   totalWithEquipment: string;
 };
 
+type AddonBox = {
+  title: string;
+  price: string;
+  note: string;
+};
+
 const PAYMENT_PLANS: PaymentPlanRow[] = [
   {
     plan: "M1",
@@ -27,6 +33,19 @@ const PAYMENT_PLANS: PaymentPlanRow[] = [
     softwarePrice: "$350",
     equipment: "+ Scanner + Impresora",
     totalWithEquipment: "$700"
+  }
+];
+
+const ADDONS: AddonBox[] = [
+  {
+    title: "Scanner",
+    price: "+$125",
+    note: "Se suma a cualquier plan"
+  },
+  {
+    title: "Impresora",
+    price: "+$225",
+    note: "Se suma a cualquier plan"
   }
 ];
 
@@ -75,20 +94,21 @@ export function PaymentMethodsTab() {
       </article>
 
       <article className="alamcen-payment-methods-card alamcen-payment-methods-addon-card">
-        <div className="alamcen-payment-methods-addon-head">
+        <div className="alamcen-payment-methods-card-head">
           <div>
-            <p className="alamcen-payment-methods-kicker">Complemento</p>
-            <h2>Carga de datos</h2>
+            <p className="alamcen-payment-methods-kicker">Complementos</p>
+            <h2>Agregar equipo a cualquier plan</h2>
           </div>
-          <strong className="alamcen-payment-methods-addon-price">+$150</strong>
         </div>
 
-        <div className="alamcen-payment-methods-addon-table">
-          <div className="alamcen-payment-methods-addon-row">
-            <span>Disponible para cualquier plan</span>
-            <span>Hasta 2000 productos</span>
-            <span>Se suma al plan elegido</span>
-          </div>
+        <div className="alamcen-payment-methods-addon-grid">
+          {ADDONS.map((addon) => (
+            <div key={addon.title} className="alamcen-payment-methods-addon-box">
+              <strong>{addon.title}</strong>
+              <span className="alamcen-payment-methods-addon-price">{addon.price}</span>
+              <small>{addon.note}</small>
+            </div>
+          ))}
         </div>
       </article>
     </section>
