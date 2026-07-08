@@ -36,12 +36,14 @@ const WITH_MATERIALS: PaymentPlan[] = [
   {
     module: "Modulo 2",
     includes: "Caja + Scanner + Cliente",
-    monthly: "$500"
+    monthly: "$500",
+    note: "Primeros 2 meses"
   },
   {
     module: "Modulo 3",
     includes: "Caja + Scanner + Cliente + Impresora",
-    monthly: "$700"
+    monthly: "$700",
+    note: "Primeros 2 meses"
   }
 ];
 
@@ -68,7 +70,7 @@ function PlanTable({ title, subtitle, plans }: { title: string; subtitle: string
             <strong>{plan.module}</strong>
             <span>{plan.includes}</span>
             <span className="alamcen-payment-methods-price">{plan.monthly}</span>
-            <span>{plan.note ?? "Mensual"}</span>
+            <span>{plan.note ?? "Primeros 2 meses"}</span>
           </div>
         ))}
       </div>
