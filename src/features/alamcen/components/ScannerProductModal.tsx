@@ -5,10 +5,13 @@ type ScannerProductModalProps = {
   title: string;
   helperText?: string;
   submitLabel: string;
+  nameInput: string;
   priceInput: string;
   onClose: () => void;
+  onChangeName: (value: string) => void;
   onChangePrice: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  nameInputRef?: RefObject<HTMLInputElement | null>;
   priceInputRef?: RefObject<HTMLInputElement | null>;
   children?: ReactNode;
 };
@@ -18,10 +21,13 @@ export function ScannerProductModal({
   title,
   helperText,
   submitLabel,
+  nameInput,
   priceInput,
   onClose,
+  onChangeName,
   onChangePrice,
   onSubmit,
+  nameInputRef,
   priceInputRef,
   children
 }: ScannerProductModalProps) {
@@ -51,6 +57,18 @@ export function ScannerProductModal({
         ) : null}
         <form className="scanner-modal-form" onSubmit={onSubmit}>
           {children}
+          <label className="scanner-modal-label" htmlFor="scanner-product-name-input">
+            Nombre
+          </label>
+          <input
+            id="scanner-product-name-input"
+            ref={nameInputRef}
+            className="scanner-modal-input"
+            type="text"
+            placeholder="Opcional, deja vacio para S/N"
+            value={nameInput}
+            onChange={(event) => onChangeName(event.target.value)}
+          />
           <label className="scanner-modal-label" htmlFor="scanner-product-price-input">
             Precio
           </label>

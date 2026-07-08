@@ -39,6 +39,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
   const [lookupError, setLookupError] = useState("");
   const [saleLines, setSaleLines] = useState<SaleLine[]>([]);
   const [manualBarcode, setManualBarcode] = useState("");
+  const [manualNameInput, setManualNameInput] = useState("");
   const [manualPriceInput, setManualPriceInput] = useState("");
   const [manualModalMode, setManualModalMode] = useState<ManualModalMode>("barcode-miss");
   const [manualModalOpen, setManualModalOpen] = useState(false);
@@ -52,6 +53,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
   const [paymentMethod, setPaymentMethod] = useState<ScannerPaymentMethod>("efectivo");
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const barcodeInputRef = useRef<HTMLInputElement | null>(null);
+  const manualNameInputRef = useRef<HTMLInputElement | null>(null);
   const manualPriceInputRef = useRef<HTMLInputElement | null>(null);
   const editNameInputRef = useRef<HTMLInputElement | null>(null);
   const total = saleLines.reduce((sum, line) => sum + line.subtotal, 0);
@@ -140,8 +142,13 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
     }
 
     requestAnimationFrame(() => {
-      manualPriceInputRef.current?.focus();
-      manualPriceInputRef.current?.select();
+      if (manualNameInputRef.current) {
+        manualNameInputRef.current.focus();
+        manualNameInputRef.current.select();
+      } else {
+        manualPriceInputRef.current?.focus();
+        manualPriceInputRef.current?.select();
+      }
     });
   }, [manualModalOpen]);
 
@@ -168,6 +175,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
   function openManualProductModal(barcode: string, mode: ManualModalMode = "barcode-miss") {
     setManualModalMode(mode);
     setManualBarcode(barcode);
+    setManualNameInput("");
     setManualPriceInput("");
     setManualModalOpen(true);
   }
@@ -177,6 +185,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
     setManualModalMode("barcode-miss");
     setShouldRestoreBarcodeFocus(true);
     setManualBarcode("");
+    setManualNameInput("");
     setManualPriceInput("");
     setBarcodeInput("");
   }
@@ -317,9 +326,9 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
 
     try {
       if (manualModalMode === "manual-button") {
-        setSaleLines((current) => appendLocalManualProduct(current, parsedPrice));
+        setSaleLines((current) => appendLocalManualProduct(current, parsedPrice, manualNameInput));
       } else {
-        const product = await createManualProduct(manualBarcode, parsedPrice);
+        const product = await createManualProduct(manualBarcode, parsedPrice, manualNameInput.trim() || undefined);
         setSaleLines((current) => appendProductToSale(current, product));
       }
 
@@ -408,11 +417,14 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       <ScannerProductModal
         isOpen={manualModalOpen}
         title="Producto manual"
-        helperText={manualModalMode === "barcode-miss" ? `Codigo leido: ${manualBarcode}` : "Ingrese precio"}
+        helperText={manualModalMode === "barcode-miss" ? `Codigo leido: ${manualBarcode}` : "Nombre opcional. Si lo dejas vacio se guardara como S/N."}
         submitLabel="Agregar"
+        nameInput={manualNameInput}
         priceInput={manualPriceInput}
+        nameInputRef={manualNameInputRef}
         priceInputRef={manualPriceInputRef}
         onClose={closeManualProductModal}
+        onChangeName={setManualNameInput}
         onChangePrice={setManualPriceInput}
         onSubmit={handleManualProductSubmit}
       />

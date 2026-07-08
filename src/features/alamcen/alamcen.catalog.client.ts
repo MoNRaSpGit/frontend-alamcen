@@ -448,7 +448,7 @@ export function clearProductLookupCache() {
   }
 }
 
-export async function createManualProduct(barcode: string, price: number) {
+export async function createManualProduct(barcode: string, price: number, name?: string) {
   const response = await fetchWithAuth(buildUrl("/alamcen/productos/manual"), {
     method: "POST",
     headers: {
@@ -456,7 +456,8 @@ export async function createManualProduct(barcode: string, price: number) {
     },
     body: JSON.stringify({
       barcode,
-      price
+      price,
+      name
     })
   });
 
