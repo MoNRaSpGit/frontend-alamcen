@@ -361,6 +361,24 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       return;
     }
 
+    const previousLine = saleLines.find((line) => line.productId === editingLineId) || null;
+    if (!previousLine) {
+      closeEditModal();
+      return;
+    }
+
+    const nextLine = {
+      ...previousLine,
+      name: normalizedName,
+      price: parsedPrice,
+      subtotal: previousLine.quantity * parsedPrice
+    };
+
+    setSaleLines((current) =>
+      current.map((line) => (line.productId === editingLineId ? nextLine : line))
+    );
+    closeEditModal();
+
     try {
       const updatedProduct = await updateProduct(editingLineId, {
         nombre: normalizedName,
@@ -373,9 +391,11 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
           precioVenta: updatedProduct.precioVenta
         })
       );
-      closeEditModal();
     } catch (error) {
       console.error(error);
+      if (previousLine) {
+        setSaleLines((current) => current.map((line) => (line.productId === editingLineId ? previousLine : line)));
+      }
       toast.error(error instanceof Error ? error.message : "No pudimos guardar el cambio.");
     }
   }
