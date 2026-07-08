@@ -7,58 +7,23 @@
 }
 
 .alamcen-payment-methods-hero {
-  border: 1px solid rgba(25, 118, 210, 0.14);
-  border-radius: 18px;
-  background:
-    linear-gradient(135deg, rgba(20, 184, 166, 0.14) 0%, rgba(37, 99, 235, 0.08) 100%),
-    #fff;
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+  border: 1px solid #dbe4ee;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff 0%, #f8fbff 100%);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
   padding: 18px 20px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px;
 }
 
 .alamcen-payment-methods-hero h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1.1;
   color: #102033;
 }
 
 .alamcen-payment-methods-hero p {
   margin: 0;
-  color: #526175;
-}
-
-.alamcen-payment-methods-hero-copy {
-  display: grid;
-  gap: 6px;
-}
-
-.alamcen-payment-methods-hero-badge {
-  display: grid;
-  gap: 6px;
-  min-width: 140px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(22, 101, 52, 0.14);
-  text-align: right;
-}
-
-.alamcen-payment-methods-hero-badge span {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 800;
-  color: #5b708a;
-}
-
-.alamcen-payment-methods-hero-badge strong {
-  font-size: 24px;
-  color: #166534;
+  color: #64748b;
 }
 
 .alamcen-payment-methods-kicker {
@@ -79,8 +44,8 @@
 .alamcen-payment-methods-card {
   border: 1px solid #d6dde7;
   border-radius: 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+  background: linear-gradient(180deg, #f8fafd 0%, #f4f7fb 100%);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
   padding: 14px;
 }
 
@@ -102,12 +67,6 @@
   margin: 4px 0 0;
   color: #334155;
   font-size: 14px;
-}
-
-.pricing-section-note {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 13px;
 }
 
 .alamcen-payment-methods-table {
@@ -196,18 +155,6 @@
   gap: 12px;
 }
 
-.pricing-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.pricing-main-panel {
-  display: grid;
-  gap: 18px;
-}
-
 .pricing-builder-card {
   display: grid;
   gap: 18px;
@@ -223,11 +170,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  border: 1px solid rgba(22, 101, 52, 0.12);
+  border: 1px solid #d6dde7;
   border-radius: 16px;
-  background: linear-gradient(135deg, #f4fbf6 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
   padding: 14px 16px;
-  box-shadow: 0 10px 20px rgba(22, 101, 52, 0.06);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
 }
 
 .pricing-feature-copy {
@@ -316,16 +263,6 @@
   padding-top: 2px;
 }
 
-.pricing-summary-panel {
-  position: sticky;
-  top: 16px;
-  border: 1px solid rgba(22, 101, 52, 0.14);
-  border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #f4fbf7 100%);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
-  padding: 16px;
-}
-
 .pricing-summary-head {
   display: flex;
   align-items: flex-start;
@@ -337,26 +274,6 @@
   font-size: 26px;
   line-height: 1;
   color: #102033;
-}
-
-.pricing-summary-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 2px;
-  color: #5b708a;
-  font-size: 13px;
-}
-
-.pricing-summary-foot::before {
-  content: "";
-  display: inline-block;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(22, 101, 52, 0.18) 0%, rgba(37, 99, 235, 0.12) 100%);
-  flex: 0 0 auto;
 }
 
 .pricing-summary-list {
@@ -389,29 +306,9 @@
   }
 }
 
-@media (max-width: 980px) {
-  .pricing-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .pricing-summary-panel {
-    position: static;
-  }
-}
-
 @media (max-width: 720px) {
   .alamcen-payment-methods-hero h1 {
     font-size: 23px;
-  }
-
-  .alamcen-payment-methods-hero {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .alamcen-payment-methods-hero-badge {
-    width: 100%;
-    text-align: left;
   }
 
   .alamcen-payment-methods-table-head {
