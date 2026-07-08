@@ -66,6 +66,24 @@ export function PaymentMethodsTab() {
           ))}
         </div>
       </article>
+
+      <article className="alamcen-payment-methods-card alamcen-payment-methods-addon-card">
+        <div className="alamcen-payment-methods-addon-head">
+          <div>
+            <p className="alamcen-payment-methods-kicker">Complemento</p>
+            <h2>Carga de datos</h2>
+          </div>
+          <strong className="alamcen-payment-methods-addon-price">+$150</strong>
+        </div>
+
+        <div className="alamcen-payment-methods-addon-table">
+          <div className="alamcen-payment-methods-addon-row">
+            <span>Disponible para cualquier plan</span>
+            <span>Opcional</span>
+            <span>Se suma al plan elegido</span>
+          </div>
+        </div>
+      </article>
     </section>
   );
 }
