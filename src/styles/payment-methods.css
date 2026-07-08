@@ -116,36 +116,112 @@
   color: #334155;
 }
 
-.alamcen-payment-methods-addon-card {
+.pricing-base-card {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
-.alamcen-payment-methods-addon-grid {
+.pricing-base-price {
+  font-size: 24px;
+  line-height: 1;
+  color: #166534;
+}
+
+.pricing-base-copy {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+}
+
+.pricing-base-copy span {
+  font-weight: 700;
+  color: #102033;
+}
+
+.pricing-base-copy small,
+.pricing-toggle-card small {
+  color: #64748b;
+}
+
+.pricing-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
-.alamcen-payment-methods-addon-box {
+.payment-toggle-card {
+  min-height: 118px;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   background: #fff;
   padding: 14px 12px;
   display: grid;
   gap: 6px;
+  text-align: left;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease, background 120ms ease;
 }
 
-.alamcen-payment-methods-addon-box strong {
+.payment-toggle-card.selected {
+  border-color: #166534;
+  box-shadow: 0 10px 20px rgba(22, 101, 52, 0.12);
+  background: #f5fbf7;
+}
+
+.payment-toggle-card.disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.payment-toggle-card-title {
   color: #102033;
-  font-size: 16px;
+  font-weight: 800;
 }
 
-.alamcen-payment-methods-addon-price {
+.payment-toggle-card-price {
   font-size: 18px;
-  line-height: 1;
   color: #166534;
-  font-weight: 900;
+}
+
+.pricing-summary-card {
+  display: grid;
+  gap: 12px;
+}
+
+.pricing-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pricing-summary-total {
+  font-size: 28px;
+  line-height: 1;
+  color: #102033;
+}
+
+.pricing-summary-list {
+  display: grid;
+  gap: 10px;
+}
+
+.pricing-summary-list > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.pricing-summary-list span {
+  color: #64748b;
+}
+
+.pricing-summary-list strong {
+  color: #102033;
 }
 
 @media (min-width: 860px) {
@@ -168,8 +244,12 @@
     gap: 6px;
   }
 
-  .alamcen-payment-methods-addon-grid {
+  .pricing-grid {
     grid-template-columns: 1fr;
+  }
+
+  .pricing-summary-head {
+    flex-direction: column;
   }
 
   .alamcen-payment-methods-row > span::before {
