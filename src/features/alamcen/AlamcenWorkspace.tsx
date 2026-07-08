@@ -1,5 +1,5 @@
-import { Dispatch, FormEvent, SetStateAction, useEffect, useMemo, useState } from "react";
-import { ArrowLeftRight, CreditCard, HandCoins, Trophy, Wallet } from "lucide-react";
+import { Dispatch, FormEvent, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeftRight, CreditCard, HandCoins, Menu, Trophy, UserRound, Wallet } from "lucide-react";
 import { logoutSession } from "../auth/auth.client";
 import { AlamcenHomePage } from "./AlamcenHomePage";
 import { PaymentMethodsTab } from "./PaymentMethodsTab";
@@ -88,8 +88,10 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
   const [statusError, setStatusError] = useState("");
   const [panelRefreshKey, setPanelRefreshKey] = useState(0);
   const [scannerFocusKey, setScannerFocusKey] = useState(0);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [customers, setCustomers] = useState<DemoCustomer[]>(CUSTOMER_PREVIEW);
   const [stockItems, setStockItems] = useState<TrackedStockItem[]>([]);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setStockItems(loadTrackedStock());
@@ -103,6 +105,28 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
       .catch((error) => {
         setStatusError(error instanceof Error ? error.message : "No pudimos validar el modulo.");
       });
+  }, []);
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
   async function handleLogout() {
@@ -154,19 +178,47 @@ export function AlamcenWorkspace({ onLoggedOut }: AlamcenWorkspaceProps) {
           >
             Caja
           </button>
-          {WORKSPACE_MENU_ITEMS.map((item) => (
+
+          <div className="workspace-user-menu" ref={userMenuRef}>
             <button
-              key={item.key}
               type="button"
-              className={activeTab === item.key ? "workspace-tab active" : "workspace-tab"}
-              onClick={() => setActiveTab(item.key)}
+              className={isUserMenuOpen ? "workspace-user-button open" : "workspace-user-button"}
+              aria-label="Abrir menu de usuario"
+              aria-expanded={isUserMenuOpen}
+              onClick={() => setIsUserMenuOpen((current) => !current)}
             >
-              {item.label}
+              <UserRound size={18} strokeWidth={2.2} />
+              <Menu size={18} strokeWidth={2.2} />
             </button>
-          ))}
-          <button type="button" className="workspace-tab workspace-logout-tab" onClick={() => void handleLogout()}>
-            Salir
-          </button>
+
+            {isUserMenuOpen ? (
+              <div className="workspace-user-dropdown">
+                {WORKSPACE_MENU_ITEMS.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={activeTab === item.key ? "workspace-user-dropdown-item active" : "workspace-user-dropdown-item"}
+                    onClick={() => {
+                      setActiveTab(item.key);
+                      setIsUserMenuOpen(false);
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className="workspace-user-dropdown-item"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    void handleLogout();
+                  }}
+                >
+                  Salir
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </header>
       {statusError ? <p className="workspace-error">{statusError}</p> : null}
