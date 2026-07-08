@@ -12,7 +12,7 @@ const PAYMENT_PLANS: PaymentPlanRow[] = [
     includes: "Caja + Clientes + Panel",
     softwarePrice: "$350",
     equipment: "+ Scanner",
-    totalWithEquipment: "$500"
+    totalWithEquipment: "$475"
   },
   {
     plan: "M2",
@@ -72,7 +72,7 @@ export function PaymentMethodsTab() {
         <div className="alamcen-payment-methods-addon-table">
           <div className="alamcen-payment-methods-addon-row">
             <span>Disponible para cualquier plan</span>
-            <span>Opcional</span>
+            <span>Hasta 2000 productos</span>
             <span>Se suma al plan elegido</span>
           </div>
         </div>
