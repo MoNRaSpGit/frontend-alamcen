@@ -142,77 +142,89 @@ export function PaymentMethodsTab() {
   return (
     <section className="alamcen-payment-methods-page">
       <header className="alamcen-payment-methods-hero">
-        <h1>Planes</h1>
-        <p>Primeros 2 meses.</p>
+        <div className="alamcen-payment-methods-hero-copy">
+          <p className="alamcen-payment-methods-kicker">Almacen</p>
+          <h1>Planes</h1>
+          <p>Primeros 2 meses. Armado simple, claro y listo para mostrar.</p>
+        </div>
+        <div className="alamcen-payment-methods-hero-badge">
+          <span>Plan base</span>
+          <strong>{currency(BASE_PLAN.price)}</strong>
+        </div>
       </header>
 
-      <article className="alamcen-payment-methods-card pricing-builder-card">
-        <div className="alamcen-payment-methods-card-head">
-          <div>
-            <h2>{BASE_PLAN.label}</h2>
-            <p className="pricing-base-subtitle">{BASE_PLAN.includes}</p>
-          </div>
-          <strong className="pricing-base-price">{currency(BASE_PLAN.price)}</strong>
-        </div>
-
-        <div className="pricing-inline-section">
-          <div className="pricing-inline-head">
+      <article className="pricing-shell">
+        <div className="pricing-main-panel pricing-builder-card">
+          <div className="alamcen-payment-methods-card-head pricing-base-header">
             <div>
-              <h2>Agregar equipamiento</h2>
+              <h2>{BASE_PLAN.label}</h2>
+              <p className="pricing-base-subtitle">{BASE_PLAN.includes}</p>
+            </div>
+            <strong className="pricing-base-price">{currency(BASE_PLAN.price)}</strong>
+          </div>
+
+          <div className="pricing-inline-section">
+            <div className="pricing-inline-head">
+              <div>
+                <h2>Agregar equipamiento</h2>
+                <p className="pricing-section-note">Scanner y impresora</p>
+              </div>
+            </div>
+
+            <div className="pricing-grid">
+              {EQUIPMENT_OPTIONS.map((option) => (
+                <ToggleCard
+                  key={option.id}
+                  option={option}
+                  selected={isSelected(selectedEquipment, option.id)}
+                  disabled={option.requires === "printing" && !printingEnabled}
+                  onClick={option.id === "printer" ? togglePrinter : () => toggleSelection(selectedEquipment, setSelectedEquipment, option.id)}
+                />
+              ))}
             </div>
           </div>
 
-          <div className="pricing-grid">
-            {EQUIPMENT_OPTIONS.map((option) => (
-              <ToggleCard
-                key={option.id}
-                option={option}
-                selected={isSelected(selectedEquipment, option.id)}
-                disabled={option.requires === "printing" && !printingEnabled}
-                onClick={option.id === "printer" ? togglePrinter : () => toggleSelection(selectedEquipment, setSelectedEquipment, option.id)}
-              />
-            ))}
-          </div>
-        </div>
+          <div className="pricing-inline-section">
+            <div className="pricing-inline-head">
+              <div>
+                <h2>Agregar modulo</h2>
+                <p className="pricing-section-note">Impresion y opciones extra</p>
+              </div>
+            </div>
 
-        <div className="pricing-inline-section">
-          <div className="pricing-inline-head">
-            <div>
-              <h2>Agregar modulo</h2>
+            <div className="pricing-grid">
+              {MODULE_OPTIONS.map((option) => (
+                <ToggleCard
+                  key={option.id}
+                  option={option}
+                  selected={isSelected(selectedModules, option.id)}
+                  onClick={() => toggleSelection(selectedModules, setSelectedModules, option.id)}
+                />
+              ))}
             </div>
           </div>
 
-          <div className="pricing-grid">
-            {MODULE_OPTIONS.map((option) => (
-              <ToggleCard
-                key={option.id}
-                option={option}
-                selected={isSelected(selectedModules, option.id)}
-                onClick={() => toggleSelection(selectedModules, setSelectedModules, option.id)}
-              />
-            ))}
+          <div className="pricing-feature-card">
+            <div className="pricing-feature-copy">
+              <h2>Ingreso de datos</h2>
+              <p>Hasta 2000 productos.</p>
+            </div>
+
+            <button
+              type="button"
+              className={`payment-feature-price ${selectedExtras.includes("data-load") ? "selected" : ""}`.trim()}
+              onClick={() => toggleSelection(selectedExtras, setSelectedExtras, "data-load")}
+            >
+              +{currency(150)}
+            </button>
           </div>
         </div>
 
-        <div className="pricing-feature-card">
-          <div className="pricing-feature-copy">
-            <h2>Ingreso de datos</h2>
-            <p>Hasta 2000 productos.</p>
-          </div>
-
-          <button
-            type="button"
-            className={`payment-feature-price ${selectedExtras.includes("data-load") ? "selected" : ""}`.trim()}
-            onClick={() => toggleSelection(selectedExtras, setSelectedExtras, "data-load")}
-          >
-            +{currency(150)}
-          </button>
-        </div>
-
-        <div className="pricing-summary-card">
+        <aside className="pricing-summary-card pricing-summary-panel">
           <div className="pricing-summary-head">
             <div>
-              <h2>Total</h2>
+              <p className="alamcen-payment-methods-kicker">Resumen</p>
+              <h2>Total estimado</h2>
             </div>
             <strong className="pricing-summary-total">{currency(total)}</strong>
           </div>
@@ -235,7 +247,11 @@ export function PaymentMethodsTab() {
               <strong>{selectedExtrasTotal ? currency(selectedExtrasTotal) : "$0"}</strong>
             </div>
           </div>
-        </div>
+
+          <div className="pricing-summary-foot">
+            <span>Todo queda sumado al instante.</span>
+          </div>
+        </aside>
       </article>
     </section>
   );
