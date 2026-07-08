@@ -10,23 +10,23 @@ const PAYMENT_PLANS: PaymentPlanRow[] = [
   {
     plan: "M1",
     includes: "Caja + Clientes + Panel",
-    softwarePrice: "$350",
+    softwarePrice: "$350 primeros 2 meses",
     equipment: "+ Scanner",
-    totalWithEquipment: "$500"
+    totalWithEquipment: "$500 primeros 2 meses"
   },
   {
     plan: "M2",
-    includes: "Todo lo de M1 + Módulo de impresión",
-    softwarePrice: "$350",
+    includes: "Todo lo de M1 + Modulo de impresion",
+    softwarePrice: "$350 primeros 2 meses",
     equipment: "+ Impresora",
-    totalWithEquipment: "$500"
+    totalWithEquipment: "$500 primeros 2 meses"
   },
   {
     plan: "M3",
     includes: "Todo lo de M2 + Carga inicial de datos",
-    softwarePrice: "$350",
+    softwarePrice: "$350 primeros 2 meses",
     equipment: "+ Impresora + Carga de datos",
-    totalWithEquipment: "$550"
+    totalWithEquipment: "$550 primeros 2 meses"
   }
 ];
 
@@ -73,7 +73,7 @@ export function PaymentMethodsTab() {
             <p className="alamcen-payment-methods-kicker">Complemento</p>
             <h2>Carga de datos</h2>
           </div>
-          <strong className="alamcen-payment-methods-addon-price">+$150</strong>
+          <strong className="alamcen-payment-methods-addon-price">+$150 primeros 2 meses</strong>
         </div>
 
         <div className="alamcen-payment-methods-addon-table">
