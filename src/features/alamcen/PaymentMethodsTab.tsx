@@ -36,6 +36,14 @@ const EQUIPMENT_OPTIONS: Option[] = [
   }
 ];
 
+const EXTRA_OPTIONS: Option[] = [
+  {
+    id: "data-load",
+    label: "Ingreso de datos",
+    price: 150
+  }
+];
+
 function currency(value: number) {
   return `$${new Intl.NumberFormat("es-UY", { maximumFractionDigits: 0 }).format(value)}`;
 }
@@ -71,6 +79,7 @@ function ToggleCard({
 export function PaymentMethodsTab() {
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
+  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
 
   const printingEnabled = selectedModules.includes("printing");
 
@@ -92,8 +101,12 @@ export function PaymentMethodsTab() {
       (sum, option) => sum + option.price,
       0
     );
-    return BASE_PLAN.price + moduleTotal + equipmentTotal;
-  }, [selectedEquipment, selectedModules]);
+    const extraTotal = EXTRA_OPTIONS.filter((option) => selectedExtras.includes(option.id)).reduce(
+      (sum, option) => sum + option.price,
+      0
+    );
+    return BASE_PLAN.price + moduleTotal + equipmentTotal + extraTotal;
+  }, [selectedEquipment, selectedExtras, selectedModules]);
 
   const selectedModuleTotal = useMemo(
     () => MODULE_OPTIONS.filter((option) => selectedModules.includes(option.id)).reduce((sum, option) => sum + option.price, 0),
@@ -102,6 +115,10 @@ export function PaymentMethodsTab() {
   const selectedEquipmentTotal = useMemo(
     () => EQUIPMENT_OPTIONS.filter((option) => selectedEquipment.includes(option.id)).reduce((sum, option) => sum + option.price, 0),
     [selectedEquipment]
+  );
+  const selectedExtrasTotal = useMemo(
+    () => EXTRA_OPTIONS.filter((option) => selectedExtras.includes(option.id)).reduce((sum, option) => sum + option.price, 0),
+    [selectedExtras]
   );
 
   function toggleSelection(
@@ -177,6 +194,21 @@ export function PaymentMethodsTab() {
           </div>
         </div>
 
+        <div className="pricing-feature-card">
+          <div className="pricing-feature-copy">
+            <h2>Ingreso de datos</h2>
+            <p>Hasta 2000 productos.</p>
+          </div>
+
+          <button
+            type="button"
+            className={`payment-feature-price ${selectedExtras.includes("data-load") ? "selected" : ""}`.trim()}
+            onClick={() => toggleSelection(selectedExtras, setSelectedExtras, "data-load")}
+          >
+            +{currency(150)}
+          </button>
+        </div>
+
         <div className="pricing-summary-card">
           <div className="pricing-summary-head">
             <div>
@@ -197,6 +229,10 @@ export function PaymentMethodsTab() {
             <div>
               <span>Equipamiento</span>
               <strong>{selectedEquipmentTotal ? currency(selectedEquipmentTotal) : "$0"}</strong>
+            </div>
+            <div>
+              <span>Datos</span>
+              <strong>{selectedExtrasTotal ? currency(selectedExtrasTotal) : "$0"}</strong>
             </div>
           </div>
         </div>
