@@ -51,6 +51,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
   const [isSubmittingSale, setIsSubmittingSale] = useState(false);
   const [isCheckoutConfirmOpen, setIsCheckoutConfirmOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<ScannerPaymentMethod>("efectivo");
+  const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const barcodeInputRef = useRef<HTMLInputElement | null>(null);
   const manualNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -276,6 +277,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       setBarcodeInput("");
       setLookupError("");
       setIsCheckoutConfirmOpen(false);
+      setShowPaymentMethods(false);
       setPaymentMethod("efectivo");
       setSelectedCustomerId("");
       if (paymentMethod === "cuenta" && selectedCustomer) {
@@ -403,16 +405,18 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
         isOpen={isCheckoutConfirmOpen}
         total={total}
         isSubmittingSale={isSubmittingSale}
-        paymentMethod={paymentMethod}
-        customers={customers}
-        selectedCustomerId={selectedCustomerId}
-        onClose={() => setIsCheckoutConfirmOpen(false)}
-        onConfirm={() => {
-          void handleCheckout();
-        }}
-        onChangePaymentMethod={setPaymentMethod}
-        onChangeCustomer={setSelectedCustomerId}
-      />
+      paymentMethod={paymentMethod}
+      showPaymentMethods={showPaymentMethods}
+      customers={customers}
+      selectedCustomerId={selectedCustomerId}
+      onClose={() => setIsCheckoutConfirmOpen(false)}
+      onConfirm={() => {
+        void handleCheckout();
+      }}
+      onChangePaymentMethod={setPaymentMethod}
+      onChangeCustomer={setSelectedCustomerId}
+      onTogglePaymentMethods={() => setShowPaymentMethods((current) => !current)}
+    />
 
       <ScannerProductModal
         isOpen={manualModalOpen}

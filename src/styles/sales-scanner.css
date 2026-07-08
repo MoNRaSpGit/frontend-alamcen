@@ -672,6 +672,31 @@
   margin-bottom: 16px;
 }
 
+.scanner-payment-toggle-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.scanner-payment-toggle {
+  border: 1px solid #d7dde6;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #4b5563;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.scanner-payment-toggle:hover,
+.scanner-payment-toggle:focus-visible {
+  background: #eef2f7;
+  color: #111827;
+  opacity: 1;
+}
+
 .scanner-payment-method-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

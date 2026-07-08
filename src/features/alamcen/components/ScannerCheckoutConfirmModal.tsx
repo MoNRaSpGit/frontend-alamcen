@@ -8,12 +8,14 @@ type ScannerCheckoutConfirmModalProps = {
   total: number;
   isSubmittingSale: boolean;
   paymentMethod: ScannerPaymentMethod;
+  showPaymentMethods: boolean;
   customers: DemoCustomer[];
   selectedCustomerId: string;
   onClose: () => void;
   onConfirm: () => void;
   onChangePaymentMethod: (paymentMethod: ScannerPaymentMethod) => void;
   onChangeCustomer: (customerId: string) => void;
+  onTogglePaymentMethods: () => void;
 };
 
 export function ScannerCheckoutConfirmModal({
@@ -21,12 +23,14 @@ export function ScannerCheckoutConfirmModal({
   total,
   isSubmittingSale,
   paymentMethod,
+  showPaymentMethods,
   customers,
   selectedCustomerId,
   onClose,
   onConfirm,
   onChangePaymentMethod,
-  onChangeCustomer
+  onChangeCustomer,
+  onTogglePaymentMethods
 }: ScannerCheckoutConfirmModalProps) {
   if (!isOpen) {
     return null;
@@ -76,32 +80,45 @@ export function ScannerCheckoutConfirmModal({
         </div>
         <p className="scanner-modal-kicker">Total a cobrar</p>
         <p className="scanner-modal-total">{formatCurrency(total)}</p>
-        <div className="scanner-payment-method-section">
-          <p className="scanner-modal-kicker">Medio de cobro</p>
-          <div className="scanner-payment-method-grid">
-            {paymentOptions.map((option) => (
-              <label
-                key={option.value}
-                className={getPaymentButtonClass(option.value)}
-              >
-                <input
-                  type="radio"
-                  name="scanner-payment-method"
-                  value={option.value}
-                  checked={paymentMethod === option.value}
-                  disabled={isSubmittingSale}
-                  onChange={() => {
-                    onChangePaymentMethod(option.value);
-                    if (option.value !== "cuenta") {
-                      onChangeCustomer("");
-                    }
-                  }}
-                />
-                <span>{option.label}</span>
-              </label>
-            ))}
-          </div>
+        <div className="scanner-payment-toggle-row">
+          <button
+            type="button"
+            className="scanner-payment-toggle"
+            onClick={onTogglePaymentMethods}
+            disabled={isSubmittingSale}
+            aria-pressed={showPaymentMethods}
+          >
+            {showPaymentMethods ? "Ocultar medios" : "Medios"}
+          </button>
         </div>
+        {showPaymentMethods ? (
+          <div className="scanner-payment-method-section">
+            <p className="scanner-modal-kicker">Medio de cobro</p>
+            <div className="scanner-payment-method-grid">
+              {paymentOptions.map((option) => (
+                <label
+                  key={option.value}
+                  className={getPaymentButtonClass(option.value)}
+                >
+                  <input
+                    type="radio"
+                    name="scanner-payment-method"
+                    value={option.value}
+                    checked={paymentMethod === option.value}
+                    disabled={isSubmittingSale}
+                    onChange={() => {
+                      onChangePaymentMethod(option.value);
+                      if (option.value !== "cuenta") {
+                        onChangeCustomer("");
+                      }
+                    }}
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ) : null}
         {isAccountPayment ? (
           <div className="scanner-account-customer-box">
             <label htmlFor="scanner-account-customer">Cliente</label>
