@@ -40,7 +40,7 @@ const EXTRA_OPTIONS: Option[] = [
   {
     id: "data-load",
     label: "Ingreso de datos",
-    price: 150
+    price: 50
   }
 ];
 
@@ -197,7 +197,7 @@ export function PaymentMethodsTab() {
         <div className="pricing-feature-card">
           <div className="pricing-feature-copy">
             <h2>Ingreso de datos</h2>
-            <p>Hasta 2000 productos.</p>
+            <p>Cada 1000 productos.</p>
           </div>
 
           <button
@@ -205,7 +205,7 @@ export function PaymentMethodsTab() {
             className={`payment-feature-price ${selectedExtras.includes("data-load") ? "selected" : ""}`.trim()}
             onClick={() => toggleSelection(selectedExtras, setSelectedExtras, "data-load")}
           >
-            +{currency(150)}
+            +{currency(50)}
           </button>
         </div>
 
