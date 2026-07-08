@@ -11,12 +11,12 @@
   border-radius: 16px;
   background: linear-gradient(135deg, #fff 0%, #f8fbff 100%);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-  padding: 20px 22px;
+  padding: 18px 20px;
 }
 
 .alamcen-payment-methods-hero h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1.1;
   color: #102033;
 }
@@ -46,7 +46,7 @@
   border-radius: 16px;
   background: linear-gradient(180deg, #f8fafd 0%, #f4f7fb 100%);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
-  padding: 16px;
+  padding: 14px;
 }
 
 .alamcen-payment-methods-card-head {
@@ -61,6 +61,12 @@
   margin: 0;
   font-size: 18px;
   color: #0f172a;
+}
+
+.pricing-base-subtitle {
+  margin: 4px 0 0;
+  color: #334155;
+  font-size: 14px;
 }
 
 .alamcen-payment-methods-table {
@@ -156,7 +162,7 @@
 
 .pricing-inline-section {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .pricing-inline-head {
@@ -167,11 +173,11 @@
 }
 
 .pricing-pill {
-  min-width: 72px;
+  min-width: 64px;
   border: 1px solid #d6dde7;
   border-radius: 999px;
   background: #fff;
-  padding: 10px 16px;
+  padding: 8px 14px;
   font-weight: 800;
   color: #102033;
 }
@@ -188,13 +194,13 @@
 }
 
 .payment-toggle-card {
-  min-height: 118px;
+  min-height: 92px;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   background: #fff;
-  padding: 14px 12px;
+  padding: 12px;
   display: grid;
-  gap: 6px;
+  gap: 4px;
   text-align: left;
   transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease, background 120ms ease;
 }
@@ -216,14 +222,14 @@
 }
 
 .payment-toggle-card-price {
-  font-size: 18px;
+  font-size: 17px;
   color: #166534;
 }
 
 .pricing-summary-card {
   display: grid;
-  gap: 12px;
-  padding-top: 4px;
+  gap: 10px;
+  padding-top: 2px;
 }
 
 .pricing-summary-head {
@@ -234,7 +240,7 @@
 }
 
 .pricing-summary-total {
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1;
   color: #102033;
 }
@@ -251,7 +257,7 @@
   gap: 12px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   background: #fff;
 }
 
@@ -271,7 +277,7 @@
 
 @media (max-width: 720px) {
   .alamcen-payment-methods-hero h1 {
-    font-size: 24px;
+    font-size: 23px;
   }
 
   .alamcen-payment-methods-table-head {
@@ -293,6 +299,10 @@
 
   .pricing-inline-head {
     flex-direction: column;
+  }
+
+  .pricing-base-subtitle {
+    font-size: 13px;
   }
 
   .alamcen-payment-methods-row > span::before {

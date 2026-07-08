@@ -5,7 +5,6 @@ type Option = {
   id: string;
   label: string;
   price: number;
-  note: string;
   requires?: string;
 };
 
@@ -19,8 +18,7 @@ const MODULE_OPTIONS: Option[] = [
   {
     id: "printing",
     label: "Modulo de impresion",
-    price: 125,
-    note: "Se suma al plan base"
+    price: 125
   }
 ];
 
@@ -28,24 +26,13 @@ const EQUIPMENT_OPTIONS: Option[] = [
   {
     id: "scanner",
     label: "Scanner",
-    price: 125,
-    note: "Se suma a cualquier plan"
+    price: 125
   },
   {
     id: "printer",
     label: "Impresora",
     price: 225,
-    note: "Requiere modulo de impresion",
     requires: "printing"
-  }
-];
-
-const EXTRA_SERVICES: Option[] = [
-  {
-    id: "data",
-    label: "Carga de datos",
-    price: 150,
-    note: "Hasta 2000 productos"
   }
 ];
 
@@ -77,7 +64,6 @@ function ToggleCard({
     >
       <span className="payment-toggle-card-title">{option.label}</span>
       <strong className="payment-toggle-card-price">{`+${currency(option.price)}`}</strong>
-      <small>{option.note}</small>
     </button>
   );
 }
@@ -85,7 +71,6 @@ function ToggleCard({
 export function PaymentMethodsTab() {
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
-  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [includeEquipment, setIncludeEquipment] = useState(false);
 
   const printingEnabled = selectedModules.includes("printing");
@@ -116,14 +101,8 @@ export function PaymentMethodsTab() {
       (sum, option) => sum + option.price,
       0
     );
-
-    const extraTotal = EXTRA_SERVICES.filter((option) => selectedExtras.includes(option.id)).reduce(
-      (sum, option) => sum + option.price,
-      0
-    );
-
-    return BASE_PLAN.price + moduleTotal + equipmentTotal + extraTotal;
-  }, [selectedEquipment, selectedExtras, selectedModules]);
+    return BASE_PLAN.price + moduleTotal + equipmentTotal;
+  }, [selectedEquipment, selectedModules]);
 
   const selectedModuleTotal = useMemo(
     () => MODULE_OPTIONS.filter((option) => selectedModules.includes(option.id)).reduce((sum, option) => sum + option.price, 0),
@@ -132,10 +111,6 @@ export function PaymentMethodsTab() {
   const selectedEquipmentTotal = useMemo(
     () => EQUIPMENT_OPTIONS.filter((option) => selectedEquipment.includes(option.id)).reduce((sum, option) => sum + option.price, 0),
     [selectedEquipment]
-  );
-  const selectedExtrasTotal = useMemo(
-    () => EXTRA_SERVICES.filter((option) => selectedExtras.includes(option.id)).reduce((sum, option) => sum + option.price, 0),
-    [selectedExtras]
   );
 
   function toggleSelection(
@@ -163,30 +138,23 @@ export function PaymentMethodsTab() {
   return (
     <section className="alamcen-payment-methods-page">
       <header className="alamcen-payment-methods-hero">
-        <p className="alamcen-payment-methods-kicker">Almacen</p>
-        <h1>Configurador de planes</h1>
-        <p>Primeros 2 meses. Empezas con el plan base y vas sumando modulos o equipo segun lo que el cliente quiera.</p>
+        <h1>Planes</h1>
+        <p>Primeros 2 meses.</p>
       </header>
 
       <article className="alamcen-payment-methods-card pricing-builder-card">
         <div className="alamcen-payment-methods-card-head">
           <div>
-            <p className="alamcen-payment-methods-kicker">Base fija</p>
             <h2>{BASE_PLAN.label}</h2>
+            <p className="pricing-base-subtitle">{BASE_PLAN.includes}</p>
           </div>
           <strong className="pricing-base-price">{currency(BASE_PLAN.price)}</strong>
-        </div>
-
-        <div className="pricing-base-copy">
-          <span>{BASE_PLAN.includes}</span>
-          <small>Este plan queda activo por defecto y no se desmarca.</small>
         </div>
 
         <div className="pricing-inline-section">
           <div className="pricing-inline-head">
             <div>
-              <p className="alamcen-payment-methods-kicker">Equipamiento</p>
-              <h2>Si o no</h2>
+              <h2>Agregar equipamiento</h2>
             </div>
             <button
               type="button"
@@ -210,15 +178,14 @@ export function PaymentMethodsTab() {
               ))}
             </div>
           ) : (
-            <p className="pricing-muted-copy">Si no elegis equipamiento, solo queda el plan base y los modulos.</p>
+            <p className="pricing-muted-copy">Sin equipamiento.</p>
           )}
         </div>
 
         <div className="pricing-inline-section">
           <div className="pricing-inline-head">
             <div>
-              <p className="alamcen-payment-methods-kicker">Modulos</p>
-              <h2>Sumas de software</h2>
+              <h2>Agregar modulo</h2>
             </div>
           </div>
 
@@ -234,31 +201,10 @@ export function PaymentMethodsTab() {
           </div>
         </div>
 
-        <div className="pricing-inline-section">
-          <div className="pricing-inline-head">
-            <div>
-              <p className="alamcen-payment-methods-kicker">Extras</p>
-              <h2>Carga de datos</h2>
-            </div>
-          </div>
-
-          <div className="pricing-grid">
-            {EXTRA_SERVICES.map((option) => (
-              <ToggleCard
-                key={option.id}
-                option={option}
-                selected={isSelected(selectedExtras, option.id)}
-                onClick={() => toggleSelection(selectedExtras, setSelectedExtras, option.id)}
-              />
-            ))}
-          </div>
-        </div>
-
         <div className="pricing-summary-card">
           <div className="pricing-summary-head">
             <div>
-              <p className="alamcen-payment-methods-kicker">Resumen</p>
-              <h2>Total estimado</h2>
+              <h2>Total</h2>
             </div>
             <strong className="pricing-summary-total">{currency(total)}</strong>
           </div>
@@ -275,10 +221,6 @@ export function PaymentMethodsTab() {
             <div>
               <span>Equipamiento</span>
               <strong>{selectedEquipmentTotal ? currency(selectedEquipmentTotal) : "$0"}</strong>
-            </div>
-            <div>
-              <span>Extras</span>
-              <strong>{selectedExtrasTotal ? currency(selectedExtrasTotal) : "$0"}</strong>
             </div>
           </div>
         </div>
