@@ -15,6 +15,7 @@ import { BarcodeProductLookup } from "./alamcen.types";
 import { clearTrackedStock, loadTrackedStock, recordStockSale, TrackedStockItem, updateTrackedStockItem, StockUpdateInput } from "./alamcen.stock";
 import { StockTab } from "./StockTab";
 import { SaleLine } from "./alamcen.scanner.types";
+import { loadTodayPaymentMetrics } from "./alamcen.payment-metrics";
 
 type AlamcenWorkspaceProps = {
   onLoggedOut: () => void;
@@ -254,6 +255,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dashboard, setDashboard] = useState<Awaited<ReturnType<typeof fetchDashboard>>["dashboard"] | null>(null);
+  const [paymentMetrics, setPaymentMetrics] = useState({ tarjeta: 0, cuenta: 0 });
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -273,6 +275,10 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
       .finally(() => {
         setLoading(false);
       });
+  }, [refreshKey]);
+
+  useEffect(() => {
+    setPaymentMetrics(loadTodayPaymentMetrics());
   }, [refreshKey]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -356,30 +362,46 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
           {error ? <span className="alamcen-panel-error">{error}</span> : null}
         </div>
         {dashboard ? (
-          <div className="alamcen-panel-summary-columns">
-            <div className="alamcen-panel-summary-column">
-              <MetricCard title="Ventas del dia" value={formatCurrency(dashboard.metrics.salesToday)} hint="Total vendido desde la caja." highlight />
-              <MetricCard title="Pagos" value={formatCurrency(dashboard.metrics.paymentsTotal)} hint="Egresos cargados en el panel." />
-            </div>
-            <div className="alamcen-panel-summary-column">
-              <article className="alamcen-panel-metric-card comparison">
-                <p className="alamcen-panel-metric-title">Comparativa</p>
-                <div className="alamcen-panel-comparison-row">
-                  <span>vs ayer</span>
-                  <strong className={comparisonVsYesterday >= 0 ? "positive" : "negative"}>{formatPercent(comparisonVsYesterday)}</strong>
-                </div>
-                <div className="alamcen-panel-comparison-values">
-                  <span>Hoy {formatCurrency(dashboard.comparison.today)}</span>
-                  <span>Ayer {formatCurrency(dashboard.comparison.yesterday)}</span>
-                </div>
-              </article>
-              <MetricCard
-                title="Ganancia estimada"
-                value={formatCurrency(estimatedProfit)}
-                hint={`Calculada al ${Math.round(ESTIMATED_PROFIT_RATE * 100)}% de la venta del dia.`}
-              />
-            </div>
+          <div className="alamcen-panel-summary-grid">
+            <MetricCard title="Ventas del dia" value={formatCurrency(dashboard.metrics.salesToday)} hint="Total vendido desde la caja." highlight />
+            <article className="alamcen-panel-metric-card payment">
+              <p className="alamcen-panel-metric-title">Pagos</p>
+              <p className="alamcen-panel-metric-value">{formatCurrency(dashboard.metrics.paymentsTotal)}</p>
+              <p className="alamcen-panel-metric-hint">Egresos cargados en el panel.</p>
+            </article>
+            <MetricCard
+              title="Ganancia estimada"
+              value={formatCurrency(estimatedProfit)}
+              hint={`Calculada al ${Math.round(ESTIMATED_PROFIT_RATE * 100)}% de la venta del dia.`}
+            />
+            <article className="alamcen-panel-metric-card comparison">
+              <p className="alamcen-panel-metric-title">Comparativa</p>
+              <div className="alamcen-panel-comparison-row">
+                <span>vs ayer</span>
+                <strong className={comparisonVsYesterday >= 0 ? "positive" : "negative"}>{formatPercent(comparisonVsYesterday)}</strong>
+              </div>
+              <div className="alamcen-panel-comparison-values">
+                <span>Hoy {formatCurrency(dashboard.comparison.today)}</span>
+                <span>Ayer {formatCurrency(dashboard.comparison.yesterday)}</span>
+              </div>
+            </article>
+            <MetricCard title="Tarjeta" value={formatCurrency(paymentMetrics.tarjeta)} hint="Cobros confirmados con tarjeta." />
+            <MetricCard title="Credito" value={formatCurrency(paymentMetrics.cuenta)} hint="Ventas cargadas a cuenta." />
           </div>
+        ) : null}
+
+        {dashboard ? (
+          <article className="alamcen-panel-payment-entry">
+            <div>
+              <h3><HandCoins size={17} /> Registrar pago</h3>
+              <p>Ingresa un monto y una descripcion, por ejemplo Coca cola.</p>
+            </div>
+            <form className="alamcen-panel-payment-form" onSubmit={handleSubmit}>
+              <input type="text" inputMode="decimal" placeholder="Monto" value={amount} onChange={(event) => setAmount(event.target.value)} />
+              <input type="text" placeholder="Descripcion" value={description} onChange={(event) => setDescription(event.target.value)} />
+              <button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar pago"}</button>
+            </form>
+          </article>
         ) : null}
       </article>
 
@@ -423,7 +445,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
                     <div key={movement.id}>
                       <div className={isPayment ? "alamcen-panel-movement-row payment" : "alamcen-panel-movement-row sale"}>
                         <div>
-                          <p>{movement.type}</p>
+                          <p>{isPayment ? "Pago" : movement.type}</p>
                           <span>{movementTime.date} {movementTime.time}</span>
                         </div>
                         <div className="alamcen-panel-movement-actions">
