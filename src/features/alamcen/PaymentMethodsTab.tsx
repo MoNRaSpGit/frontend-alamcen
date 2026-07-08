@@ -1,38 +1,74 @@
-type PaymentPlanRow = {
+import type { ReactNode } from "react";
+
+type BasePlanRow = {
   plan: string;
   includes: string;
   softwarePrice: string;
-  equipment: string;
-  totalWithEquipment: string;
 };
 
-const PAYMENT_PLANS: PaymentPlanRow[] = [
+type AddonRow = {
+  name: string;
+  price: string;
+  note: string;
+};
+
+type ExampleRow = {
+  scenario: string;
+  formula: string;
+  total: string;
+};
+
+const BASE_PLANS: BasePlanRow[] = [
   {
     plan: "M1",
     includes: "Caja + Clientes + Panel",
-    softwarePrice: "$350",
-    equipment: "+ Scanner",
-    totalWithEquipment: "$475"
+    softwarePrice: "$350"
   },
   {
     plan: "M2",
     includes: "Todo lo de M1 + Modulo de impresion",
-    softwarePrice: "$425",
-    equipment: "+ Impresora",
-    totalWithEquipment: "$650"
+    softwarePrice: "$425"
   }
 ];
 
-function PaymentRow({ row }: { row: PaymentPlanRow }) {
-  return (
-    <div className="alamcen-payment-methods-row">
-      <strong className="alamcen-payment-methods-plan">{row.plan}</strong>
-      <span className="alamcen-payment-methods-includes">{row.includes}</span>
-      <span className="alamcen-payment-methods-price">{row.softwarePrice}</span>
-      <span className="alamcen-payment-methods-equipment">{row.equipment}</span>
-      <span className="alamcen-payment-methods-total">{row.totalWithEquipment}</span>
-    </div>
-  );
+const ADDONS: AddonRow[] = [
+  {
+    name: "Scanner",
+    price: "$125",
+    note: "Se suma al plan elegido"
+  },
+  {
+    name: "Impresora",
+    price: "$225",
+    note: "Se suma al plan elegido"
+  },
+  {
+    name: "Carga de datos",
+    price: "$150",
+    note: "Hasta 2000 productos"
+  }
+];
+
+const EXAMPLES: ExampleRow[] = [
+  {
+    scenario: "M1 + Scanner",
+    formula: "$350 + $125",
+    total: "$475"
+  },
+  {
+    scenario: "M1 + Scanner + Impresora",
+    formula: "$350 + $125 + $225",
+    total: "$700"
+  },
+  {
+    scenario: "M2 + Impresora",
+    formula: "$425 + $225",
+    total: "$650"
+  }
+];
+
+function TableRow({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`alamcen-payment-methods-row ${className}`.trim()}>{children}</div>;
 }
 
 export function PaymentMethodsTab() {
@@ -41,40 +77,80 @@ export function PaymentMethodsTab() {
       <header className="alamcen-payment-methods-hero">
         <p className="alamcen-payment-methods-kicker">Almacen</p>
         <h1>Metodos de pago</h1>
-        <p>Primeros 2 meses: planes base y complementos para presentar al cliente.</p>
+        <p>Primeros 2 meses. El total se arma sumando el plan base y los complementos elegidos.</p>
       </header>
 
       <article className="alamcen-payment-methods-card">
+        <div className="alamcen-payment-methods-card-head">
+          <div>
+            <p className="alamcen-payment-methods-kicker">Planes</p>
+            <h2>Base de software</h2>
+          </div>
+        </div>
         <div className="alamcen-payment-methods-table">
-          <div className="alamcen-payment-methods-table-head">
+          <div className="alamcen-payment-methods-table-head alamcen-payment-methods-table-head-3">
             <span>Plan</span>
             <span>Incluye</span>
-            <span>Precio (Software)</span>
-            <span>Equipamiento</span>
-            <span>Con equipamiento</span>
+            <span>Precio software</span>
           </div>
 
-          {PAYMENT_PLANS.map((row) => (
-            <PaymentRow key={row.plan} row={row} />
+          {BASE_PLANS.map((row) => (
+            <TableRow key={row.plan} className="alamcen-payment-methods-row-3">
+              <strong className="alamcen-payment-methods-plan">{row.plan}</strong>
+              <span className="alamcen-payment-methods-includes">{row.includes}</span>
+              <span className="alamcen-payment-methods-price">{row.softwarePrice}</span>
+            </TableRow>
           ))}
         </div>
       </article>
 
-      <article className="alamcen-payment-methods-card alamcen-payment-methods-addon-card">
-        <div className="alamcen-payment-methods-addon-head">
+      <article className="alamcen-payment-methods-card">
+        <div className="alamcen-payment-methods-card-head">
           <div>
-            <p className="alamcen-payment-methods-kicker">Complemento</p>
-            <h2>Carga de datos</h2>
+            <p className="alamcen-payment-methods-kicker">Complementos</p>
+            <h2>Equipamiento y extras</h2>
           </div>
-          <strong className="alamcen-payment-methods-addon-price">+$150</strong>
         </div>
 
-        <div className="alamcen-payment-methods-addon-table">
-          <div className="alamcen-payment-methods-addon-row">
-            <span>Disponible para cualquier plan</span>
-            <span>Hasta 2000 productos</span>
-            <span>Se suma al plan elegido</span>
+        <div className="alamcen-payment-methods-table">
+          <div className="alamcen-payment-methods-table-head alamcen-payment-methods-table-head-3">
+            <span>Complemento</span>
+            <span>Precio</span>
+            <span>Detalle</span>
           </div>
+
+          {ADDONS.map((row) => (
+            <TableRow key={row.name} className="alamcen-payment-methods-row-3">
+              <strong className="alamcen-payment-methods-plan">{row.name}</strong>
+              <span className="alamcen-payment-methods-price">{row.price}</span>
+              <span className="alamcen-payment-methods-equipment">{row.note}</span>
+            </TableRow>
+          ))}
+        </div>
+      </article>
+
+      <article className="alamcen-payment-methods-card">
+        <div className="alamcen-payment-methods-card-head">
+          <div>
+            <p className="alamcen-payment-methods-kicker">Ejemplos</p>
+            <h2>Combinaciones frecuentes</h2>
+          </div>
+        </div>
+
+        <div className="alamcen-payment-methods-table">
+          <div className="alamcen-payment-methods-table-head alamcen-payment-methods-table-head-3">
+            <span>Escenario</span>
+            <span>Formula</span>
+            <span>Total</span>
+          </div>
+
+          {EXAMPLES.map((row) => (
+            <TableRow key={row.scenario} className="alamcen-payment-methods-row-3">
+              <strong className="alamcen-payment-methods-plan">{row.scenario}</strong>
+              <span className="alamcen-payment-methods-includes">{row.formula}</span>
+              <span className="alamcen-payment-methods-total">{row.total}</span>
+            </TableRow>
+          ))}
         </div>
       </article>
     </section>

@@ -76,6 +76,11 @@
   align-items: center;
 }
 
+.alamcen-payment-methods-table-head-3,
+.alamcen-payment-methods-row-3 {
+  grid-template-columns: 0.8fr 1.4fr 0.8fr;
+}
+
 .alamcen-payment-methods-table-head {
   padding: 0 6px;
   color: #64748b;
@@ -112,42 +117,6 @@
 }
 
 .alamcen-payment-methods-addon-card {
-  display: grid;
-  gap: 12px;
-}
-
-.alamcen-payment-methods-addon-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.alamcen-payment-methods-addon-head h2 {
-  margin: 0;
-  font-size: 18px;
-  color: #0f172a;
-}
-
-.alamcen-payment-methods-addon-price {
-  font-size: 22px;
-  line-height: 1;
-  color: #166534;
-}
-
-.alamcen-payment-methods-addon-table {
-  display: grid;
-}
-
-.alamcen-payment-methods-addon-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  padding: 12px 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #fff;
-  color: #334155;
 }
 
 @media (min-width: 860px) {
@@ -170,13 +139,9 @@
     gap: 6px;
   }
 
-  .alamcen-payment-methods-addon-head {
-    flex-direction: column;
-  }
-
-  .alamcen-payment-methods-addon-row {
+  .alamcen-payment-methods-table-head-3,
+  .alamcen-payment-methods-row-3 {
     grid-template-columns: 1fr;
-    gap: 6px;
   }
 
   .alamcen-payment-methods-row > span::before {
@@ -203,5 +168,27 @@
 
   .alamcen-payment-methods-total::before {
     content: "Con equipo";
+  }
+
+  .alamcen-payment-methods-row-3 > span::before {
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.03em;
+  }
+
+  .alamcen-payment-methods-row-3 > .alamcen-payment-methods-price::before {
+    content: "Precio";
+  }
+
+  .alamcen-payment-methods-row-3 > .alamcen-payment-methods-includes::before {
+    content: "Incluye";
+  }
+
+  .alamcen-payment-methods-row-3 > .alamcen-payment-methods-total::before {
+    content: "Total";
   }
 }
