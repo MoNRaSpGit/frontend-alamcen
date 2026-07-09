@@ -142,8 +142,16 @@ export function PaymentMethodsTab() {
   return (
     <section className="alamcen-payment-methods-page">
       <header className="alamcen-payment-methods-hero">
-        <h1>Planes</h1>
-        <p>Primeros 2 meses.</p>
+        <div className="alamcen-payment-methods-hero-copy">
+          <p className="alamcen-payment-methods-kicker">Almacen</p>
+          <h1>Planes</h1>
+          <p>Primeros 2 meses. Base simple, clara y lista para presentar.</p>
+        </div>
+        <div className="alamcen-payment-methods-hero-badge">
+          <span>Plan base</span>
+          <strong>{currency(BASE_PLAN.price)}</strong>
+          <small>{BASE_PLAN.includes}</small>
+        </div>
       </header>
 
       <article className="alamcen-payment-methods-card pricing-builder-card">
@@ -151,6 +159,7 @@ export function PaymentMethodsTab() {
           <div>
             <h2>{BASE_PLAN.label}</h2>
             <p className="pricing-base-subtitle">{BASE_PLAN.includes}</p>
+            <p className="pricing-section-note">Activo por defecto, sin vueltas.</p>
           </div>
           <strong className="pricing-base-price">{currency(BASE_PLAN.price)}</strong>
         </div>
@@ -159,6 +168,7 @@ export function PaymentMethodsTab() {
           <div className="pricing-inline-head">
             <div>
               <h2>Agregar equipamiento</h2>
+              <p className="pricing-section-note">Scanner y impresora como extras simples.</p>
             </div>
           </div>
 
@@ -179,6 +189,7 @@ export function PaymentMethodsTab() {
           <div className="pricing-inline-head">
             <div>
               <h2>Agregar modulo</h2>
+              <p className="pricing-section-note">Impresion habilita la impresora.</p>
             </div>
           </div>
 
@@ -213,6 +224,7 @@ export function PaymentMethodsTab() {
           <div className="pricing-summary-head">
             <div>
               <h2>Total</h2>
+              <p className="pricing-section-note">Se actualiza al instante con lo que selecciones.</p>
             </div>
             <strong className="pricing-summary-total">{currency(total)}</strong>
           </div>
