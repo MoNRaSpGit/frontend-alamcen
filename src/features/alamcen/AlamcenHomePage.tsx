@@ -212,6 +212,19 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
 
     const normalizedBarcode = barcodeInput.trim();
     if (!normalizedBarcode) {
+      if (manualModalOpen || editModalOpen || isSubmittingSale) {
+        return;
+      }
+
+      if (isCheckoutConfirmOpen) {
+        void handleCheckout();
+        return;
+      }
+
+      if (saleLines.length) {
+        setIsCheckoutConfirmOpen(true);
+      }
+
       return;
     }
 
