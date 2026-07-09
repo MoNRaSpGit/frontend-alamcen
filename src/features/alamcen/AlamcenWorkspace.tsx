@@ -390,19 +390,6 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
           </div>
         ) : null}
 
-        {dashboard ? (
-          <article className="alamcen-panel-payment-entry">
-            <div>
-              <h3><HandCoins size={17} /> Registrar pago</h3>
-              <p>Ingresa un monto y una descripcion, por ejemplo Coca cola.</p>
-            </div>
-            <form className="alamcen-panel-payment-form" onSubmit={handleSubmit}>
-              <input type="text" inputMode="decimal" placeholder="Monto" value={amount} onChange={(event) => setAmount(event.target.value)} />
-              <input type="text" placeholder="Descripcion" value={description} onChange={(event) => setDescription(event.target.value)} />
-              <button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar pago"}</button>
-            </form>
-          </article>
-        ) : null}
       </article>
 
       {SHOW_PANEL_EXTRAS && dashboard ? (
@@ -548,6 +535,25 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
         </div>
         ) : null}
       </div>
+
+      {dashboard ? (
+        <article className="alamcen-panel-section alamcen-panel-payment-section">
+          <div className="alamcen-panel-section-header">
+            <div>
+              <h2>Registrar pago</h2>
+              <p>Ingresa un monto y una descripcion, por ejemplo Coca cola.</p>
+            </div>
+            {error ? <span className="alamcen-panel-error">{error}</span> : null}
+          </div>
+          <div className="alamcen-panel-payment-entry">
+            <form className="alamcen-panel-payment-form" onSubmit={handleSubmit}>
+              <input type="text" inputMode="decimal" placeholder="Monto" value={amount} onChange={(event) => setAmount(event.target.value)} />
+              <input type="text" placeholder="Descripcion" value={description} onChange={(event) => setDescription(event.target.value)} />
+              <button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar pago"}</button>
+            </form>
+          </div>
+        </article>
+      ) : null}
     </section>
   );
 }

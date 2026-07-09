@@ -308,6 +308,16 @@
   background: #e8edf4;
 }
 
+.alamcen-panel-movement-row.payment {
+  border-color: #f0b4b4;
+  background: #fff4f4;
+}
+
+.alamcen-panel-movement-row.payment p,
+.alamcen-panel-movement-row.payment span {
+  color: #991b1b;
+}
+
 .alamcen-panel-movement-row p {
   margin: 0;
   font-weight: 800;
@@ -479,6 +489,11 @@
 
 .alamcen-panel-payment-entry .alamcen-panel-payment-form input:first-child {
   max-width: 180px;
+}
+
+.alamcen-panel-payment-section {
+  display: grid;
+  gap: 12px;
 }
 
 .alamcen-panel-live-banner {
