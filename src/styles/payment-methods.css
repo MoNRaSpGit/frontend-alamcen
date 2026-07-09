@@ -106,9 +106,19 @@
 }
 
 .pricing-base-subtitle {
-  margin: 4px 0 0;
-  color: #334155;
-  font-size: 14px;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  margin: 6px 0 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 101, 52, 0.16);
+  background: #ecfdf5;
+  color: #14532d;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .pricing-section-note {
@@ -210,9 +220,19 @@
 }
 
 .pricing-base-subtitle {
-  margin: 4px 0 0;
-  color: #334155;
-  font-size: 14px;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  margin: 6px 0 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 101, 52, 0.16);
+  background: #ecfdf5;
+  color: #14532d;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .pricing-inline-section {

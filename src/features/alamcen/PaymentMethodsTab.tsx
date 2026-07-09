@@ -9,7 +9,7 @@ type Option = {
 };
 
 const BASE_PLAN = {
-  label: "Plan A",
+  label: "Plan inicial",
   includes: "Caja + Clientes + Panel",
   price: 350
 };
