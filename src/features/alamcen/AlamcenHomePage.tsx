@@ -174,51 +174,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
     setShouldRestoreBarcodeFocus(false);
   }, [editModalOpen, manualModalOpen, shouldRestoreBarcodeFocus]);
 
-  useEffect(() => {
-    function isEditableTarget(target: EventTarget | null) {
-      if (!(target instanceof HTMLElement)) {
-        return false;
-      }
-
-      return Boolean(
-        target.closest("input, textarea, select, button") || target.isContentEditable
-      );
-    }
-
-    function handleEnterKey(event: KeyboardEvent) {
-      if (event.key !== "Enter" || event.repeat) {
-        return;
-      }
-
-      if (isEditableTarget(event.target)) {
-        return;
-      }
-
-      if (manualModalOpen || editModalOpen || isSubmittingSale) {
-        return;
-      }
-
-      if (isCheckoutConfirmOpen) {
-        event.preventDefault();
-        void handleCheckout();
-        return;
-      }
-
-      if (!saleLines.length) {
-        return;
-      }
-
-      event.preventDefault();
-      setIsCheckoutConfirmOpen(true);
-    }
-
-    document.addEventListener("keydown", handleEnterKey);
-
-    return () => {
-      document.removeEventListener("keydown", handleEnterKey);
-    };
-  }, [editModalOpen, handleCheckout, isCheckoutConfirmOpen, isSubmittingSale, manualModalOpen, saleLines.length]);
-
   function openManualProductModal(barcode: string, mode: ManualModalMode = "barcode-miss") {
     setManualModalMode(mode);
     setManualBarcode(barcode);
@@ -286,6 +241,29 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       setLookupError(buildLookupErrorMessage(error, getApiBaseUrl()));
       focusBarcodeInput();
     }
+  }
+
+  function handleBarcodeKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter" || event.repeat) {
+      return;
+    }
+
+    if (manualModalOpen || editModalOpen || isSubmittingSale) {
+      return;
+    }
+
+    if (isCheckoutConfirmOpen) {
+      event.preventDefault();
+      void handleCheckout();
+      return;
+    }
+
+    if (!saleLines.length) {
+      return;
+    }
+
+    event.preventDefault();
+    setIsCheckoutConfirmOpen(true);
   }
 
   async function handleCheckout() {
@@ -461,6 +439,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
           editModalOpen={editModalOpen}
           barcodeInputRef={barcodeInputRef}
           onSubmit={handleBarcodeSubmit}
+          onBarcodeKeyDown={handleBarcodeKeyDown}
           onChangeBarcode={setBarcodeInput}
           onBlurBarcode={focusBarcodeInput}
           onOpenManual={() => openManualProductModal("", "manual-button")}
