@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:gh": "tsc -b && vite build --base=/frontend-alamcen/",
+    "generate:sw": "node scripts/generate-sw.js",
+    "build": "npm run generate:sw && tsc -b && vite build",
+    "build:gh": "npm run generate:sw && tsc -b && vite build --base=/frontend-alamcen/",
     "deploy": "npm run build:gh",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
