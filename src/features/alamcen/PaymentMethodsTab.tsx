@@ -145,7 +145,7 @@ export function PaymentMethodsTab() {
         <div className="alamcen-payment-methods-hero-copy">
           <p className="alamcen-payment-methods-kicker">Almacen</p>
           <h1>Planes</h1>
-          <p>Primeros 2 meses. Base simple, clara y lista para presentar.</p>
+          <p>Primeros 2 meses al 50 % de descuento.</p>
         </div>
         <div className="alamcen-payment-methods-hero-badge">
           <span>Plan base</span>
@@ -159,7 +159,6 @@ export function PaymentMethodsTab() {
           <div>
             <h2>{BASE_PLAN.label}</h2>
             <p className="pricing-base-subtitle">{BASE_PLAN.includes}</p>
-            <p className="pricing-section-note">Activo por defecto, sin vueltas.</p>
           </div>
           <strong className="pricing-base-price">{currency(BASE_PLAN.price)}</strong>
         </div>
@@ -168,7 +167,6 @@ export function PaymentMethodsTab() {
           <div className="pricing-inline-head">
             <div>
               <h2>Agregar equipamiento</h2>
-              <p className="pricing-section-note">Scanner y impresora como extras simples.</p>
             </div>
           </div>
 
@@ -189,7 +187,6 @@ export function PaymentMethodsTab() {
           <div className="pricing-inline-head">
             <div>
               <h2>Agregar modulo</h2>
-              <p className="pricing-section-note">Impresion habilita la impresora.</p>
             </div>
           </div>
 
