@@ -161,6 +161,16 @@
   background: linear-gradient(180deg, #fff 0%, #f7fbff 100%);
 }
 
+.alamcen-panel-metric-card-editable {
+  cursor: pointer;
+}
+
+.alamcen-panel-metric-card-editable:hover,
+.alamcen-panel-metric-card-editable:focus-within {
+  border-color: #9fb2cc;
+  box-shadow: 0 8px 18px rgba(28, 82, 140, 0.12);
+}
+
 .alamcen-panel-metric-title {
   margin: 0 0 4px;
   font-size: 12px;

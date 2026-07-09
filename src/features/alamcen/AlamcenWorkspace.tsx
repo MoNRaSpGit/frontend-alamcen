@@ -77,7 +77,8 @@ function MetricCard({
 }
 
 const SHOW_PANEL_EXTRAS = false;
-const ESTIMATED_PROFIT_RATE = 0.3;
+const DEFAULT_ESTIMATED_PROFIT_RATE = 0.3;
+const ESTIMATED_PROFIT_RATE_STORAGE_KEY = "alamcen.estimated-profit-rate";
 const WORKSPACE_MENU_ITEMS: WorkspaceNavItem[] = [
   { key: "panel", label: "Panel de control" },
   { key: "customers", label: "Clientes" },
@@ -256,6 +257,10 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
   const [error, setError] = useState("");
   const [dashboard, setDashboard] = useState<Awaited<ReturnType<typeof fetchDashboard>>["dashboard"] | null>(null);
   const [paymentMetrics, setPaymentMetrics] = useState({ tarjeta: 0, cuenta: 0 });
+  const [estimatedProfitRate, setEstimatedProfitRate] = useState(DEFAULT_ESTIMATED_PROFIT_RATE);
+  const [estimatedProfitRateInput, setEstimatedProfitRateInput] = useState(String(Math.round(DEFAULT_ESTIMATED_PROFIT_RATE * 100)));
+  const [estimatedProfitModalOpen, setEstimatedProfitModalOpen] = useState(false);
+  const [estimatedProfitError, setEstimatedProfitError] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -280,6 +285,21 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
   useEffect(() => {
     setPaymentMetrics(loadTodayPaymentMetrics());
   }, [refreshKey]);
+
+  useEffect(() => {
+    const storedRate = window.localStorage.getItem(ESTIMATED_PROFIT_RATE_STORAGE_KEY);
+    if (!storedRate) {
+      return;
+    }
+
+    const parsedRate = Number(storedRate);
+    if (!Number.isFinite(parsedRate) || parsedRate < 0) {
+      return;
+    }
+
+    setEstimatedProfitRate(parsedRate);
+    setEstimatedProfitRateInput(String(Math.round(parsedRate * 100)));
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -315,7 +335,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
     dashboard && dashboard.comparison.yesterday > 0
       ? ((dashboard.comparison.today - dashboard.comparison.yesterday) / dashboard.comparison.yesterday) * 100
       : 0;
-  const estimatedProfit = dashboard ? dashboard.metrics.salesToday * ESTIMATED_PROFIT_RATE : 0;
+  const estimatedProfit = dashboard ? dashboard.metrics.salesToday * estimatedProfitRate : 0;
   const allMovements = dashboard?.movements ?? [];
   const visibleMovements = allMovements.slice(0, movementLimit);
   const visibleRanking = dashboard?.ranking.slice(0, 8) ?? [];
@@ -336,6 +356,33 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
     }
 
     setMovementLimit((current) => (current === 3 ? Math.min(6, allMovements.length) : allMovements.length));
+  }
+
+  function handleOpenEstimatedProfitModal() {
+    setEstimatedProfitRateInput(String(Math.round(estimatedProfitRate * 100)));
+    setEstimatedProfitError("");
+    setEstimatedProfitModalOpen(true);
+  }
+
+  function handleCloseEstimatedProfitModal() {
+    setEstimatedProfitModalOpen(false);
+    setEstimatedProfitError("");
+  }
+
+  function handleEstimatedProfitSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const parsedPercent = Number(estimatedProfitRateInput.replace(",", "."));
+    if (!Number.isFinite(parsedPercent) || parsedPercent < 0) {
+      setEstimatedProfitError("Ingresa un porcentaje valido.");
+      return;
+    }
+
+    const nextRate = parsedPercent / 100;
+    setEstimatedProfitRate(nextRate);
+    window.localStorage.setItem(ESTIMATED_PROFIT_RATE_STORAGE_KEY, String(nextRate));
+    setEstimatedProfitModalOpen(false);
+    setEstimatedProfitError("");
   }
 
   return (
@@ -369,11 +416,15 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
               <p className="alamcen-panel-metric-value">{formatCurrency(dashboard.metrics.paymentsTotal)}</p>
               <p className="alamcen-panel-metric-hint">Egresos cargados en el panel.</p>
             </article>
-            <MetricCard
-              title="Ganancia estimada"
-              value={formatCurrency(estimatedProfit)}
-              hint={`Calculada al ${Math.round(ESTIMATED_PROFIT_RATE * 100)}% de la venta del dia.`}
-            />
+            <article
+              className="alamcen-panel-metric-card alamcen-panel-metric-card-editable"
+              onDoubleClick={handleOpenEstimatedProfitModal}
+              title="Doble click para cambiar el porcentaje"
+            >
+              <p className="alamcen-panel-metric-title">Ganancia estimada</p>
+              <p className="alamcen-panel-metric-value">{formatCurrency(estimatedProfit)}</p>
+              <p className="alamcen-panel-metric-hint">{`Calculada al ${Math.round(estimatedProfitRate * 100)}% de la venta del dia.`}</p>
+            </article>
             <article className="alamcen-panel-metric-card comparison">
               <p className="alamcen-panel-metric-title">Comparativa</p>
               <div className="alamcen-panel-comparison-row">
@@ -391,6 +442,48 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
         ) : null}
 
       </article>
+
+      {estimatedProfitModalOpen ? (
+        <div className="scanner-modal-overlay" onClick={handleCloseEstimatedProfitModal}>
+          <section
+            className="scanner-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="estimated-profit-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="scanner-modal-header">
+              <h2 id="estimated-profit-title" className="scanner-modal-title">Porcentaje de ganancia</h2>
+              <button type="button" className="scanner-modal-close" onClick={handleCloseEstimatedProfitModal} aria-label="Cerrar">
+                x
+              </button>
+            </div>
+            <form className="scanner-modal-form" onSubmit={handleEstimatedProfitSubmit}>
+              <label className="scanner-modal-label" htmlFor="estimated-profit-input">
+                Porcentaje
+              </label>
+              <input
+                id="estimated-profit-input"
+                className="scanner-modal-input"
+                type="text"
+                inputMode="decimal"
+                value={estimatedProfitRateInput}
+                onChange={(event) => setEstimatedProfitRateInput(event.target.value)}
+                placeholder="30"
+              />
+              {estimatedProfitError ? <p className="alamcen-panel-error">{estimatedProfitError}</p> : null}
+              <div className="scanner-modal-actions">
+                <button type="button" className="scanner-secondary-btn" onClick={handleCloseEstimatedProfitModal}>
+                  Cancelar
+                </button>
+                <button type="submit" className="scanner-primary-btn">
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      ) : null}
 
       {SHOW_PANEL_EXTRAS && dashboard ? (
         <article className="alamcen-panel-section">
