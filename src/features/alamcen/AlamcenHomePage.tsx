@@ -174,31 +174,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
     setShouldRestoreBarcodeFocus(false);
   }, [editModalOpen, manualModalOpen, shouldRestoreBarcodeFocus]);
 
-  useEffect(() => {
-    if (!isCheckoutConfirmOpen) {
-      return;
-    }
-
-    function handleCheckoutEnter(event: KeyboardEvent) {
-      if (event.key !== "Enter" || event.repeat) {
-        return;
-      }
-
-      if (manualModalOpen || editModalOpen || isSubmittingSale) {
-        return;
-      }
-
-      event.preventDefault();
-      void handleCheckout();
-    }
-
-    document.addEventListener("keydown", handleCheckoutEnter);
-
-    return () => {
-      document.removeEventListener("keydown", handleCheckoutEnter);
-    };
-  }, [editModalOpen, handleCheckout, isCheckoutConfirmOpen, isSubmittingSale, manualModalOpen]);
-
   function openManualProductModal(barcode: string, mode: ManualModalMode = "barcode-miss") {
     setManualModalMode(mode);
     setManualBarcode(barcode);
