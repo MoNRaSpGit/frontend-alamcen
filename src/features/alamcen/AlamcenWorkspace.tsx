@@ -428,6 +428,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
                   const movementTime = formatDateTime(movement.createdAt);
                   const isPayment = movement.detail.kind === "payment";
                   const isExpanded = expandedMovementId === movement.id;
+                  const movementAmount = formatCurrency(Math.abs(movement.amount));
                   return (
                     <div key={movement.id}>
                       <div className={isPayment ? "alamcen-panel-movement-row payment" : "alamcen-panel-movement-row sale"}>
@@ -437,7 +438,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
                         </div>
                         <div className="alamcen-panel-movement-actions">
                           <strong className={isPayment ? "negative" : "positive"}>
-                            {isPayment ? "-" : "+"}{formatCurrency(movement.amount)}
+                            {isPayment ? "-" : "+"}{movementAmount}
                           </strong>
                           <button type="button" onClick={() => setExpandedMovementId(isExpanded ? null : movement.id)}>
                             {isExpanded ? "Ocultar" : "Detalle"}
