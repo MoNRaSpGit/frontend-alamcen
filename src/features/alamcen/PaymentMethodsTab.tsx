@@ -148,9 +148,7 @@ export function PaymentMethodsTab() {
           <p>Primeros 2 meses al 50 % de descuento.</p>
         </div>
         <div className="alamcen-payment-methods-hero-badge">
-          <span>Plan base</span>
           <strong>{currency(BASE_PLAN.price)}</strong>
-          <small>{BASE_PLAN.includes}</small>
         </div>
       </header>
 
