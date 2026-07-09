@@ -8,7 +8,6 @@ type ScannerInputPanelProps = {
   editModalOpen: boolean;
   barcodeInputRef: RefObject<HTMLInputElement | null>;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onBarcodeKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onChangeBarcode: (value: string) => void;
   onBlurBarcode: () => void;
   onOpenManual: () => void;
@@ -22,7 +21,6 @@ export function ScannerInputPanel({
   editModalOpen,
   barcodeInputRef,
   onSubmit,
-  onBarcodeKeyDown,
   onChangeBarcode,
   onBlurBarcode,
   onOpenManual
@@ -38,7 +36,6 @@ export function ScannerInputPanel({
           inputMode="numeric"
           value={barcodeInput}
           placeholder="Escanear o escribir codigo"
-          onKeyDown={onBarcodeKeyDown}
           onBlur={() => {
             if (!manualModalOpen && !editModalOpen && !isCheckoutConfirmOpen) {
               onBlurBarcode();

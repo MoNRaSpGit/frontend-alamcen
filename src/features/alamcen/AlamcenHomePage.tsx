@@ -212,19 +212,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
 
     const normalizedBarcode = barcodeInput.trim();
     if (!normalizedBarcode) {
-      if (manualModalOpen || editModalOpen || isSubmittingSale) {
-        return;
-      }
-
-      if (isCheckoutConfirmOpen) {
-        void handleCheckout();
-        return;
-      }
-
-      if (saleLines.length) {
-        setIsCheckoutConfirmOpen(true);
-      }
-
       return;
     }
 
@@ -254,29 +241,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       setLookupError(buildLookupErrorMessage(error, getApiBaseUrl()));
       focusBarcodeInput();
     }
-  }
-
-  function handleBarcodeKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (event.key !== "Enter" || event.repeat) {
-      return;
-    }
-
-    if (manualModalOpen || editModalOpen || isSubmittingSale) {
-      return;
-    }
-
-    if (isCheckoutConfirmOpen) {
-      event.preventDefault();
-      void handleCheckout();
-      return;
-    }
-
-    if (!saleLines.length) {
-      return;
-    }
-
-    event.preventDefault();
-    setIsCheckoutConfirmOpen(true);
   }
 
   async function handleCheckout() {
@@ -452,7 +416,6 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
           editModalOpen={editModalOpen}
           barcodeInputRef={barcodeInputRef}
           onSubmit={handleBarcodeSubmit}
-          onBarcodeKeyDown={handleBarcodeKeyDown}
           onChangeBarcode={setBarcodeInput}
           onBlurBarcode={focusBarcodeInput}
           onOpenManual={() => openManualProductModal("", "manual-button")}
