@@ -21,7 +21,7 @@ export type DemoCustomer = {
 export const CUSTOMER_PREVIEW: DemoCustomer[] = [
   {
     id: "lucia",
-    name: "Lucia Almacen",
+    name: "Juan",
     phone: "099 000 000",
     debtTotal: 2450,
     lastSale: "Hoy 14:20",
@@ -33,7 +33,7 @@ export const CUSTOMER_PREVIEW: DemoCustomer[] = [
   },
   {
     id: "claudia",
-    name: "La Claudia",
+    name: "Ana",
     phone: "098 111 222",
     debtTotal: 780,
     lastSale: "Ayer 11:12",
@@ -42,7 +42,7 @@ export const CUSTOMER_PREVIEW: DemoCustomer[] = [
   },
   {
     id: "oriol",
-    name: "Oriol",
+    name: "Pablo",
     phone: "097 333 444",
     debtTotal: 0,
     lastSale: "Sin deuda",
