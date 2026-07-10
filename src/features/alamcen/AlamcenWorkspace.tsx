@@ -505,7 +505,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
 
       <div className={SHOW_PANEL_EXTRAS ? "alamcen-panel-layout-grid" : "alamcen-panel-layout-grid single"}>
         <div className="alamcen-panel-left-stack">
-          <article className="alamcen-panel-block accent-blue">
+          <article className={`alamcen-panel-block accent-blue ${isMovementsOpen ? "" : "is-collapsed"}`}>
             <div className="alamcen-panel-block-header">
               <button
                 type="button"
@@ -516,10 +516,12 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
                 <span className="alamcen-panel-collapse-toggle__icon">
                   {isMovementsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </span>
-                <span>
-                  <h3><ArrowLeftRight size={17} /> Movimientos</h3>
-                  <p>Ultimas ventas y pagos registrados.</p>
-                </span>
+                {isMovementsOpen ? (
+                  <span>
+                    <h3><ArrowLeftRight size={17} /> Movimientos</h3>
+                    <p>Ultimas ventas y pagos registrados.</p>
+                  </span>
+                ) : null}
               </button>
               {isMovementsOpen && allMovements.length > 3 ? (
                 <button type="button" className="alamcen-panel-movements-toggle" onClick={handleToggleMovements}>
@@ -645,7 +647,7 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
       </div>
 
       {dashboard ? (
-        <article className="alamcen-panel-section alamcen-panel-payment-section">
+        <article className={`alamcen-panel-section alamcen-panel-payment-section ${isPaymentsOpen ? "" : "is-collapsed"}`}>
           <div className="alamcen-panel-section-header">
             <button
               type="button"
@@ -656,12 +658,14 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
               <span className="alamcen-panel-collapse-toggle__icon">
                 {isPaymentsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               </span>
-              <span>
-                <h2>Registrar pago</h2>
-                <p>Ingresa un monto y una descripcion, por ejemplo Coca cola.</p>
-              </span>
+              {isPaymentsOpen ? (
+                <span>
+                  <h2>Registrar pago</h2>
+                  <p>Ingresa un monto y una descripcion, por ejemplo Coca cola.</p>
+                </span>
+              ) : null}
             </button>
-            {error ? <span className="alamcen-panel-error">{error}</span> : null}
+            {isPaymentsOpen && error ? <span className="alamcen-panel-error">{error}</span> : null}
           </div>
           {isPaymentsOpen ? (
             <div className="alamcen-panel-payment-entry">

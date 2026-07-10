@@ -241,6 +241,11 @@
   --zone-border: #a7b4c7;
 }
 
+.alamcen-panel-block.is-collapsed,
+.alamcen-panel-payment-section.is-collapsed {
+  background: #ffffff;
+}
+
 .alamcen-panel-block.accent-blue {
   --zone-bg: #edf4fb;
   --zone-border: #9fb2cc;
@@ -269,6 +274,11 @@
   gap: 12px;
 }
 
+.alamcen-panel-block.is-collapsed .alamcen-panel-block-header,
+.alamcen-panel-payment-section.is-collapsed .alamcen-panel-section-header {
+  margin-bottom: 0;
+}
+
 .alamcen-panel-collapse-toggle {
   width: 100%;
   display: flex;
@@ -280,6 +290,12 @@
   color: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+.alamcen-panel-block.is-collapsed .alamcen-panel-collapse-toggle,
+.alamcen-panel-payment-section.is-collapsed .alamcen-panel-collapse-toggle {
+  justify-content: flex-start;
+  min-height: 24px;
 }
 
 .alamcen-panel-collapse-toggle > span:last-child {
@@ -295,6 +311,15 @@
   margin-top: 2px;
   color: #475569;
   flex: 0 0 auto;
+}
+
+.alamcen-panel-block.is-collapsed .alamcen-panel-collapse-toggle__icon,
+.alamcen-panel-payment-section.is-collapsed .alamcen-panel-collapse-toggle__icon {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #dbe2eb;
+  border-radius: 999px;
+  background: #ffffff;
 }
 
 .alamcen-panel-collapse-toggle--section {
