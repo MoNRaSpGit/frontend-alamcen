@@ -1,5 +1,5 @@
 import { Dispatch, FormEvent, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeftRight, CreditCard, HandCoins, Menu, Trophy, UserRound, Wallet } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, ChevronRight, CreditCard, HandCoins, Menu, Trophy, UserRound, Wallet } from "lucide-react";
 import { logoutSession } from "../auth/auth.client";
 import { AlamcenHomePage } from "./AlamcenHomePage";
 import { PaymentMethodsTab } from "./PaymentMethodsTab";
@@ -266,6 +266,8 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
   const [saving, setSaving] = useState(false);
   const [expandedMovementId, setExpandedMovementId] = useState<string | null>(null);
   const [movementLimit, setMovementLimit] = useState(3);
+  const [isMovementsOpen, setIsMovementsOpen] = useState(false);
+  const [isPaymentsOpen, setIsPaymentsOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -505,67 +507,79 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
         <div className="alamcen-panel-left-stack">
           <article className="alamcen-panel-block accent-blue">
             <div className="alamcen-panel-block-header">
-              <div>
-                <h3><ArrowLeftRight size={17} /> Movimientos</h3>
-                <p>Ultimas ventas y pagos registrados.</p>
-              </div>
-              {allMovements.length > 3 ? (
+              <button
+                type="button"
+                className="alamcen-panel-collapse-toggle"
+                aria-expanded={isMovementsOpen}
+                onClick={() => setIsMovementsOpen((current) => !current)}
+              >
+                <span className="alamcen-panel-collapse-toggle__icon">
+                  {isMovementsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </span>
+                <span>
+                  <h3><ArrowLeftRight size={17} /> Movimientos</h3>
+                  <p>Ultimas ventas y pagos registrados.</p>
+                </span>
+              </button>
+              {isMovementsOpen && allMovements.length > 3 ? (
                 <button type="button" className="alamcen-panel-movements-toggle" onClick={handleToggleMovements}>
                   {nextMovementButtonLabel}
                 </button>
               ) : null}
             </div>
-            <div className="alamcen-panel-block-body">
-              <div className="alamcen-panel-movements-list">
-                {visibleMovements.length ? visibleMovements.map((movement) => {
-                  const movementTime = formatDateTime(movement.createdAt);
-                  const isPayment = movement.detail.kind === "payment";
-                  const isExpanded = expandedMovementId === movement.id;
-                  const movementAmount = formatCurrency(Math.abs(movement.amount));
-                  return (
-                    <div key={movement.id}>
-                      <div className={isPayment ? "alamcen-panel-movement-row payment" : "alamcen-panel-movement-row sale"}>
-                        <div>
-                          <p>{isPayment ? "Pago" : movement.type}</p>
-                          <span>{movementTime.date} {movementTime.time}</span>
+            {isMovementsOpen ? (
+              <div className="alamcen-panel-block-body">
+                <div className="alamcen-panel-movements-list">
+                  {visibleMovements.length ? visibleMovements.map((movement) => {
+                    const movementTime = formatDateTime(movement.createdAt);
+                    const isPayment = movement.detail.kind === "payment";
+                    const isExpanded = expandedMovementId === movement.id;
+                    const movementAmount = formatCurrency(Math.abs(movement.amount));
+                    return (
+                      <div key={movement.id}>
+                        <div className={isPayment ? "alamcen-panel-movement-row payment" : "alamcen-panel-movement-row sale"}>
+                          <div>
+                            <p>{isPayment ? "Pago" : movement.type}</p>
+                            <span>{movementTime.date} {movementTime.time}</span>
+                          </div>
+                          <div className="alamcen-panel-movement-actions">
+                            <strong className={isPayment ? "negative" : "positive"}>
+                              {isPayment ? "-" : "+"}{movementAmount}
+                            </strong>
+                            <button type="button" onClick={() => setExpandedMovementId(isExpanded ? null : movement.id)}>
+                              {isExpanded ? "Ocultar" : "Detalle"}
+                            </button>
+                          </div>
                         </div>
-                        <div className="alamcen-panel-movement-actions">
-                          <strong className={isPayment ? "negative" : "positive"}>
-                            {isPayment ? "-" : "+"}{movementAmount}
-                          </strong>
-                          <button type="button" onClick={() => setExpandedMovementId(isExpanded ? null : movement.id)}>
-                            {isExpanded ? "Ocultar" : "Detalle"}
-                          </button>
-                        </div>
+                        {isExpanded ? (
+                          <div className="alamcen-panel-movement-detail">
+                            {movement.detail.kind === "sale" ? (
+                              movement.detail.items?.length ? (
+                                <ul>
+                                  {movement.detail.items.map((item) => (
+                                    <li key={`${movement.id}-${item.name}`}>
+                                      <span>{item.name} x{item.quantity}</span>
+                                      <strong>{formatCurrency(item.lineTotal)}</strong>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : <span>Venta sin detalle de productos.</span>
+                            ) : (
+                              <span>{movement.detail.description || "Pago registrado"}</span>
+                            )}
+                          </div>
+                        ) : null}
                       </div>
-                      {isExpanded ? (
-                        <div className="alamcen-panel-movement-detail">
-                          {movement.detail.kind === "sale" ? (
-                            movement.detail.items?.length ? (
-                              <ul>
-                                {movement.detail.items.map((item) => (
-                                  <li key={`${movement.id}-${item.name}`}>
-                                    <span>{item.name} x{item.quantity}</span>
-                                    <strong>{formatCurrency(item.lineTotal)}</strong>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : <span>Venta sin detalle de productos.</span>
-                          ) : (
-                            <span>{movement.detail.description || "Pago registrado"}</span>
-                          )}
-                        </div>
-                      ) : null}
+                    );
+                  }) : (
+                    <div className="alamcen-panel-empty">
+                      <strong>Sin movimientos todavia.</strong>
+                      <span>Cuando confirmes ventas o pagos van a aparecer aca.</span>
                     </div>
-                  );
-                }) : (
-                  <div className="alamcen-panel-empty">
-                    <strong>Sin movimientos todavia.</strong>
-                    <span>Cuando confirmes ventas o pagos van a aparecer aca.</span>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
+            ) : null}
           </article>
         </div>
 
@@ -633,19 +647,31 @@ function PanelTab({ refreshKey, onPaymentRecorded }: { refreshKey: number; onPay
       {dashboard ? (
         <article className="alamcen-panel-section alamcen-panel-payment-section">
           <div className="alamcen-panel-section-header">
-            <div>
-              <h2>Registrar pago</h2>
-              <p>Ingresa un monto y una descripcion, por ejemplo Coca cola.</p>
-            </div>
+            <button
+              type="button"
+              className="alamcen-panel-collapse-toggle alamcen-panel-collapse-toggle--section"
+              aria-expanded={isPaymentsOpen}
+              onClick={() => setIsPaymentsOpen((current) => !current)}
+            >
+              <span className="alamcen-panel-collapse-toggle__icon">
+                {isPaymentsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </span>
+              <span>
+                <h2>Registrar pago</h2>
+                <p>Ingresa un monto y una descripcion, por ejemplo Coca cola.</p>
+              </span>
+            </button>
             {error ? <span className="alamcen-panel-error">{error}</span> : null}
           </div>
-          <div className="alamcen-panel-payment-entry">
-            <form className="alamcen-panel-payment-form" onSubmit={handleSubmit}>
-              <input type="text" inputMode="decimal" placeholder="Monto" value={amount} onChange={(event) => setAmount(event.target.value)} />
-              <input type="text" placeholder="Descripcion" value={description} onChange={(event) => setDescription(event.target.value)} />
-              <button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar pago"}</button>
-            </form>
-          </div>
+          {isPaymentsOpen ? (
+            <div className="alamcen-panel-payment-entry">
+              <form className="alamcen-panel-payment-form" onSubmit={handleSubmit}>
+                <input type="text" inputMode="decimal" placeholder="Monto" value={amount} onChange={(event) => setAmount(event.target.value)} />
+                <input type="text" placeholder="Descripcion" value={description} onChange={(event) => setDescription(event.target.value)} />
+                <button type="submit" disabled={saving}>{saving ? "Guardando..." : "Guardar pago"}</button>
+              </form>
+            </div>
+          ) : null}
         </article>
       ) : null}
     </section>

@@ -269,6 +269,39 @@
   gap: 12px;
 }
 
+.alamcen-panel-collapse-toggle {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.alamcen-panel-collapse-toggle > span:last-child {
+  min-width: 0;
+}
+
+.alamcen-panel-collapse-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: #475569;
+  flex: 0 0 auto;
+}
+
+.alamcen-panel-collapse-toggle--section {
+  width: auto;
+  flex: 1;
+}
+
 .alamcen-panel-block-header h3 {
   margin: 0;
   display: flex;
