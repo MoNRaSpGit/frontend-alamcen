@@ -23,6 +23,34 @@
   color: #0f172a;
 }
 
+.alamcen-customers-collapse-toggle {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.alamcen-customers-collapse-toggle > span:last-child {
+  min-width: 0;
+}
+
+.alamcen-customers-collapse-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: #475569;
+  flex: 0 0 auto;
+}
+
 .alamcen-customers-kicker {
   margin: 0 0 6px;
   font-size: 12px;

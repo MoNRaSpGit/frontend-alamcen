@@ -792,11 +792,12 @@ function CustomersTab({
   customers: DemoCustomer[];
   onChangeCustomers: Dispatch<SetStateAction<DemoCustomer[]>>;
 }) {
-  const [selectedCustomerId, setSelectedCustomerId] = useState(CUSTOMER_PREVIEW[0]?.id ?? "");
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [isCreateCustomerOpen, setIsCreateCustomerOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [paymentAmount, setPaymentAmount] = useState("");
-  const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId) ?? customers[0];
+  const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId) ?? null;
 
   function handleCreateCustomer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -858,30 +859,44 @@ function CustomersTab({
   return (
     <section className="alamcen-customers-page">
       <article className="alamcen-customers-card">
-        <p className="alamcen-customers-kicker">Clientes</p>
-        <h2>Alta rapida</h2>
-        <p className="alamcen-customers-note">Demo visual: permite mostrar el flujo sin guardar en base de datos.</p>
-        <form className="alamcen-customers-form" onSubmit={handleCreateCustomer}>
-          <label>
-            <span>Nombre</span>
-            <input
-              type="text"
-              placeholder="Juan Perez"
-              value={customerName}
-              onChange={(event) => setCustomerName(event.target.value)}
-            />
-          </label>
-          <label>
-            <span>Telefono</span>
-            <input
-              type="text"
-              placeholder="099 000 000"
-              value={customerPhone}
-              onChange={(event) => setCustomerPhone(event.target.value)}
-            />
-          </label>
-          <button type="submit" disabled={!customerName.trim()}>Guardar cliente</button>
-        </form>
+        <button
+          type="button"
+          className="alamcen-customers-collapse-toggle"
+          aria-expanded={isCreateCustomerOpen}
+          onClick={() => setIsCreateCustomerOpen((current) => !current)}
+        >
+          <span className="alamcen-customers-collapse-toggle__icon">
+            {isCreateCustomerOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </span>
+          <span>
+            <p className="alamcen-customers-kicker">Clientes</p>
+            <h2>Alta rapida</h2>
+            <p className="alamcen-customers-note">Demo visual: permite mostrar el flujo sin guardar en base de datos.</p>
+          </span>
+        </button>
+        {isCreateCustomerOpen ? (
+          <form className="alamcen-customers-form" onSubmit={handleCreateCustomer}>
+            <label>
+              <span>Nombre</span>
+              <input
+                type="text"
+                placeholder="Juan Perez"
+                value={customerName}
+                onChange={(event) => setCustomerName(event.target.value)}
+              />
+            </label>
+            <label>
+              <span>Telefono</span>
+              <input
+                type="text"
+                placeholder="099 000 000"
+                value={customerPhone}
+                onChange={(event) => setCustomerPhone(event.target.value)}
+              />
+            </label>
+            <button type="submit" disabled={!customerName.trim()}>Guardar cliente</button>
+          </form>
+        ) : null}
       </article>
 
       <article className="alamcen-customers-card">
@@ -913,70 +928,66 @@ function CustomersTab({
         </div>
       </article>
 
-      <article className="alamcen-customers-card">
-        <p className="alamcen-customers-kicker">Detalle</p>
-        <h2>Estado del cliente</h2>
-        {selectedCustomer ? (
-          <>
-            <div className="alamcen-customers-balance">
-              <span>
-                <small>Saldo actual</small>
-                <strong>{selectedCustomer.name}</strong>
-              </span>
-              <strong>{formatCurrency(selectedCustomer.debtTotal)}</strong>
-            </div>
+      {selectedCustomer ? (
+        <article className="alamcen-customers-card">
+          <p className="alamcen-customers-kicker">Detalle</p>
+          <h2>Estado del cliente</h2>
+          <div className="alamcen-customers-balance">
+            <span>
+              <small>Saldo actual</small>
+              <strong>{selectedCustomer.name}</strong>
+            </span>
+            <strong>{formatCurrency(selectedCustomer.debtTotal)}</strong>
+          </div>
 
-            <form className="alamcen-customers-payment-box" onSubmit={handleRegisterCustomerPayment}>
-              <div>
-                <small>Registrar pago</small>
-                <strong>Descontar deuda</strong>
+          <form className="alamcen-customers-payment-box" onSubmit={handleRegisterCustomerPayment}>
+            <div>
+              <small>Registrar pago</small>
+              <strong>Descontar deuda</strong>
+            </div>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder="Monto"
+              value={paymentAmount}
+              onChange={(event) => setPaymentAmount(event.target.value)}
+            />
+            <button type="submit" disabled={!paymentAmount.trim()}>Registrar pago</button>
+          </form>
+
+          <div className="alamcen-customers-history-head">
+            <span>Historial de ventas</span>
+            <strong>{selectedCustomer.sales.length}</strong>
+          </div>
+          <div className="alamcen-customers-history-list">
+            {selectedCustomer.sales.length ? selectedCustomer.sales.map((sale) => (
+              <div key={sale.id} className="alamcen-customers-history-row">
+                <span>
+                  <strong>{formatCurrency(sale.amount)}</strong>
+                  <small>{sale.items}</small>
+                </span>
+                <small>{sale.date}</small>
               </div>
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="Monto"
-                value={paymentAmount}
-                onChange={(event) => setPaymentAmount(event.target.value)}
-              />
-              <button type="submit" disabled={!paymentAmount.trim()}>Registrar pago</button>
-            </form>
+            )) : <p className="alamcen-customers-note">Sin ventas pendientes.</p>}
+          </div>
 
-            <div className="alamcen-customers-history-head">
-              <span>Historial de ventas</span>
-              <strong>{selectedCustomer.sales.length}</strong>
-            </div>
-            <div className="alamcen-customers-history-list">
-              {selectedCustomer.sales.length ? selectedCustomer.sales.map((sale) => (
-                <div key={sale.id} className="alamcen-customers-history-row">
-                  <span>
-                    <strong>{formatCurrency(sale.amount)}</strong>
-                    <small>{sale.items}</small>
-                  </span>
-                  <small>{sale.date}</small>
-                </div>
-              )) : <p className="alamcen-customers-note">Sin ventas pendientes.</p>}
-            </div>
-
-            <div className="alamcen-customers-history-head">
-              <span>Historial de pagos</span>
-              <strong>{selectedCustomer.payments.length}</strong>
-            </div>
-            <div className="alamcen-customers-history-list">
-              {selectedCustomer.payments.length ? selectedCustomer.payments.map((payment) => (
-                <div key={payment.id} className="alamcen-customers-history-row payment">
-                  <span>
-                    <strong>{formatCurrency(payment.amount)}</strong>
-                    <small>{payment.note}</small>
-                  </span>
-                  <small>{payment.date}</small>
-                </div>
-              )) : <p className="alamcen-customers-note">Sin pagos registrados.</p>}
-            </div>
-          </>
-        ) : (
-          <p className="alamcen-customers-note">Selecciona un cliente para ver su estado.</p>
-        )}
-      </article>
+          <div className="alamcen-customers-history-head">
+            <span>Historial de pagos</span>
+            <strong>{selectedCustomer.payments.length}</strong>
+          </div>
+          <div className="alamcen-customers-history-list">
+            {selectedCustomer.payments.length ? selectedCustomer.payments.map((payment) => (
+              <div key={payment.id} className="alamcen-customers-history-row payment">
+                <span>
+                  <strong>{formatCurrency(payment.amount)}</strong>
+                  <small>{payment.note}</small>
+                </span>
+                <small>{payment.date}</small>
+              </div>
+            )) : <p className="alamcen-customers-note">Sin pagos registrados.</p>}
+          </div>
+        </article>
+      ) : null}
     </section>
   );
 }
