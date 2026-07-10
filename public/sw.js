@@ -1,4 +1,4 @@
-const CACHE_NAME = "alamcen-pwa-2026-07-10T06-52-16-955Z";
+const CACHE_NAME = "alamcen-pwa-__ALAMCEN_SW_BUILD_ID__";
 const ASSETS_TO_CACHE = [
   "/frontend-alamcen/",
   "/frontend-alamcen/index.html",
