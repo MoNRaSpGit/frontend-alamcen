@@ -862,7 +862,7 @@ function CustomersTab({
 
   return (
     <section className="alamcen-customers-page">
-      <article className="alamcen-customers-card">
+      <article className={`alamcen-customers-card ${isCreateCustomerOpen ? "" : "is-collapsed"}`}>
         <button
           type="button"
           className="alamcen-customers-collapse-toggle"
@@ -872,11 +872,13 @@ function CustomersTab({
           <span className="alamcen-customers-collapse-toggle__icon">
             {isCreateCustomerOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </span>
-          <span>
-            <p className="alamcen-customers-kicker">Clientes</p>
-            <h2>Alta rapida</h2>
-            <p className="alamcen-customers-note">Demo visual: permite mostrar el flujo sin guardar en base de datos.</p>
-          </span>
+          {isCreateCustomerOpen ? (
+            <span>
+              <p className="alamcen-customers-kicker">Clientes</p>
+              <h2>Alta rapida</h2>
+              <p className="alamcen-customers-note">Demo visual: permite mostrar el flujo sin guardar en base de datos.</p>
+            </span>
+          ) : null}
         </button>
         {isCreateCustomerOpen ? (
           <form className="alamcen-customers-form" onSubmit={handleCreateCustomer}>
