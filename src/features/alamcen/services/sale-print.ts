@@ -1,5 +1,6 @@
 import type { SalePrintPayload } from "./sale-print.types";
 import { printSaleReceiptWithBrowser } from "./sale-print.browser";
+import { printSaleReceiptWithWebUsb } from "./sale-print.webusb";
 
 async function tryPrintWithQz(payload: SalePrintPayload) {
   const { printSaleReceiptWithQz } = await import("./sale-print.qz");
@@ -7,6 +8,13 @@ async function tryPrintWithQz(payload: SalePrintPayload) {
 }
 
 export async function printSaleReceipt(payload: SalePrintPayload) {
+  try {
+    await printSaleReceiptWithWebUsb(payload);
+    return { method: "webusb" as const };
+  } catch (webUsbError) {
+    console.warn("[alamcen-print] WebUSB fallo, probando QZ.", webUsbError);
+  }
+
   try {
     await tryPrintWithQz(payload);
     return { method: "qz" as const };

@@ -28,6 +28,7 @@ import { logScannerWarmup, logScanResult, logScanUi, warnWarmupFailure } from ".
 import { DemoCustomer } from "./alamcen.customer-demo";
 import { recordCheckoutPaymentMethod } from "./alamcen.payment-metrics";
 import { printSaleReceipt } from "./services/sale-print";
+import { primeUsbPrinterConnection } from "./services/sale-print.webusb";
 
 type AlamcenHomePageProps = {
   customers: DemoCustomer[];
@@ -86,6 +87,10 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
 
   useEffect(() => {
     void flushPendingSalesQueue().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    void primeUsbPrinterConnection().catch(() => {});
   }, []);
 
   useEffect(() => {
