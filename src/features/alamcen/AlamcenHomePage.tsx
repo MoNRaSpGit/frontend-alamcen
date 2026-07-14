@@ -27,6 +27,7 @@ import { ScannerProductModal } from "./components/ScannerProductModal";
 import { logScannerWarmup, logScanResult, logScanUi, warnWarmupFailure } from "./alamcen.diagnostics";
 import { DemoCustomer } from "./alamcen.customer-demo";
 import { recordCheckoutPaymentMethod } from "./alamcen.payment-metrics";
+import { printSaleReceipt } from "./services/sale-print";
 
 type AlamcenHomePageProps = {
   customers: DemoCustomer[];
@@ -287,6 +288,25 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
       }
       recordCheckoutPaymentMethod(total, paymentMethod);
       queueSaleForBackgroundSync(payload);
+      void printSaleReceipt({
+        storeName: "Almacen",
+        externalId: payload.externalId,
+        chargedAtIso: new Date().toISOString(),
+        paymentMethodLabel:
+          paymentMethod === "cuenta" && selectedCustomer ? `Cuenta de ${selectedCustomer.name}` : paymentMethod,
+        customerName: paymentMethod === "cuenta" && selectedCustomer ? selectedCustomer.name : "",
+        notes: payload.notes,
+        items: completedLines.map((line) => ({
+          name: line.name,
+          price: line.price,
+          quantity: line.quantity,
+          subtotal: line.subtotal
+        })),
+        total
+      }).catch((error) => {
+        console.error(error);
+        toast.warn("La venta se confirmo, pero no pudimos imprimir el ticket.");
+      });
       if (paymentMethod === "cuenta" && selectedCustomer) {
         toast.success(`Venta cargada a cuenta de ${selectedCustomer.name}.`);
       } else if (paymentMethod === "tarjeta") {
