@@ -91,6 +91,9 @@ function buildRawTicket(payload: SalePrintPayload) {
   lines.push("\x1B\x61\x01");
   lines.push("Gracias por su compra\n");
   lines.push("\n\n\n");
+  if (payload.openCashDrawer) {
+    lines.push("\x1B\x70\x00\x19\xFA");
+  }
   lines.push("\x1D\x56\x41\x00");
 
   return lines;

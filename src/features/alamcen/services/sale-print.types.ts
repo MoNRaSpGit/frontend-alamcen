@@ -8,6 +8,7 @@ export type SalePrintPayload = {
   paymentMethodLabel?: string;
   customerName?: string;
   notes?: string;
+  openCashDrawer?: boolean;
   items?: Array<Pick<SaleLine, "name" | "price" | "quantity" | "subtotal">>;
   total?: number;
 };

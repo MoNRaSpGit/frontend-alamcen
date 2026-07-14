@@ -296,6 +296,7 @@ export function AlamcenHomePage({ customers, onAccountSale, onSaleRecorded, focu
           paymentMethod === "cuenta" && selectedCustomer ? `Cuenta de ${selectedCustomer.name}` : paymentMethod,
         customerName: paymentMethod === "cuenta" && selectedCustomer ? selectedCustomer.name : "",
         notes: payload.notes,
+        openCashDrawer: true,
         items: completedLines.map((line) => ({
           name: line.name,
           price: line.price,
